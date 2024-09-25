@@ -20,7 +20,7 @@ export const asyncHandler = (requestHandler) => {
         });
       }
       console.log(err);
-      next();
+      // next();
     });
   };
 };

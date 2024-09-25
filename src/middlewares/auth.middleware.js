@@ -38,26 +38,31 @@ export const generateAccessRefreshToken = async (userId) => {
 };
 
 export const verifyJWT = asyncHandler(async (req, _, next) => {
-  //take cookies from req
-  const token =
-    req.cookies?.accessToken ||
-    req.header("Authorization").replace("Bearer ", "");
+  try {
+    //take cookies from req
+    const token =
+      req.cookies?.accessToken ||
+      req.header("Authorization")?.replace("Bearer ", "");
 
-  //validate cookies
-  if (!token) {
-    throw new ApiError(401, "access token missing");
-  }
+    //validate cookies
+    if (!token) {
+      throw new ApiError(400, "access token missing");
+    }
 
-  //extract data from cookies
-  const decodedData = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-  if (!decodedData) {
-    throw new ApiError(403, "invalid or expired token");
+    //extract data from cookies
+    const decodedData = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    if (!decodedData) {
+      throw new ApiError(401, "invalid or expired token");
+    }
+    console.log("verifiedJWT Data:", decodedData);
+    //set user id in req
+    req._id = decodedData._id;
+    //move the control to next middleware
+    next();
+  } catch (error) {
+    console.log("Error during JWT verification:", error);
+    throw error;
   }
-  console.log("verifyJWT:", decodedData);
-  //set user id in req
-  req._id = decodedData._id;
-  //move the control to next middleware
-  next();
 });
 
 export const refreshAccessToken = asyncHandler(async (req, res) => {
