@@ -16,9 +16,10 @@ export const asyncHandler = (requestHandler) => {
           statusCode: 500,
           message: "Internal Server Error",
           success: false,
-          errors: [err.message || "Unknown error occurred"],
+          errors: [err || "Unknown error occurred"],
         });
       }
+      console.log(err);
       next();
     });
   };
