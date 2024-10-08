@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadImage } from "../utils/cloudinary.js";
+import { uploadOnCloudinary } from "../services/cloudinary/cloudinary.js";
 import { generateAccessRefreshToken } from "../middlewares/auth.middleware.js";
 import fs from "fs";
 
@@ -45,7 +45,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     }
 
     //upload photo to cloudinary
-    const imageUploadResponse = await uploadImage(profilePhotoLocalPath);
+    const imageUploadResponse = await uploadOnCloudinary(profilePhotoLocalPath);
     if (!imageUploadResponse) {
       throw new ApiError(400, "Something went wrong during image upload");
     }
@@ -68,9 +68,6 @@ export const registerUser = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, newUser, "User registered successfully"));
   } catch (error) {
-    if (req.file?.path) {
-      fs.unlinkSync(req.file.path);
-    }
     console.log("Something went wrong during user registration", error);
     throw error;
   }
@@ -224,7 +221,9 @@ export const updateUserProfilePhoto = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Proflie photo is missing");
     }
     //upload new profile photo to cloudinary
-    const uploadProfilePhotoRes = await uploadImage(profilePhotoLocalPath);
+    const uploadProfilePhotoRes = await uploadOnCloudinary(
+      profilePhotoLocalPath
+    );
     //validate response
     if (!uploadProfilePhotoRes) {
       throw new ApiError(
