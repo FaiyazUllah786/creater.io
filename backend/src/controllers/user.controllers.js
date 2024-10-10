@@ -62,11 +62,12 @@ export const registerUser = asyncHandler(async (req, res) => {
       firstName,
       lastName,
     });
+    const userWithoutPass = await User.findById(newUser._id).select("-password")
 
     console.log("User created:", newUser);
     return res
       .status(200)
-      .json(new ApiResponse(200, newUser, "User registered successfully"));
+      .json(new ApiResponse(200, userWithoutPass, "User registered successfully"));
   } catch (error) {
     console.log("Something went wrong during user registration", error);
     throw error;
