@@ -8,7 +8,7 @@ export const generativeBackgroundReplace = async (
 ) => {
   try {
     cloudinaryConfig();
-    console.log("Prompt is here", prompt);
+    console.log("Prompt is here: ", prompt);
 
     if (!imagePublicId) {
       throw new ApiError(400, "Image public id is required");
@@ -19,9 +19,15 @@ export const generativeBackgroundReplace = async (
         effect: `gen_background_replace`,
       });
     } else {
-      res = cloudinary.url(imagePublicId, {
-        effect: `gen_background_replace:prompt_${prompt.trim()}`,
-      });
+      console.log("I am transforming here");
+      res = cloudinary.url(
+        imagePublicId,
+        transformations[
+          {
+            effect: `gen_background_replace:prompt_${prompt.trim()}`,
+          }
+        ]
+      );
     }
     if (!res) {
       throw new ApiError(400, "Something went wrong while transforming image");

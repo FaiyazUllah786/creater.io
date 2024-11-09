@@ -1,4 +1,4 @@
-# createrio
+# creatorio
 
 A new Flutter project.
 

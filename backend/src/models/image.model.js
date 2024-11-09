@@ -18,17 +18,8 @@ const imageSchema = new Schema({
     type: Number,
     required: true,
   },
-  transformationUrl: {
-    type: [
-      {
-        secureUrl: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
-  },
   author: {
+    required: true,
     type: Schema.Types.ObjectId,
     ref: "User",
   },

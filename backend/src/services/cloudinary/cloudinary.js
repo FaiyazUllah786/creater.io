@@ -6,6 +6,8 @@ import { ApiError } from "../../utils/ApiError.js";
 //TODO:upload any file
 export const uploadOnCloudinary = async (localFilePath) => {
   try {
+    // const temp = await fetch(localFilePath);
+    // console.log("temp", temp);
     cloudinaryConfig();
     if (!localFilePath) {
       return null;
