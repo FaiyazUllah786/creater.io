@@ -26,7 +26,6 @@ export const generateAccessRefreshToken = async (userId) => {
       validateBeforeSave: false,
     });
 
-    console.log(updatedUserWithRefreshToken);
     return { accessToken, refreshToken };
   } catch (error) {
     console.log("error on generating tokens:", error);
@@ -65,57 +64,67 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
   }
 });
 
-
-export const refreshAccessToken = asyncHandler(async (req, res) => {
-  //take refresh token from cookies or frontend
-  const incomingRefreshToken =
-    req.cookies.refreshToken || req.body.refreshToken;
-  //validate refresh token
-  if (!incomingRefreshToken) {
-    throw new ApiError(401, "Refresh Token is missing");
-  }
-  //decode refresh token
-  const decodedData = jwt.verify(
-    incomingRefreshToken,
-    process.env.REFRESH_TOKEN_SECRET
-  );
-  const user = await User.findById(decodedData?._id);
-  //validate user
-  if (!user) {
-    throw new ApiError(400, "User not found");
-  }
-  //validate user with incomingrefreshtoken
-  const token = user?.refreshToken;
-  console.log("incoming refresh token :", incomingRefreshToken);
-  console.log("user refresh token :", token);
-  console.log(
-    "check whether they are same or not:",
-    token != incomingRefreshToken
-  );
-  if (user?.refreshToken != incomingRefreshToken) {
-    throw new ApiError(403, "Refresh Token expired");
-  }
-  //get new access and refresh token
-  const { accessToken, refreshToken } = await generateAccessRefreshToken(
-    user._id
-  );
-  const updatedUserWithRefreshToken = await User.findById(user._id).select(
-    "-password -refreshToken"
-  );
-  //set access and refreshtoken
-  const opts = {
-    httpOnly: true,
-    secure: true,
-  };
-  return res
-    .status(200)
-    .cookie("accessToken", accessToken, opts)
-    .cookie("refreshToken", refreshToken, opts)
-    .json(
-      new ApiResponse(
-        201,
-        { updatedUserWithRefreshToken, accessToken, refreshToken },
-        "New access and refresh token generated"
-      )
+export const refreshAccessToken = async (req, res) => {
+  try {
+    //take refresh token from cookies or frontend
+    const incomingRefreshToken =
+      req.cookies.refreshToken || req.body.refreshToken;
+    //validate refresh token
+    if (!incomingRefreshToken) {
+      throw new ApiError(401, "Refresh Token is missing");
+    }
+    //decode refresh token
+    const decodedData = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
     );
-});
+    const user = await User.findById(decodedData?._id);
+    //validate user
+    if (!user) {
+      throw new ApiError(400, "User not found");
+    }
+    //validate user with incomingrefreshtoken
+    const token = user?.refreshToken;
+    console.log("incoming refresh token :", incomingRefreshToken);
+    console.log("user refresh token :", token);
+    console.log(
+      "check whether they are not same: ",
+      token != incomingRefreshToken
+    );
+    if (user?.refreshToken != incomingRefreshToken) {
+      user.refreshToken = null;
+      await user.save({ validateBeforeSave: false });
+      throw new ApiError(403, "Refresh Token expired");
+    }
+    //get new access and refresh token
+    const { accessToken, refreshToken } = await generateAccessRefreshToken(
+      user._id
+    );
+    const updatedUserWithRefreshToken = await User.findById(user._id).select(
+      "-password -refreshToken"
+    );
+    //set access and refreshtoken
+    const opts = {
+      httpOnly: true,
+      secure: true,
+    };
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, opts)
+      .cookie("refreshToken", refreshToken, opts)
+      .json(
+        new ApiResponse(
+          201,
+          { updatedUserWithRefreshToken, accessToken, refreshToken },
+          "New access and refresh token generated"
+        )
+      );
+  } catch (error) {
+    console.log("Somethin went wrong while refreshing access token: ", error);
+    return res
+      .clearCookie("accessToken")
+      .clearCookie("refreshToken")
+      .status(401)
+      .json(new ApiError(401, "Failed to refresh tokens"));
+  }
+};

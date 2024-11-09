@@ -87,20 +87,12 @@ export const getImageFromDatabase = asyncHandler(async (req, res) => {
         author: user._id,
       },
     },
-    {
-      $project: {
-        publicId: 1,
-        secureUrl: 1,
-        height: 1,
-        width: 1,
-        createdAt: 1,
-      },
-    },
   ]);
   //validate res
   if (!images) {
     throw new ApiError(400, "Something went wrong while getting images");
   }
+  console.log(images);
   //send res
   return res
     .status(200)
@@ -250,20 +242,48 @@ export const imageEnhancer = asyncHandler(async (req, res) => {
 
 export const imageBackgroundFill = asyncHandler(async (req, res) => {
   try {
-    //take an image from gallery or upload an image and prompt if any
-    const { imageId, aspectRatio, height, width, gravity } = req.body;
-    //validate image, prompt and perform generative fill on image
-    const image = await Image.findById(imageId);
-    if (!image) {
-      throw new ApiError(400, "Something went wrong while transformation");
-    }
+    //take an image url and prompt if any
+    const { imageUrl, aspectRatio, height, width, gravity } = req.body;
+    console.log(imageUrl, aspectRatio, height, width, gravity);
+    const image = await uploadOnCloudinary(imageUrl);
     const responseUrl = await generativeBackgroundFill(
-      image.publicId,
+      image.public_id,
       aspectRatio,
       height,
       width,
       gravity
     );
+    const deleteImage = await deleteImageFromCloudinary(image.public_id);
+    console.log("Image Deleted: ", deleteImage);
+    console.log("transformed image response", responseUrl);
+    //validate transform image
+    if (!responseUrl || responseUrl.trim() == "") {
+      throw new ApiError(400, "Something went wrong during transformation");
+    }
+
+    //send res
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, responseUrl, "Image transformed successfully")
+      );
+  } catch (error) {
+    console.log(
+      "Something went wrong during image background replace transformation",
+      error
+    );
+    throw error;
+  }
+});
+
+export const imageUpscale = asyncHandler(async (req, res) => {
+  try {
+    //take an image from gallery or upload an image and prompt if any
+    const { imageUrl } = req.body;
+    //validate image, prompt and perform backgroung removal on image
+    const image = await uploadOnCloudinary(imageUrl);
+    const responseUrl = await generativeUpscale(image.publicId);
+    const deleteImage = await deleteImageFromCloudinary(image.public_id);
     console.log("transformed image response", responseUrl);
     //validate transform image
     if (!responseUrl || responseUrl.trim() == "") {
@@ -276,10 +296,7 @@ export const imageBackgroundFill = asyncHandler(async (req, res) => {
         new ApiResponse(200, responseUrl, "Image transformed successfully")
       );
   } catch (error) {
-    console.log(
-      "Something went wrong during image background replace transformation",
-      error
-    );
+    console.log("Something went wrong during image background removal", error);
     throw error;
   }
 });
@@ -416,33 +433,6 @@ export const imageRestore = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Something went wrong while transformation");
     }
     const responseUrl = await generativeRestore(image.publicId);
-    console.log("transformed image response", responseUrl);
-    //validate transform image
-    if (!responseUrl || responseUrl.trim() == "") {
-      throw new ApiError(400, "Something went wrong during transformation");
-    }
-    //send res
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(200, responseUrl, "Image transformed successfully")
-      );
-  } catch (error) {
-    console.log("Something went wrong during image background removal", error);
-    throw error;
-  }
-});
-
-export const imageUpscale = asyncHandler(async (req, res) => {
-  try {
-    //take an image from gallery or upload an image and prompt if any
-    const { imageId } = req.body;
-    //validate image, prompt and perform backgroung removal on image
-    const image = await Image.findById(imageId);
-    if (!image) {
-      throw new ApiError(400, "Something went wrong while transformation");
-    }
-    const responseUrl = await generativeUpscale(image.publicId);
     console.log("transformed image response", responseUrl);
     //validate transform image
     if (!responseUrl || responseUrl.trim() == "") {

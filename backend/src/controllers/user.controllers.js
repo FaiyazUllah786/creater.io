@@ -19,13 +19,10 @@ export const registerUser = asyncHandler(async (req, res) => {
     }
     //validate data
     const existedUser = await User.findOne({
-      $or: [{ userName }, { email }],
+      $and: [{ userName }, { email }],
     });
-    console.log(existedUser);
     const existedUsername = await User.findOne({ userName });
-    console.log(existedUsername);
     const existedEmail = await User.findOne({ email });
-    console.log(existedEmail);
     if (existedUser) {
       throw new ApiError(401, "User already exists");
     } else if (existedUsername) {
@@ -34,9 +31,7 @@ export const registerUser = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Email already exists");
     }
     //Take profile Photo from req.files
-    console.log("i am here");
     const profilePhotoLocalPath = req.file?.path;
-    console.log("i am here also");
     console.log(profilePhotoLocalPath);
 
     //validate profile photo path
@@ -62,12 +57,16 @@ export const registerUser = asyncHandler(async (req, res) => {
       firstName,
       lastName,
     });
-    const userWithoutPass = await User.findById(newUser._id).select("-password")
+    const userWithoutPass = await User.findById(newUser._id).select(
+      "-password"
+    );
 
     console.log("User created:", newUser);
     return res
       .status(200)
-      .json(new ApiResponse(200, userWithoutPass, "User registered successfully"));
+      .json(
+        new ApiResponse(200, userWithoutPass, "User registered successfully")
+      );
   } catch (error) {
     console.log("Something went wrong during user registration", error);
     throw error;
@@ -112,7 +111,7 @@ export const loginUser = asyncHandler(async (req, res) => {
 
     //update login user refresh token
     //***********updating user database is done on  generateAccessRefreshToken func **************
-    const udpatedUser = await User.findById(existedUser._id).select(
+    const loggedInUser = await User.findById(existedUser._id).select(
       "-password -refreshToken"
     );
     //store access and refresh token to cookie storage
@@ -127,7 +126,7 @@ export const loginUser = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          { udpatedUser, accessToken, refreshToken },
+          { loggedInUser, accessToken, refreshToken },
           "User successfully logged in"
         )
       );
@@ -260,10 +259,12 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
   try {
     //get the previous data of user
     const user = await User.findById(req._id);
-
+    if (!user) {
+      throw new ApiError(400, "User not found");
+    }
     //get all or any update data from frontend
     const { userName, email, firstName, lastName } = req.body;
-
+    console.log(userName, email, firstName, lastName);
     //validate data
     //1.validate userName with database
     if (userName && userName.trim() != "") {
@@ -274,19 +275,22 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
     }
     //2.validate email
     if (email && email.trim() != "") {
-      const existedEmail = await User.findOne({ userName });
+      const existedEmail = await User.findOne({ email });
       if (existedEmail && existedEmail.email != user.email) {
         throw new ApiError(400, "Email already exist");
       }
     }
     //update user
-    const updatedUser = await user.updateOne({
+    await user.updateOne({
       userName: userName || user.userName,
       email: email || user.email,
       firstName: firstName || user.firstName,
       lastName: lastName || user.lastName,
     });
 
+    const updatedUser = await User.findById(req._id).select(
+      "-password -refreshToken"
+    );
     return res
       .status(200)
       .json(new ApiResponse(200, { updatedUser }, "User account updated"));
