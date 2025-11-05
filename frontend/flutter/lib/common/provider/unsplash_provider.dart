@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:unsplash_client/unsplash_client.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,11 +12,11 @@ class UnsplashProvider extends ChangeNotifier {
 
   UnsplashProvider() {
     client = UnsplashClient(
-      settings: const ClientSettings(
+      settings: ClientSettings(
         debug: true,
         credentials: AppCredentials(
-          accessKey: "6LP5slkGArnEhuRF6fm90-kAOTlt_o1BtI3T1Ypl9cc",
-          // secretKey: "USTCBUbQOZ-xdSCF9aH_zVhcABgBRtGnVp5Pt0R-jAM",
+          accessKey: dotenv.env['UNSPLASH_ACCESS_KEY'] ?? '',
+          secretKey: dotenv.env['UNSPLASH_SECRET_KEY'] ?? '',
         ),
       ),
     );

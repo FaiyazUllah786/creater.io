@@ -52,11 +52,11 @@ showSourceSheet(BuildContext context) async => await showModalBottomSheet(
                 }),
                 _buildSourceOption("assets/icons/unsplash.png", "Unsplash",
                     () async {
-                  // Navigator.pushNamed(
-                  //   context,
-                  //   '/unsplash',
-                  //   arguments: pickImageFromUnsplash,
-                  // );
+                  Navigator.pushNamed(
+                    context,
+                    '/unsplash',
+                    arguments: pickImageFromUnsplash,
+                  );
                 }),
                 // Additional options can go here
               ],

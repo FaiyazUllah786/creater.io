@@ -2,6 +2,7 @@ import 'package:creatorio/features/Image/controller/image_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '/common/provider/unsplash_provider.dart';
 import '/common/theme/colors.dart';
@@ -11,8 +12,9 @@ import '/features/auth/controller/user_controller.dart';
 import '/router.dart';
 import 'splash_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.transparent,
