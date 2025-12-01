@@ -117,7 +117,8 @@ export const loginUser = asyncHandler(async (req, res) => {
     //store access and refresh token to cookie storage
     const opts = {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production", // only HTTPS in prod
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     };
     return res
       .status(200)
@@ -150,7 +151,8 @@ export const logoutUser = asyncHandler(async (req, res) => {
     //reset cookies
     const opts = {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production", // only HTTPS in prod
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     };
     return res
       .status(200)

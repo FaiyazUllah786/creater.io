@@ -106,7 +106,8 @@ export const refreshAccessToken = async (req, res) => {
     //set access and refreshtoken
     const opts = {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production", // only HTTPS in prod
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     };
     return res
       .status(200)

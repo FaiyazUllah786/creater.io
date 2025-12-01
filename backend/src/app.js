@@ -1,6 +1,10 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import dotenv from "dotenv";
+
+//import dotenv here cause index.js execute app module first without env
+dotenv.config();
 
 const app = express();
 
