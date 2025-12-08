@@ -25,8 +25,11 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 //Routers
 import userRouter from "./routes/user.routes.js";
 import imageRouter from "./routes/image.routes.js";
+import authRouter from "./routes/auth.routes.js";
 //User Route
 app.use("/user", userRouter);
 //image Route
 app.use("/image", imageRouter);
+
+app.use("/auth", authRouter);
 export { app };

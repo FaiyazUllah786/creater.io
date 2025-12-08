@@ -21,8 +21,18 @@ const userSchema = new Schema(
     password: {
       type: String,
       trim: true,
-      required: [true, "Password is required"],
       min: [6, "length must be atleast 6"],
+      required: [true, "Password is required"],
+    },
+    authProvider: {
+      type: String,
+      default: "local",
+    },
+    githubId: {
+      type: String,
+    },
+    googleId: {
+      type: String,
     },
     profilePhoto: {
       type: String,

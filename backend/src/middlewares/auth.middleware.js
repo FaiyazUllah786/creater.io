@@ -3,6 +3,9 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import configurePassport from "../passport/auth.passport.js";
+
+const passport = configurePassport();
 
 export const generateAccessRefreshToken = async (userId) => {
   try {
@@ -129,3 +132,12 @@ export const refreshAccessToken = async (req, res) => {
       .json(new ApiError(401, "Failed to refresh tokens"));
   }
 };
+
+export const githubAuthMiddleware = passport.authenticate("github", {
+  scope: ["user:email"],
+});
+
+export const githubCallbackMiddleware = passport.authenticate("github", {
+  failureRedirect: "/login",
+  session: false,
+});
