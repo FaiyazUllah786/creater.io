@@ -141,3 +141,12 @@ export const githubCallbackMiddleware = passport.authenticate("github", {
   failureRedirect: "/login",
   session: false,
 });
+
+export const googleAuthMiddleware = passport.authenticate("google", {
+  scope: ["profile", "email"],
+});
+
+export const googleCallbackMiddleware = passport.authenticate("google", {
+  failureRedirect: "/login",
+  session: false,
+});

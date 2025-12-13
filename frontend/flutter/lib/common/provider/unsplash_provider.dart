@@ -44,6 +44,8 @@ class UnsplashProvider extends ChangeNotifier {
           .goAndGet();
       _photos.addAll(response.results);
       _currentPage++;
+    } catch (e) {
+      debugPrint(e.toString());
     } finally {
       _isLoading = false;
     }

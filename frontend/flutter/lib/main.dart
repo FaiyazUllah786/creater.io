@@ -12,7 +12,7 @@ import '/features/auth/controller/user_controller.dart';
 import '/router.dart';
 import 'splash_screen.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
