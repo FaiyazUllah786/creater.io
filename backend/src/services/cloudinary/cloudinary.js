@@ -50,3 +50,22 @@ export const deleteImageFromCloudinary = async (imagePublicId) => {
     );
   }
 };
+
+export const transformationUsingCloudinary = async (imagePublicId, transformationList) => {
+  try {
+    cloudinaryConfig();
+    if (!imagePublicId || (Array.isArray(transformationList) && transformationList?.length === 0)) {
+      return null;
+    }
+    const resUrl = cloudinary.url(imagePublicId, { transformation: transformationList });
+    console.log(resUrl)
+    return resUrl;
+  } catch (error) {
+    console.log("Failed to apply transformation,Something went wrong", error);
+    throw new ApiError(
+      400,
+      "Failed to apply transformation",
+      error
+    );
+  }
+}
