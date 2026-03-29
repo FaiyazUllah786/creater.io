@@ -41,6 +41,12 @@ export const generateAccessRefreshToken = async (userId) => {
 
 export const verifyJWT = asyncHandler(async (req, _, next) => {
   try {
+    // If req.user is already set (e.g., by a test bypass or upstream middleware), skip JWT check
+    if (req.user) {
+      req._id = req.user._id;
+      return next();
+    }
+
     //take cookies from req
     const token =
       req.cookies?.accessToken ||

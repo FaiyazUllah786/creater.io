@@ -2,21 +2,18 @@ import { Router } from "express";
 import {
   deleteImage,
   getImageFromDatabase,
-  imageBackgroundFill,
-  imageBackgroundRemoval,
-  imageBackgroundReplace,
-  imageEnhancer,
-  imageObjectExtraction,
-  imageObjectRecolor,
-  imageObjectRemove,
-  imageObjectReplace,
-  imageRestore,
   imageUploads,
-  imageUpscale,
   saveImageToDatabase,
 } from "../controllers/image.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import {
+  addTransformation,
+  clearTransformation,
+  deleteTransformation,
+  updateTransformation,
+  saveTransformation,
+} from "../controllers/transformation.controller.js";
 
 const router = Router();
 
@@ -32,34 +29,19 @@ router.route("/save-image").post(verifyJWT, saveImageToDatabase);
 //http:localhost:8000/image/delete-image
 router.route("/delete-image").post(verifyJWT, deleteImage);
 
-//http:localhost:8000/image/background-replace
-router.route("/background-replace").post(verifyJWT, imageBackgroundReplace);
+//http:localhost:8000/image/add-transformation
+router.route("/add-transformation").post(verifyJWT, addTransformation);
 
-//http:localhost:8000/image/enhancer
-router.route("/enhancer").post(verifyJWT, imageEnhancer);
+//http:localhost:8000/image/update-transformation
+router.route("/update-transformation").post(verifyJWT, updateTransformation);
 
-//http:localhost:8000/image/generative-fill
-router.route("/generative-fill").post(verifyJWT, imageBackgroundFill);
+//http:localhost:8000/image/delete-transformation
+router.route("/delete-transformation").post(verifyJWT, deleteTransformation);
 
-//http:localhost:8000/image/generative-replace
-router.route("/generative-replace").post(verifyJWT, imageObjectReplace);
+//http:localhost:8000/image/clear-transformation
+router.route("/clear-transformation").post(verifyJWT, clearTransformation);
 
-//http:localhost:8000/image/generative-remove
-router.route("/generative-remove").post(verifyJWT, imageObjectRemove);
-
-//http:localhost:8000/image/background-removal
-router.route("/background-removal").post(verifyJWT, imageBackgroundRemoval);
-
-//http:localhost:8000/image/object-recolor
-router.route("/object-recolor").post(verifyJWT, imageObjectRecolor);
-
-//http:localhost:8000/image/image-restore
-router.route("/image-restore").post(verifyJWT, imageRestore);
-
-//http:localhost:8000/image/image-upscale
-router.route("/image-upscale").post(verifyJWT, imageUpscale);
-
-//http:localhost:8000/image/image-object-extraction
-router.route("/image-object-extraction").post(verifyJWT, imageObjectExtraction);
+//http:localhost:8000/image/save
+router.route("/save").post(verifyJWT, saveTransformation);
 
 export default router;

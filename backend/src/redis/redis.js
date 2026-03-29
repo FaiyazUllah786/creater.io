@@ -5,9 +5,12 @@ import { ApiError } from "./../utils/ApiError.js";
 
 dotenv.config();
 
+let redisClient = null;
+
 export const connectRedis = async () => {
   return new Promise((resolve, reject) => {
     const redis = new Redis(process.env.REDIS_URL);
+    redisClient = redis;
 
     redis.on("connect", () => {
       console.log("Redis connected successfully");
@@ -21,3 +24,10 @@ export const connectRedis = async () => {
     });
   });
 };
+
+export const getRedisInstance = () => {
+  if (!redisClient) {
+    throw new ApiError(404, "Redis client not found");
+  }
+  return redisClient;
+}

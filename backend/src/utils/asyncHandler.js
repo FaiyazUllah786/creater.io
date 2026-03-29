@@ -16,11 +16,13 @@ export const asyncHandler = (requestHandler) => {
           statusCode: 500,
           message: "Internal Server Error",
           success: false,
-          errors: [err || "Unknown error occurred"],
+          errors:
+            process.env.NODE_ENV === "development" && err?.message
+              ? [err?.message]
+              : "Unknown error occurred",
+          stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
         });
       }
-      console.log(err);
-      // next();
     });
   };
 };
