@@ -34,25 +34,25 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  rive: ^0.13.14
+  rive: ^0.14.4
   top_snackbar_flutter: ^3.1.0
   animated_bottom_navigation_bar: ^1.3.3
   lottie: ^3.1.3
   provider: ^6.1.2
   http: ^1.2.2
   image_picker: ^1.1.2
-  flutter_secure_storage: ^9.2.2
+  flutter_secure_storage: ^10.0.0
   jwt_decoder: ^2.0.1
-  unsplash_client: ^2.2.0
+  unsplash_client: ^3.0.0
   flutter_staggered_grid_view: ^0.7.0
   cached_network_image: ^3.4.1
   shimmer: ^3.0.0
-  file_picker: ^8.1.3
+  file_picker: ^10.3.10
   path_provider: ^2.1.4
-  intl: ^0.19.0
+  intl: ^0.20.2
   dio: ^5.7.0
-  cached_video_player_plus: ^3.0.3
-  share_plus: ^10.1.1
+  cached_video_player_plus: ^4.1.0
+  share_plus: ^12.0.1
   flutter_dotenv: ^6.0.0
 
 dev_dependencies:
@@ -64,7 +64,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
