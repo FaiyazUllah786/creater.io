@@ -168,7 +168,7 @@ export const googleMobileAuthHandler = asyncHandler(async (req, res) => {
   console.log(googleProfile);
 
   const profilePhoto =
-    picture || "https://www.gravatar.com/avatar/?d=mp&s=200";
+    picture || "";
   const firstName = givenName || name?.split(" ")[0] || "";
   const lastName = familyName || name?.split(" ")[1] || "";
   let user = await User.findOne({ $or: [{ googleId }, { email }] });
@@ -253,7 +253,7 @@ export const githubMobileAuthHandler = asyncHandler(async (req, res) => {
 
   const email = `${githubId}@github.user`;
   const profilePhoto =
-    avatar_url || "https://www.gravatar.com/avatar/?d=mp&s=200";
+    avatar_url || "";
   const [firstName, lastName = ""] = name?.split(" ") || [];
 
   let user = await User.findOne({ $or: [{ githubId }, { email }] });

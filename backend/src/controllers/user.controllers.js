@@ -34,19 +34,22 @@ export const registerUser = asyncHandler(async (req, res) => {
     const profilePhotoLocalPath = req.file?.path;
     console.log(profilePhotoLocalPath);
 
-    //validate profile photo path
-    if (!profilePhotoLocalPath) {
-      throw new ApiError(400, "Profile photo is required");
-    }
+    let profilePhoto = "";
 
-    //upload photo to cloudinary
-    const imageUploadResponse = await uploadOnCloudinary(profilePhotoLocalPath);
-    if (!imageUploadResponse) {
-      throw new ApiError(400, "Something went wrong during image upload");
+    //validate profile photo path
+    if (profilePhotoLocalPath) {
+      // throw new ApiError(400, "Profile photo is required");
+
+
+      //upload photo to cloudinary
+      const imageUploadResponse = await uploadOnCloudinary(profilePhotoLocalPath);
+      if (!imageUploadResponse) {
+        throw new ApiError(400, "Something went wrong during image upload");
+      }
+      //validate updload
+      //*************Validation of upload is happening in cloudinary upload*************
+      profilePhoto = imageUploadResponse.url;
     }
-    //validate updload
-    //*************Validation of upload is happening in cloudinary upload*************
-    const profilePhoto = imageUploadResponse.url;
 
     //register user in database
     const newUser = await User.create({
