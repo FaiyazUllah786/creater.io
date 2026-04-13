@@ -12,6 +12,7 @@ import 'shimmer_loading.dart';
 class UnsplashScreen extends StatefulWidget {
   Function pickImageFromUnsplash;
   static const String routeName = "/unsplash";
+
   UnsplashScreen({super.key, required this.pickImageFromUnsplash});
 
   @override
@@ -21,23 +22,25 @@ class UnsplashScreen extends StatefulWidget {
 class UnsplashScreenState extends State<UnsplashScreen> {
   late ScrollController _scrollController;
   String _query = "";
+
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
-    Provider.of<UnsplashProvider>(context, listen: false).fetchPhotos("latest");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UnsplashProvider>().fetchPhotos("latest");
+    });
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       if (_query.isEmpty) {
-        Provider.of<UnsplashProvider>(context, listen: false)
-            .fetchPhotos("latest");
+        context.read<UnsplashProvider>().fetchPhotos("latest");
         return;
       }
-      Provider.of<UnsplashProvider>(context, listen: false).fetchPhotos(_query);
+      context.read<UnsplashProvider>().fetchPhotos(_query);
     }
   }
 
@@ -45,8 +48,9 @@ class UnsplashScreenState extends State<UnsplashScreen> {
     setState(() {
       _query = query;
     });
-    final unsplash = Provider.of<UnsplashProvider>(context, listen: false);
+    final unsplash = context.read<UnsplashProvider>();
     if (_query.isEmpty) {
+      unsplash.reset();
       unsplash.fetchPhotos("latest");
       return;
     }
@@ -64,6 +68,7 @@ class UnsplashScreenState extends State<UnsplashScreen> {
 
   bool _openSearchBox = false;
   Map<String, double> _progressMap = {};
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

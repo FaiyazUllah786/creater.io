@@ -26,14 +26,21 @@ class UnsplashProvider extends ChangeNotifier {
   bool _isLoading = false;
 
   List<Photo> get photos => _photos;
+
   bool get isLoading => _isLoading;
 
   int _currentPage = 1;
 
+  void reset() {
+    _photos.clear();
+    _currentPage = 1;
+    notifyListeners();
+  }
+
   Future<void> fetchPhotos(String query, {int perPage = 10}) async {
     if (_isLoading) return; // Prevent duplicate requests
     _isLoading = true;
-
+    notifyListeners();
     try {
       final response = await client.search
           .photos(
@@ -48,13 +55,15 @@ class UnsplashProvider extends ChangeNotifier {
       debugPrint(e.toString());
     } finally {
       _isLoading = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   Future<File?> downloadAndSaveImage(
       String url, Function(double) onProgress) async {
     try {
+      _isLoading = true;
+      notifyListeners();
       Dio dio = Dio();
 
       //get the directory to save the image
@@ -86,6 +95,9 @@ class UnsplashProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error downloading image: $e');
       return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 }

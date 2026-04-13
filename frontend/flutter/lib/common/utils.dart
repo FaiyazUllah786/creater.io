@@ -15,6 +15,8 @@ void showSnackBar(BuildContext context, String data, SnackBarType type) {
     showTopSnackBar(
       Overlay.of(context),
       CustomSnackBar.info(
+        textAlign: TextAlign.left,
+        messagePadding: EdgeInsetsGeometry.symmetric(horizontal: 60),
         message: data,
         backgroundColor: greenColor,
         textStyle: const TextStyle(
@@ -22,18 +24,20 @@ void showSnackBar(BuildContext context, String data, SnackBarType type) {
           fontWeight: FontWeight.w600,
           color: whiteColor,
         ),
+        iconPositionLeft: 5,
         icon: const Icon(
           Icons.check_circle_outline_rounded,
-          size: 100,
+          size: 50,
           color: whiteColor,
         ),
-        iconPositionLeft: -10,
       ),
     );
   } else if (type == SnackBarType.info) {
     showTopSnackBar(
       Overlay.of(context),
       CustomSnackBar.info(
+        textAlign: TextAlign.left,
+        messagePadding: EdgeInsetsGeometry.symmetric(horizontal: 60),
         message: data,
         backgroundColor: blueColor,
         textStyle: const TextStyle(
@@ -41,18 +45,20 @@ void showSnackBar(BuildContext context, String data, SnackBarType type) {
           fontWeight: FontWeight.w600,
           color: whiteColor,
         ),
+        iconPositionLeft: 5,
         icon: const Icon(
           Icons.info_outline_rounded,
-          size: 100,
+          size: 50,
           color: whiteColor,
         ),
-        iconPositionLeft: -10,
       ),
     );
   } else if (type == SnackBarType.error) {
     showTopSnackBar(
       Overlay.of(context),
       CustomSnackBar.info(
+        textAlign: TextAlign.left,
+        messagePadding: EdgeInsetsGeometry.symmetric(horizontal: 60),
         message: data,
         backgroundColor: redColor,
         textStyle: const TextStyle(
@@ -60,12 +66,12 @@ void showSnackBar(BuildContext context, String data, SnackBarType type) {
           fontWeight: FontWeight.w600,
           color: whiteColor,
         ),
+        iconPositionLeft: 5,
         icon: const Icon(
           Icons.close_rounded,
-          size: 100,
+          size: 50,
           color: whiteColor,
         ),
-        iconPositionLeft: -10,
       ),
     );
   }

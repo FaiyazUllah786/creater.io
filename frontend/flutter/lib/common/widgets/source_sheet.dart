@@ -3,9 +3,10 @@ import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/image_viewer.dart';
 import 'package:flutter/material.dart';
 
-showSourceSheet(BuildContext context) async => await showModalBottomSheet(
+Future<dynamic> showSourceSheet(BuildContext context) async =>
+    await showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
+      builder: (showSourceSheetContext) => Container(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -29,9 +30,18 @@ showSourceSheet(BuildContext context) async => await showModalBottomSheet(
               ),
               children: [
                 _buildSourceOption(
-                    "assets/icons/camera.png", "Camera", pickImageFromCamera),
-                _buildSourceOption("assets/icons/gallery.png", "Gallery",
+                    showSourceSheetContext, "assets/icons/camera.png", "Camera",
                     () async {
+                  final imageFile = await pickImageFromCamera();
+                  if (imageFile == null) return;
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ImageViewer(imageFile),
+                      ));
+                }),
+                _buildSourceOption(showSourceSheetContext,
+                    "assets/icons/gallery.png", "Gallery", () async {
                   final imageFile = await pickImageFromGallery();
                   if (imageFile == null) return;
                   Navigator.push(
@@ -40,18 +50,18 @@ showSourceSheet(BuildContext context) async => await showModalBottomSheet(
                         builder: (context) => ImageViewer(imageFile),
                       ));
                 }),
-                _buildSourceOption("assets/icons/file-explorer.png", "Files",
-                    () async {
+                _buildSourceOption(showSourceSheetContext,
+                    "assets/icons/file-explorer.png", "Files", () async {
                   final imageFile = await pickImageFromExplorer();
                   if (imageFile == null) return;
-                  // Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //       builder: (context) => ImageViewer(imageFile),
-                  //     ));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ImageViewer(imageFile),
+                      ));
                 }),
-                _buildSourceOption("assets/icons/unsplash.png", "Unsplash",
-                    () async {
+                _buildSourceOption(showSourceSheetContext,
+                    "assets/icons/unsplash.png", "Unsplash", () async {
                   Navigator.pushNamed(
                     context,
                     '/unsplash',
@@ -67,10 +77,11 @@ showSourceSheet(BuildContext context) async => await showModalBottomSheet(
     );
 
 // Helper Widget for each source option
-Widget _buildSourceOption(
-    String iconPath, String label, VoidCallback function) {
+Widget _buildSourceOption(BuildContext context, String iconPath, String label,
+    VoidCallback function) {
   return InkWell(
     onTap: () {
+      Navigator.pop(context);
       function();
     },
     child: Column(

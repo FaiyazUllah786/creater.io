@@ -1,15 +1,19 @@
 import 'dart:convert';
 import 'package:creatorio/common/ip.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:http/http.dart' as http;
 
 import '/common/storage.dart';
 import '/common/widgets/api_error.dart';
 import '/common/widgets/api_response.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class UserRepository {
-  Future<dynamic> registerUser(BuildContext context, String userName,
-      String email, String password, String profilePhoto) async {
+  final GoogleSignIn _signIn = GoogleSignIn.instance;
+
+  Future<ApiResponse?> registerUser(String userName, String email,
+      String password, String profilePhoto) async {
     try {
       final req =
           http.MultipartRequest('POST', Uri.parse('$myIp/user/auth/register'));
@@ -21,25 +25,23 @@ class UserRepository {
         final image =
             await http.MultipartFile.fromPath('profilePhoto', profilePhoto);
         req.files.add(image);
-      } else {
-        throw ApiError(statusCode: 400, message: 'Profile photo is required');
       }
 
       final res = await http.Response.fromStream(await req.send());
-      final data = jsonDecode(res.body);
-      print(data['message']);
+      final body = jsonDecode(res.body);
+      debugPrint("Register Response body: $body");
       if (res.statusCode == 200) {
-        print(data);
-        return ApiResponse.fromMap(data);
+        return ApiResponse.fromMap(body);
       } else {
-        print('Registration failed: ${res.statusCode} - ${res.body}');
-        throw ApiError.fromMap(data);
+        throw ApiError.fromMap(body);
       }
-    } on ApiError catch (e) {
-      print(e);
+    } on ApiError {
       rethrow;
-    } catch (e) {
-      print('Something went wrong' + e.toString());
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during registration: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      throw ApiError(
+          statusCode: 500, message: "Something went wrong. Please try again.");
     }
   }
 
@@ -49,31 +51,20 @@ class UserRepository {
         'email': email,
         'password': password,
       });
-      print("logged in response: $res");
       final body = jsonDecode(res.body);
-      print("Response Data: $body");
+      debugPrint("Login Response body: $body");
       if (res.statusCode == 200) {
-        final res = ApiResponse.fromMap(body);
-        print(res);
-        final accessToken = res.data['accessToken'];
-        final refreshToken = res.data['refreshToken'];
-        print("New Access Token : $accessToken");
-        print("New Refresh Token : $refreshToken");
-        await storeTokens(
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-        );
-        return res;
+        return ApiResponse.fromMap(body);
       } else {
-        print("login failed: " + body['message']);
         throw ApiError.fromMap(body);
       }
-    } on ApiError catch (e) {
-      print(e);
+    } on ApiError {
       rethrow;
-    } catch (e) {
-      print("Something went wrong" + e.toString());
-      rethrow;
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during login: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      throw ApiError(
+          statusCode: 500, message: "Something went wrong. Please try again.");
     }
   }
 
@@ -119,47 +110,42 @@ class UserRepository {
             '$myIp/user/auth/logout',
           ),
           headers: {"Authorization": "Bearer $accessToken"});
-      print("logout response: $res");
-      final data = jsonDecode(res.body);
-      print("Response Data: $data");
+      final body = jsonDecode(res.body);
+      debugPrint("Logout Response body: $body");
       if (res.statusCode == 200) {
-        return ApiResponse.fromMap(data);
+        return ApiResponse.fromMap(body);
       } else {
-        print("logout failed: " + data['message']);
-        throw ApiError.fromMap(data);
+        throw ApiError.fromMap(body);
       }
-    } on ApiError catch (e) {
-      print(e);
+    } on ApiError {
       rethrow;
-    } catch (e) {
-      print("Something went wrong" + e.toString());
-      rethrow;
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during login: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      throw ApiError(
+          statusCode: 500, message: "Something went wrong. Please try again.");
     }
   }
 
   Future<ApiResponse?> getCurrentUser() async {
     try {
-      //  final accessToken = res.data['accessToken'];
       final accessToken = await storage.read(key: 'accessToken');
-
       final res = await http.get(Uri.parse('$myIp/user/current-user'),
           headers: {"Authorization": "Bearer $accessToken"});
       final body = jsonDecode(res.body);
-      print(body);
+      debugPrint("Current user response body: $body");
       if (res.statusCode == 200) {
-        final res = ApiResponse.fromMap(body);
-        print("Current User: $res");
-        return res;
+        return ApiResponse.fromMap(body);
       } else {
-        print("login failed: " + body['message']);
         throw ApiError.fromMap(body);
       }
-    } on ApiError catch (e) {
-      print(e);
+    } on ApiError {
       rethrow;
-    } catch (e) {
-      print("Something went wrong" + e.toString());
-      rethrow;
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during login: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      throw ApiError(
+          statusCode: 500, message: "Something went wrong. Please try again.");
     }
   }
 
@@ -180,20 +166,20 @@ class UserRepository {
       }
 
       final res = await http.Response.fromStream(await req.send());
-      final data = jsonDecode(res.body);
-      print(data['message']);
+      final body = jsonDecode(res.body);
+      debugPrint("Current user response body: $body");
       if (res.statusCode == 200) {
-        print(data);
-        return ApiResponse.fromMap(data);
+        return ApiResponse.fromMap(body);
       } else {
-        print('Registration failed: ${res.statusCode} - ${res.body}');
-        throw ApiError.fromMap(data);
+        throw ApiError.fromMap(body);
       }
-    } on ApiError catch (e) {
-      print(e);
+    } on ApiError {
       rethrow;
-    } catch (e) {
-      print(e);
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during login: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      throw ApiError(
+          statusCode: 500, message: "Something went wrong. Please try again.");
     }
   }
 
@@ -214,14 +200,58 @@ class UserRepository {
         "lastName": lastName,
       });
 
-      final data = jsonDecode(res.body);
-      print(data['message']);
+      final body = jsonDecode(res.body);
+      debugPrint("Current user response body: $body");
       if (res.statusCode == 200) {
-        print(data);
-        return ApiResponse.fromMap(data);
+        return ApiResponse.fromMap(body);
       } else {
-        print('Registration failed: ${res.statusCode} - ${res.body}');
-        throw ApiError.fromMap(data);
+        throw ApiError.fromMap(body);
+      }
+    } on ApiError {
+      rethrow;
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during login: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      throw ApiError(
+          statusCode: 500, message: "Something went wrong. Please try again.");
+    }
+  }
+
+  Future<ApiResponse?> signInWithGoogle() async {
+    try {
+      await _signIn.initialize();
+
+      final GoogleSignInAccount account = await _signIn.authenticate();
+
+      final auth = account.authentication;
+
+      final idToken = auth.idToken;
+
+      if (idToken == null) {
+        throw Exception("No ID token found");
+      }
+      final res = await http.post(
+        Uri.parse('$myIp/auth/google/mobile'),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "idToken": idToken,
+        }),
+      );
+      final body = jsonDecode(res.body);
+      if (res.statusCode == 200) {
+        final res = ApiResponse.fromMap(body);
+        debugPrint('res: ${res}');
+        final accessToken = res.data['accessToken'];
+        final refreshToken = res.data['refreshToken'];
+        debugPrint("New Access Token : $accessToken");
+        debugPrint("New Refresh Token : $refreshToken");
+        await storeTokens(
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        );
+        return res;
       }
     } on ApiError catch (e) {
       print(e);
@@ -229,5 +259,59 @@ class UserRepository {
     } catch (e) {
       print(e);
     }
+    return null;
+  }
+
+  Future<ApiResponse?> signInWithGithub() async {
+    try {
+      final result = await FlutterWebAuth2.authenticate(
+        url: "https://github.com/login/oauth/authorize"
+            "?client_id=Ov23lijSn5Gpp1EEBtzi"
+            "&scope=user:email",
+        callbackUrlScheme: "createrio",
+      );
+
+      final uri = Uri.parse(result);
+      final code = uri.queryParameters['code'];
+
+      if (code == null) {
+        throw Exception("No code received");
+      }
+      print(code);
+      print('code---------------------------------------');
+
+      final res = await http.post(
+        Uri.parse('$myIp/auth/github/mobile'),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "code": code,
+        }),
+      );
+      final body = jsonDecode(res.body);
+      print(body);
+      print('body---------------------------------------');
+
+      if (res.statusCode == 200) {
+        final res = ApiResponse.fromMap(body);
+        print('res: ${res}');
+        final accessToken = res.data['accessToken'];
+        final refreshToken = res.data['refreshToken'];
+        print("New Access Token : $accessToken");
+        print("New Refresh Token : $refreshToken");
+        await storeTokens(
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        );
+        return res;
+      }
+    } on ApiError catch (e) {
+      print(e);
+      rethrow;
+    } catch (e) {
+      print(e);
+    }
+    return null;
   }
 }

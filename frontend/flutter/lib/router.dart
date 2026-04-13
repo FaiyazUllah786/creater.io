@@ -1,4 +1,5 @@
 import 'package:creatorio/common/widgets/unsplash_screen.dart';
+import 'package:creatorio/features/auth/screens/auth.dart';
 import 'package:creatorio/features/auth/screens/update_profile_screen.dart';
 import 'package:creatorio/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,8 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (context) => const SplashScreen());
     case HomeScreen.routeName:
       return MaterialPageRoute(builder: (context) => const HomeScreen());
+    case Auth.routeName:
+      return MaterialPageRoute(builder: (context)=> const Auth());
     case SignupScreen.routeName:
       return MaterialPageRoute(builder: (context) => const SignupScreen());
     case LoginScreen.routeName:

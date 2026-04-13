@@ -1,14 +1,16 @@
 import 'package:creatorio/common/widgets/source_sheet.dart';
-import 'package:creatorio/features/Image/controller/image_controller.dart';
+import 'package:creatorio/features/auth/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:creatorio/common/theme/colors.dart';
 
 import 'features/Image/screens/image_gallery.dart';
 import '/features/auth/screens/account_screen.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String routeName = '/home';
+
   const HomeScreen({super.key});
 
   @override
@@ -20,12 +22,24 @@ class _HomeScreenState extends State<HomeScreen> {
   int _bottomNavIndex = 0;
   final iconList = [
     Icons.perm_media_outlined,
-    Icons.settings,
+    Icons.person,
   ];
   final pageName = [
     "Gallery",
     "Account",
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = context.read<UserController>();
+
+      controller.loadUserFromStorage();
+      controller.getCurrentUser();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;

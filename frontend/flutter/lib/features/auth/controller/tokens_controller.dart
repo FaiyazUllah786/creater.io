@@ -16,7 +16,9 @@ class TokensController extends ChangeNotifier {
   bool _isValidTokens = false;
 
   bool get isLogout => _isLogout;
+
   bool get isWaiting => _isWaiting;
+
   bool get isValidTokens => _isValidTokens;
 
   TokensController() {
