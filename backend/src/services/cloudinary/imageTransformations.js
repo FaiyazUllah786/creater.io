@@ -114,25 +114,39 @@ export const generativeBackgroundFill = async (
   return { resUrl, effect };
 };
 
-export const generativeObjectReplace = async (imagePublicId, itemToReplace, replaceWith) => {
-  cloudinaryConfig();
-  if (!itemToReplace || itemToReplace.trim() == "" || !replaceWith || replaceWith.trim() == "") {
-    throw new ApiError(400, "Both item to replace and replace with prompt required");
-  }
+export const generativeObjectReplace = async (
+  imagePublicId,
+  { itemToReplace, replaceWith, id: effectId } = {}
+) => {
   if (!imagePublicId) {
     throw new ApiError(400, "Image public id is required");
   }
-  const resUrl = cloudinary.url(imagePublicId, {
+  if (!itemToReplace || itemToReplace.trim() === "" || !replaceWith || replaceWith.trim() === "") {
+    throw new ApiError(400, "Both item to replace and replace with prompt required");
+  }
+
+  const redis = getRedisInstance();
+  const transformationList = await getCurrentList(redis, imagePublicId);
+
+  const previousEffects = transformationList.reduce((acc, { id, effect }) => {
+    if (id !== effectId) acc.push(effect);
+    return acc;
+  }, []);
+
+  cloudinaryConfig();
+
+  const effect = {
     effect: `gen_replace:from_${itemToReplace.trim()};to_${replaceWith.trim()}`,
+  };
+  const resUrl = cloudinary.url(imagePublicId, {
+    transformation: [...previousEffects, effect],
   });
+
   if (!resUrl) {
     throw new ApiError(400, "Something went wrong while transforming image");
   }
-  const transformImageRes = await fetch(resUrl);
-  if (transformImageRes.status != 200) {
-    throw new ApiError(400, "Something went wrong during image transformation");
-  }
-  return resUrl;
+
+  return { resUrl, effect };
 };
 
 export const generativeObjectRemove = async (imagePublicId, { prompt = "", id: effectId } = {}) => {

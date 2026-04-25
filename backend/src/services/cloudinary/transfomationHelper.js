@@ -6,6 +6,7 @@ import {
   generativeBackgroundFill,
   generativeBackgroundReplace,
   generativeObjectRemove,
+  generativeObjectReplace,
   generativeRecolor,
   generativeRestore,
   generativeUpscale,
@@ -22,7 +23,7 @@ export const transformationHelper = (transformation) => {
     case "enhance":
       return aiImageEnhancer;
     case "gen_replace":
-      return generativeBackgroundReplace;
+      return generativeObjectReplace;
     case "gen_remove":
       return generativeObjectRemove;
     case "background_removal":
