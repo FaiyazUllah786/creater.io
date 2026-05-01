@@ -144,3 +144,11 @@ Future<File?> pickImageFromUnsplash(unsplashImageUrl, onProgress) async {
 DateTime parseTimeStamp(int timeStamp) {
   return DateTime.fromMillisecondsSinceEpoch(timeStamp * 1000);
 }
+
+void handleMessage(BuildContext context, dynamic controller) {
+  final msg = controller.message;
+  if (msg != null) {
+    msg.show(context);
+    controller.clearMessage(); // VERY IMPORTANT
+  }
+}

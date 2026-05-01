@@ -86,8 +86,6 @@ class UserRepository {
         print(res);
         final accessToken = res.data['accessToken'];
         final refreshToken = res.data['refreshToken'];
-        print("New Access Token : $accessToken");
-        print("New Refresh Token : $refreshToken");
         await storeTokens(
           accessToken: accessToken,
           refreshToken: refreshToken,
@@ -96,9 +94,11 @@ class UserRepository {
         // return false;
       }
       return false;
-    } catch (e) {
-      print("Error refreshing token: $e");
-      return false;
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during login: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      throw ApiError(
+          statusCode: 500, message: "Something went wrong. Please try again.");
     }
   }
 
@@ -112,6 +112,59 @@ class UserRepository {
           headers: {"Authorization": "Bearer $accessToken"});
       final body = jsonDecode(res.body);
       debugPrint("Logout Response body: $body");
+      if (res.statusCode == 200) {
+        return ApiResponse.fromMap(body);
+      } else {
+        throw ApiError.fromMap(body);
+      }
+    } on ApiError {
+      rethrow;
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during login: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      throw ApiError(
+          statusCode: 500, message: "Something went wrong. Please try again.");
+    }
+  }
+
+  Future<ApiResponse?> deleteAccount() async {
+    try {
+      final accessToken = await storage.read(key: "accessToken");
+      final res = await http.post(
+          Uri.parse(
+            '$myIp/user/delete-user',
+          ),
+          headers: {"Authorization": "Bearer $accessToken"});
+      final body = jsonDecode(res.body);
+      debugPrint("Logout Response body: $body");
+      if (res.statusCode == 200) {
+        return ApiResponse.fromMap(body);
+      } else {
+        throw ApiError.fromMap(body);
+      }
+    } on ApiError {
+      rethrow;
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during login: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      throw ApiError(
+          statusCode: 500, message: "Something went wrong. Please try again.");
+    }
+  }
+
+  Future<ApiResponse?> changePassword(
+      String oldPassword, String newPassword) async {
+    try {
+      final accessToken = await storage.read(key: "accessToken");
+      final res =
+          await http.post(Uri.parse('$myIp/user/update-password'), body: {
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+      }, headers: {
+        "Authorization": "Bearer $accessToken"
+      });
+      final body = jsonDecode(res.body);
+      debugPrint("Change Password Response body: $body");
       if (res.statusCode == 200) {
         return ApiResponse.fromMap(body);
       } else {
@@ -228,7 +281,7 @@ class UserRepository {
       final idToken = auth.idToken;
 
       if (idToken == null) {
-        throw Exception("No ID token found");
+        throw ApiError(statusCode: 400, message: "No ID token found");
       }
       final res = await http.post(
         Uri.parse('$myIp/auth/google/mobile'),
@@ -240,26 +293,20 @@ class UserRepository {
         }),
       );
       final body = jsonDecode(res.body);
+      debugPrint("Current user response body: $body");
       if (res.statusCode == 200) {
-        final res = ApiResponse.fromMap(body);
-        debugPrint('res: ${res}');
-        final accessToken = res.data['accessToken'];
-        final refreshToken = res.data['refreshToken'];
-        debugPrint("New Access Token : $accessToken");
-        debugPrint("New Refresh Token : $refreshToken");
-        await storeTokens(
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-        );
-        return res;
+        return ApiResponse.fromMap(body);
+      } else {
+        throw ApiError.fromMap(body);
       }
-    } on ApiError catch (e) {
-      print(e);
+    } on ApiError {
       rethrow;
-    } catch (e) {
-      print(e);
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during login: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      throw ApiError(
+          statusCode: 500, message: "Something went wrong. Please try again.");
     }
-    return null;
   }
 
   Future<ApiResponse?> signInWithGithub() async {
@@ -275,11 +322,8 @@ class UserRepository {
       final code = uri.queryParameters['code'];
 
       if (code == null) {
-        throw Exception("No code received");
+        throw ApiError(statusCode: 400, message: "No code received");
       }
-      print(code);
-      print('code---------------------------------------');
-
       final res = await http.post(
         Uri.parse('$myIp/auth/github/mobile'),
         headers: {
@@ -290,28 +334,19 @@ class UserRepository {
         }),
       );
       final body = jsonDecode(res.body);
-      print(body);
-      print('body---------------------------------------');
-
+      debugPrint("Github user response body: $body");
       if (res.statusCode == 200) {
-        final res = ApiResponse.fromMap(body);
-        print('res: ${res}');
-        final accessToken = res.data['accessToken'];
-        final refreshToken = res.data['refreshToken'];
-        print("New Access Token : $accessToken");
-        print("New Refresh Token : $refreshToken");
-        await storeTokens(
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-        );
-        return res;
+        return ApiResponse.fromMap(body);
+      } else {
+        throw ApiError.fromMap(body);
       }
-    } on ApiError catch (e) {
-      print(e);
+    } on ApiError {
       rethrow;
-    } catch (e) {
-      print(e);
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during login: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      throw ApiError(
+          statusCode: 500, message: "Something went wrong. Please try again.");
     }
-    return null;
   }
 }

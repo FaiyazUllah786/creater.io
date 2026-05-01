@@ -9,6 +9,7 @@ import '../theme/colors.dart';
 
 class ImageViewer extends StatefulWidget {
   File imageFile;
+
   ImageViewer(this.imageFile);
 
   @override
@@ -31,6 +32,7 @@ class _ImageViewerState extends State<ImageViewer> {
   }
 
   bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -80,13 +82,8 @@ class _ImageViewerState extends State<ImageViewer> {
                           Expanded(
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                fixedSize: const Size.fromHeight(50),
                                 foregroundColor: whiteColor,
                                 backgroundColor: brownColor,
-                                shape: ContinuousRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                textStyle: const TextStyle(fontSize: 16),
                               ),
                               onPressed: () {
                                 Navigator.pop(context);
@@ -97,28 +94,18 @@ class _ImageViewerState extends State<ImageViewer> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                fixedSize: const Size.fromHeight(50),
-                                foregroundColor: whiteColor,
-                                backgroundColor: blackColor,
-                                shape: ContinuousRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                textStyle: const TextStyle(fontSize: 16),
-                              ),
                               onPressed: () async {
                                 // await UserController().updateProfilePhoto(
                                 //     context, widget.imageFile.path);
                                 setState(() {
                                   _isLoading = true;
                                 });
-                                await Provider.of<ImageController>(context,
+                                await Provider.of<UserController>(context,
                                         listen: false)
-                                    .uploadImage(widget.imageFile);
+                                    .updateProfilePhoto(widget.imageFile.path);
                                 setState(() {
                                   _isLoading = false;
                                 });
-                                Navigator.pop(context);
                                 Navigator.pop(context);
                               },
                               child: const Text("Select"),

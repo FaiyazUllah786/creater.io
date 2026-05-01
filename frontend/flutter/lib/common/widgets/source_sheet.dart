@@ -1,88 +1,84 @@
+import 'dart:io';
+
 import 'package:creatorio/common/theme/colors.dart';
 import 'package:creatorio/common/utils.dart';
-import 'package:creatorio/common/widgets/image_viewer.dart';
 import 'package:flutter/material.dart';
 
-Future<dynamic> showSourceSheet(BuildContext context) async =>
-    await showModalBottomSheet(
-      context: context,
-      builder: (showSourceSheetContext) => Container(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Select Source",
-              style: TextStyle(
-                fontWeight: FontWeight.w100,
-                fontSize: 16,
-              ),
+Future<File?> showSourceSheet(BuildContext context) async {
+  final imageFile = await showModalBottomSheet(
+    context: context,
+    builder: (showSourceSheetContext) => Container(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Select Source",
+            style: TextStyle(
+              fontWeight: FontWeight.w100,
+              fontSize: 16,
             ),
-            const SizedBox(height: 15),
-            GridView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 20,
-                crossAxisSpacing: 20,
-              ),
-              children: [
-                _buildSourceOption(
-                    showSourceSheetContext, "assets/icons/camera.png", "Camera",
-                    () async {
-                  final imageFile = await pickImageFromCamera();
-                  if (imageFile == null) return;
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ImageViewer(imageFile),
-                      ));
-                }),
-                _buildSourceOption(showSourceSheetContext,
-                    "assets/icons/gallery.png", "Gallery", () async {
-                  final imageFile = await pickImageFromGallery();
-                  if (imageFile == null) return;
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ImageViewer(imageFile),
-                      ));
-                }),
-                _buildSourceOption(showSourceSheetContext,
-                    "assets/icons/file-explorer.png", "Files", () async {
-                  final imageFile = await pickImageFromExplorer();
-                  if (imageFile == null) return;
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ImageViewer(imageFile),
-                      ));
-                }),
-                _buildSourceOption(showSourceSheetContext,
-                    "assets/icons/unsplash.png", "Unsplash", () async {
-                  Navigator.pushNamed(
-                    context,
-                    '/unsplash',
-                    arguments: pickImageFromUnsplash,
-                  );
-                }),
-                // Additional options can go here
-              ],
+          ),
+          const SizedBox(height: 15),
+          GridView(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 20,
+              crossAxisSpacing: 20,
             ),
-          ],
-        ),
+            children: [
+              _buildSourceOption(
+                  showSourceSheetContext, "assets/icons/camera.png", "Camera",
+                  () async {
+                final imageFile = await pickImageFromCamera();
+                Navigator.pop(showSourceSheetContext, imageFile);
+              }),
+              _buildSourceOption(
+                  showSourceSheetContext, "assets/icons/gallery.png", "Gallery",
+                  () async {
+                final imageFile = await pickImageFromGallery();
+                Navigator.pop(showSourceSheetContext, imageFile);
+              }),
+              _buildSourceOption(showSourceSheetContext,
+                  "assets/icons/file-explorer.png", "Files", () async {
+                final imageFile = await pickImageFromExplorer();
+                Navigator.pop(showSourceSheetContext, imageFile);
+
+                // if (imageFile == null) return;
+                // Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //       builder: (context) => ImageViewer(imageFile),
+                //     ));
+              }),
+              _buildSourceOption(showSourceSheetContext,
+                  "assets/icons/unsplash.png", "Unsplash", () async {
+                Navigator.pushNamed(
+                  context,
+                  '/unsplash',
+                  arguments: pickImageFromUnsplash,
+                );
+              }),
+              // Additional options can go here
+            ],
+          ),
+        ],
       ),
-    );
+    ),
+  );
+  debugPrint(imageFile.toString());
+  return imageFile;
+}
 
 // Helper Widget for each source option
 Widget _buildSourceOption(BuildContext context, String iconPath, String label,
-    VoidCallback function) {
+    Future<dynamic> Function() function) {
   return InkWell(
-    onTap: () {
-      Navigator.pop(context);
-      function();
+    onTap: () async {
+      await function();
     },
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.center,

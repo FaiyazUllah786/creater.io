@@ -15,6 +15,14 @@ class UserController extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
+  bool _googleLoading = false;
+
+  bool get isGoogleLoading => _googleLoading;
+
+  bool _githubLoading = false;
+
+  bool get isGithubLoading => _githubLoading;
+
   Message? _message;
 
   Message? get message => _message;
@@ -43,11 +51,22 @@ class UserController extends ChangeNotifier {
         return false;
       }
 
-      await userRepository.registerUser(
+      final res = await userRepository.registerUser(
           userName, email, password, profilePhoto);
+      if (res == null) {
+        _message = Message(
+            "Registration failed. Please try again.", MessageType.error);
+        return false;
+      }
       return true;
     } on ApiError catch (e) {
       _message = Message(e.message, MessageType.error);
+      return false;
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during registration: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      _message =
+          Message("Unexpected error during registration", MessageType.error);
       return false;
     } finally {
       _isLoading = false;
@@ -109,8 +128,62 @@ class UserController extends ChangeNotifier {
       await storage.delete(key: 'user');
       await storage.deleteAll();
       _userInfo = null;
-      notifyListeners();
       _message = Message("Logged out successfully", MessageType.success);
+      return true;
+    } on ApiError catch (e) {
+      _message = Message(e.message, MessageType.error);
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> deleteAccount() async {
+    try {
+      _message = null;
+      _isLoading = true;
+      notifyListeners();
+
+      final data = await userRepository.deleteAccount();
+      if (data == null) {
+        _message = Message("Delete account request failed. Please try again.",
+            MessageType.error);
+        return false;
+      }
+      await storage.delete(key: 'user');
+      await storage.deleteAll();
+      _userInfo = null;
+      _message = Message("Account deleted successfully", MessageType.success);
+      return true;
+    } on ApiError catch (e) {
+      _message = Message(e.message, MessageType.error);
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> changePassword(String oldPassword, String newPassword) async {
+    try {
+      _message = null;
+      _isLoading = true;
+      notifyListeners();
+
+      oldPassword = oldPassword.trim();
+      newPassword = newPassword.trim();
+      if (oldPassword.isEmpty || newPassword.isEmpty) {
+        _message = Message("Passwords are required", MessageType.info);
+        return false;
+      }
+      final res = await userRepository.changePassword(oldPassword, newPassword);
+      if (res == null) {
+        _message = Message("Change password request failed. Please try again.",
+            MessageType.error);
+        return false;
+      }
+      _message = Message("Password updated successfully", MessageType.success);
       return true;
     } on ApiError catch (e) {
       _message = Message(e.message, MessageType.error);
@@ -136,8 +209,6 @@ class UserController extends ChangeNotifier {
 
       _userInfo = user;
       await saveUser(user);
-
-      notifyListeners();
     } on ApiError catch (e) {
       _message = Message(e.message, MessageType.error);
       return;
@@ -156,14 +227,18 @@ class UserController extends ChangeNotifier {
         _message = Message("Avatar image is required", MessageType.info);
         return false;
       }
-      final data = await userRepository.updateProfilePhoto(profilePhoto);
-      if (data == null) {
+      final res = await userRepository.updateProfilePhoto(profilePhoto);
+      if (res == null) {
         _message = Message("Change avatar request failed. Please try again.",
             MessageType.error);
         return false;
       }
+
+      final user = UserModel.fromMap(res.data);
+
+      _userInfo = user;
+      await saveUser(user);
       _message = Message("Avatar successfully updated", MessageType.success);
-      // Navigator.pop(context);
       notifyListeners();
       return true;
     } on ApiError catch (e) {
@@ -204,47 +279,67 @@ class UserController extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> signInWithGoogle(BuildContext context) async {
+  Future<bool> signInWithGoogle() async {
     try {
+      _googleLoading = true;
+      _message = null;
+      notifyListeners();
       final res = await userRepository.signInWithGoogle();
-      if (res != null && res.statusCode == 200) {
-        showSnackBar(context, 'Logged in successfully', SnackBarType.success);
-        print("accessToken: ${res.data['accessToken']}\n");
-        print("refreshToken: ${res.data['refreshToken']}\n");
-        notifyListeners();
-        Navigator.pushReplacementNamed(context, '/home');
+      if (res == null) {
+        _message =
+            Message("Login failed. Please try again.", MessageType.error);
+        return false;
       }
-      return res;
+      final accessToken = res.data['accessToken'];
+      final refreshToken = res.data['refreshToken'];
+      if (accessToken == null || refreshToken == null) {
+        _message = Message("Invalid server response", MessageType.error);
+        return false;
+      }
+      await storeTokens(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      );
+      _message = Message("Logged in successfully", MessageType.success);
+      return true;
     } on ApiError catch (e) {
-      print("Error occured in user profile update repository: $e");
-      showSnackBar(context, 'Update failed: ${e.message}', SnackBarType.error);
-      return null;
-    } catch (e) {
-      print("Error occured in user profile update  controller: $e");
-      return null;
+      _message = Message(e.message, MessageType.error);
+      return false;
+    } finally {
+      _googleLoading = false;
+      notifyListeners();
     }
   }
 
-  Future<dynamic> signInWithGithub(BuildContext context) async {
+  Future<bool> signInWithGithub() async {
     try {
+      _githubLoading = true;
+      _message = null;
+      notifyListeners();
       final res = await userRepository.signInWithGithub();
-      print(res);
-      print('---------------------------------------');
-      if (res != null && res.statusCode == 200) {
-        showSnackBar(context, 'Logged in successfully', SnackBarType.success);
-        print("accessToken: ${res.data['accessToken']}\n");
-        print("refreshToken: ${res.data['refreshToken']}\n");
-        notifyListeners();
-        Navigator.pushReplacementNamed(context, '/home');
+      if (res == null) {
+        _message =
+            Message("Login failed. Please try again.", MessageType.error);
+        return false;
       }
-      return res;
+      final accessToken = res.data['accessToken'];
+      final refreshToken = res.data['refreshToken'];
+      if (accessToken == null || refreshToken == null) {
+        _message = Message("Invalid server response", MessageType.error);
+        return false;
+      }
+      await storeTokens(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      );
+      _message = Message("Logged in successfully", MessageType.success);
+      return true;
     } on ApiError catch (e) {
-      print("Error occured in user profile update repository: $e");
-      showSnackBar(context, 'Update failed: ${e.message}', SnackBarType.error);
-      return null;
-    } catch (e) {
-      print("Error occured in user profile update  controller: $e");
-      return null;
+      _message = Message(e.message, MessageType.error);
+      return false;
+    } finally {
+      _githubLoading = false;
+      notifyListeners();
     }
   }
 

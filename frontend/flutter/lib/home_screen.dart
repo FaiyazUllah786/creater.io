@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/source_sheet.dart';
+import 'package:creatorio/features/Image/controller/image_controller.dart';
 import 'package:creatorio/features/auth/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
@@ -43,18 +47,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final imageController = context.read<ImageController>();
     return Scaffold(
       extendBody: true,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // List<File> images = showSourceSheet(context);
-          // await ImageController().uploadImage();
-          showSourceSheet(context);
+          final File? imageFile = await showSourceSheet(context);
+          if (imageFile == null) return;
+          await imageController.uploadImage(imageFile);
+          if (!mounted) return;
+          handleMessage(context, imageController);
         },
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: AnimatedBottomNavigationBar.builder(
+        backgroundColor: whiteColor,
+        shadow: Shadow(color: greyColor, blurRadius: 15),
         activeIndex: _bottomNavIndex,
         gapLocation: GapLocation.center,
         notchSmoothness: NotchSmoothness.verySmoothEdge,

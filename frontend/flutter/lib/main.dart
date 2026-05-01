@@ -42,44 +42,71 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: "Creator.io",
         theme: ThemeData(
-          floatingActionButtonTheme: const FloatingActionButtonThemeData(
-            shape: CircleBorder(),
-            backgroundColor: whiteColor,
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
+            floatingActionButtonTheme: const FloatingActionButtonThemeData(
+                shape: CircleBorder(),
+                backgroundColor: whiteColor,
+                foregroundColor: blackColor),
+            elevatedButtonTheme: ElevatedButtonThemeData(
               style: ElevatedButton.styleFrom(
-            foregroundColor: whiteColor,
-            backgroundColor: blackColor,
-            minimumSize: Size(size.width, 50),
-            shape: ContinuousRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+                foregroundColor: whiteColor,
+                backgroundColor: blackColor,
+                textStyle: TextStyle(fontSize: 16, color: whiteColor),
+                minimumSize: Size(size.width, 50),
+                shape: ContinuousRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
             ),
-          )),
-          appBarTheme: const AppBarTheme(
-            elevation: 0,
-            backgroundColor: whiteColor,
-            foregroundColor: blackColor,
-            surfaceTintColor: whiteColor,
-            titleTextStyle: TextStyle(
-              fontFamily: "Nunito",
-              fontSize: 20,
-              color: blackColor,
-              fontWeight: FontWeight.bold,
+            appBarTheme: const AppBarTheme(
+              elevation: 0,
+              leadingWidth: 30,
+              backgroundColor: whiteColor,
+              foregroundColor: blackColor,
+              surfaceTintColor: whiteColor,
+              titleTextStyle: TextStyle(
+                fontFamily: "Nunito",
+                fontSize: 20,
+                color: blackColor,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          scaffoldBackgroundColor: whiteColor,
-          textTheme: textTheme,
-          bottomSheetTheme:
-              const BottomSheetThemeData(backgroundColor: whiteColor),
-          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-            backgroundColor: whiteColor,
-            selectedItemColor: blackColor,
-            unselectedItemColor: blackColor,
-            showSelectedLabels: true,
-            showUnselectedLabels: true,
-            elevation: 0,
-          ),
-        ),
+            scaffoldBackgroundColor: whiteColor,
+            textTheme: textTheme,
+            bottomSheetTheme:
+                const BottomSheetThemeData(backgroundColor: whiteColor),
+            bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+              backgroundColor: whiteColor,
+              selectedItemColor: blackColor,
+              unselectedItemColor: blackColor,
+              showSelectedLabels: true,
+              showUnselectedLabels: true,
+              elevation: 0,
+            ),
+            dialogTheme: DialogThemeData(backgroundColor: whiteColor),
+            inputDecorationTheme: InputDecorationTheme(
+              labelStyle: TextStyle(
+                color: blackColor,
+              ),
+              floatingLabelStyle: TextStyle(
+                color: blackColor,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(30)),
+                borderSide: BorderSide(
+                  color: Color(0xFFBFC9D1),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(30)),
+                borderSide: BorderSide(
+                  color: blackColor,
+                  width: 2,
+                ),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(30)),
+              ),
+            )),
         onGenerateRoute: onGenerateRoute,
         home: const SplashScreen(),
       ),

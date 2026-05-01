@@ -25,17 +25,28 @@ class _SingUpState extends State<LoginScreen> {
     });
   }
 
+  late UserController userController;
+
   void _login() async {
     FocusManager.instance.primaryFocus?.unfocus();
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       debugPrint("email: $_email");
       debugPrint("password: $_password");
-      final res =
-          await context.read<UserController>().loginUser(_email, _password);
+      final userController = context.read<UserController>();
+      final success = await userController.loginUser(_email, _password);
       if (!mounted) return;
-      if (res) {
-        Navigator.pushReplacementNamed(context, '/home');
+      final msg = userController.message;
+      if (msg != null) {
+        msg.show(context);
+        userController.clearMessage(); // VERY IMPORTANT
+      }
+      if (success) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          "/home",
+          (_) => false,
+        );
       }
     }
   }
@@ -46,13 +57,6 @@ class _SingUpState extends State<LoginScreen> {
 
     final size = MediaQuery.of(context).size;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final msg = userController.message;
-      if (msg != null) {
-        msg.show(context);
-        userController.clearMessage(); // VERY IMPORTANT
-      }
-    });
     return Scaffold(
       appBar: AppBar(
         title: const Text("Creater.io"),
@@ -93,9 +97,6 @@ class _SingUpState extends State<LoginScreen> {
                         TextFormField(
                           decoration: const InputDecoration(
                             labelText: 'Email',
-                            border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(30))),
                             prefixIcon: Icon(Icons.email_outlined),
                           ),
                           validator: (email) {
@@ -117,11 +118,9 @@ class _SingUpState extends State<LoginScreen> {
                         TextFormField(
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            border: const OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(30))),
                             prefixIcon: const Icon(Icons.lock_outline),
-                            suffix: InkWell(
+                            suffixIcon: InkWell(
+                              splashFactory: NoSplash.splashFactory,
                               onTap: _visiblePassword,
                               child: Icon(_seePassword
                                   ? Icons.visibility_rounded

@@ -1,3 +1,4 @@
+import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/features/auth/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -26,10 +27,11 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final success = await context
-          .read<UserController>()
-          .updateUserProfile(_email, _userName, _firstName, _lastName);
+      final userController = context.read<UserController>();
+      final success = await userController.updateUserProfile(
+          _email, _userName, _firstName, _lastName);
       if (!mounted) return;
+      handleMessage(context, userController);
       if (success) Navigator.pop(context);
     }
   }
@@ -45,14 +47,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
         ),
       ),
       body: Consumer<UserController>(builder: (context, userProvider, child) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final msg = userProvider.message;
-          if (msg != null) {
-            msg.show(context);
-            userProvider.clearMessage();
-          }
-        });
-
         if (userProvider.userInfo == null) {
           return const Center(
             child: Text("User data not found!"),
@@ -156,14 +150,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                           ),
                           const SizedBox(height: 40),
                           ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: whiteColor,
-                              backgroundColor: blackColor,
-                              minimumSize: Size(size.width, 50),
-                              shape: ContinuousRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
                             onPressed: !userProvider.isLoading
                                 ? _updateUserProfile
                                 : () {},

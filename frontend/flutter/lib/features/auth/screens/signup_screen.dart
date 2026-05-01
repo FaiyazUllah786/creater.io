@@ -41,10 +41,11 @@ class _SingUpState extends State<SignupScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final success = await context
-          .read<UserController>()
-          .registerUser(_userName, _email, _password, _profilePhoto);
+      final userController = context.read<UserController>();
+      final success = await userController.registerUser(
+          _userName, _email, _password, _profilePhoto);
       if (!mounted) return;
+      handleMessage(context, userController);
       if (success) {
         showAdaptiveDialog(
           barrierDismissible: false,
@@ -102,17 +103,13 @@ class _SingUpState extends State<SignupScreen> {
 
     final size = MediaQuery.of(context).size;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final msg = userController.message;
-      if (msg != null) {
-        msg.show(context);
-        userController.clearMessage(); // VERY IMPORTANT
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {});
 
     return Scaffold(
       body: AbsorbPointer(
-        absorbing: userController.isLoading,
+        absorbing: userController.isLoading ||
+            userController.isGoogleLoading ||
+            userController.isGithubLoading,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(
               decelerationRate: ScrollDecelerationRate.fast),
@@ -305,27 +302,69 @@ class _SingUpState extends State<SignupScreen> {
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     overlayColor: Colors.black),
-                                onPressed: () {
-                                  userController.signInWithGoogle(context);
-                                },
-                                child: SvgPicture.asset(
-                                  'assets/icons/google.svg',
-                                  semanticsLabel: 'Google Logo',
-                                  height: 30,
+                                onPressed: userController.isGoogleLoading
+                                    ? () {}
+                                    : () async {
+                                        final success = await userController
+                                            .signInWithGoogle();
+                                        if (!mounted) return;
+                                        handleMessage(context, userController);
+                                        if (success) {
+                                          Navigator.pushReplacementNamed(
+                                              context, '/home');
+                                        }
+                                      },
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 200),
+                                  child: userController.isGoogleLoading
+                                      ? Padding(
+                                          key: const ValueKey('loader'),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 28.0),
+                                          child: Lottie.asset(
+                                              'assets/anim/google_loading.json'),
+                                        )
+                                      : SvgPicture.asset(
+                                          'assets/icons/google.svg',
+                                          semanticsLabel: 'Google Logo',
+                                          height: 30,
+                                        ),
                                 ),
                               ),
                             ),
                             Expanded(
                                 child: ElevatedButton(
-                              onPressed: () {
-                                userController.signInWithGithub(context);
-                              },
-                              child: SvgPicture.asset(
-                                'assets/icons/github.svg',
-                                semanticsLabel: 'Github Logo',
-                                height: 30,
-                                colorFilter: const ColorFilter.mode(
-                                    Colors.white, BlendMode.srcIn),
+                              onPressed: userController.isGithubLoading
+                                  ? () {}
+                                  : () async {
+                                      final success = await userController
+                                          .signInWithGithub();
+                                      if (!mounted) return;
+                                      handleMessage(context, userController);
+                                      if (success) {
+                                        Navigator.pushReplacementNamed(
+                                            context, '/home');
+                                      }
+                                    },
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 200),
+                                child: userController.isGithubLoading
+                                    ? SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          key: ValueKey("loader"),
+                                          backgroundColor: whiteColor,
+                                          color: blackColor,
+                                        ),
+                                      )
+                                    : SvgPicture.asset(
+                                        'assets/icons/github.svg',
+                                        semanticsLabel: 'Github Logo',
+                                        height: 30,
+                                        colorFilter: const ColorFilter.mode(
+                                            Colors.white, BlendMode.srcIn),
+                                      ),
                               ),
                             ))
                           ],
