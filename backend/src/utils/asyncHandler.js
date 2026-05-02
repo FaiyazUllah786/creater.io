@@ -19,7 +19,7 @@ export const asyncHandler = (requestHandler) => {
           errors:
             process.env.NODE_ENV === "development" && err?.message
               ? [err?.message]
-              : "Unknown error occurred",
+              : ["Unknown error occurred"],
           stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
         });
       }
