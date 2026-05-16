@@ -239,7 +239,7 @@ export const generativeRecolor = async (imagePublicId, { prompt = "", color, id:
 
   cloudinaryConfig();
 
-  const effect = { effect: `gen_recolor:prompt_${prompt.trim()};to-to-color_rgb:${hexColor};multiple_true` };
+  const effect = { effect: `gen_recolor:prompt_${prompt.trim()};to-color_rgb:${hexColor};multiple_true` };
   const resUrl = cloudinary.url(imagePublicId, {
     transformation: [...previousEffects, effect],
   });
