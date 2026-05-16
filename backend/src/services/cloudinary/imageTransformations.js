@@ -206,19 +206,22 @@ export const backgroundRemoval = async (imagePublicId, { id: effectId } = {}) =>
   return { resUrl, effect };
 };
 
-export const generativeRecolor = async (imagePublicId, { prompts, color, id: effectId } = {}) => {
+export const generativeRecolor = async (imagePublicId, { prompt = "", color, id: effectId } = {}) => {
   if (!imagePublicId) {
     throw new ApiError(400, "Image public id is required");
   }
-  if (!prompts || prompts.length == 0 || prompts.length > 3) {
-    throw new ApiError(400, "Prompts items should not more than 3");
+  // if (!prompts || prompts.length == 0 || prompts.length > 3) {
+  //   throw new ApiError(400, "Prompts items should not more than 3");
+  // }
+  if (!prompt || prompt.trim() == "") {
+    throw new ApiError(400, "Prompt is required");
   }
   //splitting prompts and converting to string
-  let str = "";
-  prompts.forEach((prompt) => {
-    str += `${prompt};`;
-  });
-  console.log("prompts: " + str);
+  // let str = "";
+  // prompts.forEach((prompt) => {
+  //   str += `${prompt};`;
+  // });
+  // console.log("prompts: " + str);
 
   //validating and optimizing color
   if (!color || color.trim() == "") {
@@ -236,7 +239,7 @@ export const generativeRecolor = async (imagePublicId, { prompts, color, id: eff
 
   cloudinaryConfig();
 
-  const effect = { effect: `gen_recolor:prompt_(${str});to-color_${hexColor};multiple_true` };
+  const effect = { effect: `gen_recolor:prompt_${prompt.trim()};to-to-color_rgb:${hexColor};multiple_true` };
   const resUrl = cloudinary.url(imagePublicId, {
     transformation: [...previousEffects, effect],
   });
