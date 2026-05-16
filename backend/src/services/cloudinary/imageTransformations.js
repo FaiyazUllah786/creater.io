@@ -305,19 +305,22 @@ export const generativeUpscale = async (imagePublicId, { id: effectId } = {}) =>
   return { resUrl, effect };
 };
 
-export const contentExtraction = async (imagePublicId, { prompts, id: effectId } = {}) => {
+export const contentExtraction = async (imagePublicId, { prompt, id: effectId } = {}) => {
   if (!imagePublicId) {
     throw new ApiError(400, "Image public id is required");
   }
-  if (!prompts || prompts.length == 0) {
-    throw new ApiError(400, "Prompts items required");
+  // if (!prompts || prompts.length == 0) {
+  //   throw new ApiError(400, "Prompts items required");
+  // }
+  if (!prompt || prompt.trim() == "") {
+    throw new ApiError(400, "Prompt is required");
   }
   //splitting prompts and converting to string
-  let str = "";
-  prompts.forEach((prompt) => {
-    str += `${prompt};`;
-  });
-  console.log("prompts: " + str);
+  // let str = "";
+  // prompts.forEach((prompt) => {
+  //   str += `${prompt};`;
+  // });
+  // console.log("prompts: " + str);
 
   const redis = getRedisInstance();
   const transformationList = await getCurrentList(redis, imagePublicId);
@@ -329,7 +332,7 @@ export const contentExtraction = async (imagePublicId, { prompts, id: effectId }
 
   cloudinaryConfig();
 
-  const effect = { effect: `extract:prompt_(${str})` };
+  const effect = { effect: `extract:prompt_${prompt.trim()};mode_content;multiple_true;preserve-alpha_true` };
   const resUrl = cloudinary.url(imagePublicId, {
     transformation: [...previousEffects, effect],
   });
