@@ -211,24 +211,17 @@ export const backgroundRemoval = async (imagePublicId, { id: effectId } = {}) =>
   return { resUrl, effect };
 };
 
-export const generativeRecolor = async (imagePublicId, { prompt = "", color, id: effectId } = {}) => {
+export const generativeRecolor = async (imagePublicId, { prompts = [], color, id: effectId } = {}) => {
   if (!imagePublicId) {
     throw new ApiError(400, "Image public id is required");
   }
-  // if (!prompts || prompts.length == 0 || prompts.length > 3) {
-  //   throw new ApiError(400, "Prompts items should not more than 3");
-  // }
-  if (!prompt || prompt.trim() == "") {
+  if (!prompts || prompts.length === 0) {
     throw new ApiError(400, "Prompt is required");
   }
-  //splitting prompts and converting to string
-  // let str = "";
-  // prompts.forEach((prompt) => {
-  //   str += `${prompt};`;
-  // });
-  // console.log("prompts: " + str);
+  if (prompts.length > 3) {
+    throw new ApiError(400, "Prompts must not be more than 3 items");
+  }
 
-  //validating and optimizing color
   if (!color || color.trim() == "") {
     throw new ApiError(400, "Color is required");
   }
@@ -244,7 +237,12 @@ export const generativeRecolor = async (imagePublicId, { prompt = "", color, id:
 
   cloudinaryConfig();
 
-  const effect = { effect: `gen_recolor:prompt_${prompt.trim()};to-color_rgb:${hexColor};multiple_true` };
+  const promptValue =
+    prompts.length === 1
+      ? prompts[0].trim()
+      : `(${prompts.map((p) => p.trim()).join(";")})`;
+
+  const effect = { effect: `gen_recolor:prompt_${promptValue};to-color_rgb:${hexColor};multiple_true` };
   const resUrl = cloudinary.url(imagePublicId, {
     transformation: [...previousEffects, effect],
   });
@@ -310,22 +308,13 @@ export const generativeUpscale = async (imagePublicId, { id: effectId } = {}) =>
   return { resUrl, effect };
 };
 
-export const contentExtraction = async (imagePublicId, { prompt, id: effectId } = {}) => {
+export const contentExtraction = async (imagePublicId, { prompts = [], id: effectId } = {}) => {
   if (!imagePublicId) {
     throw new ApiError(400, "Image public id is required");
   }
-  // if (!prompts || prompts.length == 0) {
-  //   throw new ApiError(400, "Prompts items required");
-  // }
-  if (!prompt || prompt.trim() == "") {
+  if (!prompts || prompts.length === 0) {
     throw new ApiError(400, "Prompt is required");
   }
-  //splitting prompts and converting to string
-  // let str = "";
-  // prompts.forEach((prompt) => {
-  //   str += `${prompt};`;
-  // });
-  // console.log("prompts: " + str);
 
   const redis = getRedisInstance();
   const transformationList = await getCurrentList(redis, imagePublicId);
@@ -337,7 +326,12 @@ export const contentExtraction = async (imagePublicId, { prompt, id: effectId } 
 
   cloudinaryConfig();
 
-  const effect = { effect: `extract:prompt_${prompt.trim()};mode_content;multiple_true;preserve-alpha_true` };
+  const promptValue =
+    prompts.length === 1
+      ? prompts[0].trim()
+      : `(${prompts.map((p) => p.trim()).join(";")})`;
+
+  const effect = { effect: `extract:prompt_${promptValue};mode_content;multiple_true;preserve-alpha_true` };
   const resUrl = cloudinary.url(imagePublicId, {
     transformation: [...previousEffects, effect],
   });
