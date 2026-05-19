@@ -149,11 +149,11 @@ export const generativeObjectReplace = async (
   return { resUrl, effect };
 };
 
-export const generativeObjectRemove = async (imagePublicId, { prompt = "", id: effectId } = {}) => {
+export const generativeObjectRemove = async (imagePublicId, { prompts = [], id: effectId } = {}) => {
   if (!imagePublicId) {
     throw new ApiError(400, "Image public id is required");
   }
-  if (!prompt || prompt.trim() == "") {
+  if (!prompts || prompts.length === 0) {
     throw new ApiError(400, "Prompt is required");
   }
 
@@ -167,7 +167,12 @@ export const generativeObjectRemove = async (imagePublicId, { prompt = "", id: e
 
   cloudinaryConfig();
 
-  const effect = { effect: `gen_remove:prompt_${prompt.trim()}` };
+  const promptValue =
+    prompts.length === 1
+      ? prompts[0].trim()
+      : `(${prompts.map((p) => p.trim()).join(";")})`;
+
+  const effect = { effect: `gen_remove:prompt_${promptValue}` };
   const resUrl = cloudinary.url(imagePublicId, {
     transformation: [...previousEffects, effect],
   });
