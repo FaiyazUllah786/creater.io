@@ -16,18 +16,66 @@ enum Direction {
   south_east,
 }
 
-class GenerativeFillScreen extends StatefulWidget {
-  final String imageUrl;
-  const GenerativeFillScreen({super.key, required this.imageUrl});
+class GenerativeFill extends StatefulWidget {
+  final String imageId;
+  final String? aspectRatio;
+  final String? gravity;
+  final String? tranformationId;
+  const GenerativeFill(
+      {super.key,
+      required this.imageId,
+      this.aspectRatio,
+      this.gravity,
+      this.tranformationId});
 
   @override
-  State<GenerativeFillScreen> createState() => _GenerativeFillScreenState();
+  State<GenerativeFill> createState() => _GenerativeFillState();
 }
 
-class _GenerativeFillScreenState extends State<GenerativeFillScreen> {
+class _GenerativeFillState extends State<GenerativeFill> {
   Direction? _selectedDirection;
-  final _selectedColor = blueColor.withOpacity(0.2);
-  String _isSelected = "Potrait";
+  String? _isSelected;
+  @override
+  void initState() {
+    super.initState();
+    var aspectRatio = widget.aspectRatio;
+    if (aspectRatio == "9:16") {
+      _isSelected = "Potrait";
+    } else if (aspectRatio == "16:9") {
+      _isSelected = "Landscape";
+    } else if (aspectRatio == "1:1") {
+      _isSelected = "Square";
+    } else {
+      _isSelected = "Landscape";
+    }
+    _selectedDirection = fetchGravity(widget.gravity ?? "");
+  }
+
+  Direction fetchGravity(String gravity) {
+    switch (gravity) {
+      case "north_west":
+        return Direction.north_west;
+      case "north":
+        return Direction.north;
+      case "north_east":
+        return Direction.north_east;
+      case "west":
+        return Direction.west;
+      case "center":
+        return Direction.center;
+      case "east":
+        return Direction.east;
+      case "south_west":
+        return Direction.south_west;
+      case "south":
+        return Direction.south;
+      case "south_east":
+        return Direction.south_east;
+      default:
+        return Direction.center;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -76,21 +124,33 @@ class _GenerativeFillScreenState extends State<GenerativeFillScreen> {
                 var aspectRatio = "1:1";
                 if (_isSelected == "Potrait") {
                   aspectRatio = "9:16";
-                  print(aspectRatio);
                 } else if (_isSelected == "Landscape") {
                   aspectRatio = "16:9";
-                  print(aspectRatio);
                 } else {
                   aspectRatio = "1:1";
-                  print(aspectRatio);
                 }
-                print(widget.imageUrl);
-                print(_selectedDirection?.name);
-                Provider.of<ImageController>(context, listen: false)
-                    .generativeFill(
-                        imageUrl: widget.imageUrl,
-                        aspectRatio: aspectRatio,
-                        gravity: _selectedDirection?.name ?? "center");
+
+                if (widget.tranformationId != null) {
+                  context.read<ImageController>().updateTransformation(
+                      widget.imageId,
+                      {
+                        'id': widget.tranformationId as String,
+                        'aspectRatio': aspectRatio,
+                        'gravity': _selectedDirection?.name ?? "center",
+                        'effectType': 'gen_fill'
+                      },
+                      widget.tranformationId as String);
+                } else {
+                  context.read<ImageController>().addTransformation(
+                    widget.imageId,
+                    {
+                      'aspectRatio': aspectRatio,
+                      'gravity': _selectedDirection?.name ?? "center",
+                      'effectType': 'gen_fill'
+                    },
+                  );
+                }
+
                 Navigator.pop(context);
               },
               child: const Text("Apply")),
@@ -112,7 +172,7 @@ class _GenerativeFillScreenState extends State<GenerativeFillScreen> {
         margin: const EdgeInsets.all(5),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: _isSelected == aspectRatio ? _selectedColor : whiteColor,
+          color: _isSelected == aspectRatio ? greyColor : whiteColor,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:creatorio/common/message.dart';
 import 'package:creatorio/common/storage.dart';
-import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/api_error.dart';
 import 'package:creatorio/features/auth/repository/user_repository.dart';
 import 'package:creatorio/model/user_model.dart';

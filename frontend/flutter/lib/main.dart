@@ -72,8 +72,15 @@ class MyApp extends StatelessWidget {
             ),
             scaffoldBackgroundColor: whiteColor,
             textTheme: textTheme,
-            bottomSheetTheme:
-                const BottomSheetThemeData(backgroundColor: whiteColor),
+            bottomSheetTheme: const BottomSheetThemeData(
+              backgroundColor: whiteColor,
+              shape: ContinuousRectangleBorder(
+                side: BorderSide(color: blackColor, width: 2),
+                borderRadius: BorderRadiusGeometry.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28)),
+              ),
+            ),
             bottomNavigationBarTheme: const BottomNavigationBarThemeData(
               backgroundColor: whiteColor,
               selectedItemColor: blackColor,

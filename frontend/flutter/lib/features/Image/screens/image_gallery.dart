@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:creatorio/common/theme/colors.dart';
 import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/features/Image/controller/image_controller.dart';
 import 'package:creatorio/features/Image/screens/image_editor.dart';
@@ -41,7 +40,13 @@ class _ImageGalleryState extends State<ImageGallery> {
       ),
       body: Consumer<ImageController>(
         builder: (context, imageController, child) {
-          if (imageController.isLoading) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (imageController.message != null) {
+              handleMessage(context, imageController);
+            }
+          });
+          if (imageController.loadingState == ImageLoadingState.uploading ||
+              imageController.loadingState == ImageLoadingState.fetching) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: GridView.builder(
@@ -92,21 +97,12 @@ class _ImageGalleryState extends State<ImageGallery> {
                   final image = imageController.images[index];
                   return InkWell(
                     onTap: () async {
-                      //edit an image
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ImageEditor(imageUrl: image.secureUrl),
-                          ));
-                    },
-                    onLongPress: () async {
-                      //delete image
-                      showSnackBar(
-                          context, "Deleting image", SnackBarType.info);
-                      await imageController.deleteImage(image.id);
-                      showSnackBar(
-                          context, "Image Deleted", SnackBarType.success);
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ImageEditor(image: image),
+                        ),
+                      );
                     },
                     child: Stack(
                       fit: StackFit.expand,

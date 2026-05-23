@@ -1,34 +1,27 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:creatorio/common/provider/unsplash_provider.dart';
+import 'package:creatorio/common/theme/colors.dart';
+import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/error.dart';
 import 'package:creatorio/common/widgets/shimmer_loading.dart';
 import 'package:creatorio/features/Image/controller/image_controller.dart';
-import 'package:creatorio/features/Image/screens/generative_fill_screen.dart';
+import 'package:creatorio/features/Image/widgets/edit_widget.dart';
+import 'package:creatorio/features/Image/widgets/transformation_drawer.dart';
+import 'package:creatorio/model/image_model.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ImageEditor extends StatefulWidget {
-  final String imageUrl;
-  const ImageEditor({super.key, required this.imageUrl});
+  final ImageModel image;
+  const ImageEditor({super.key, required this.image});
 
   @override
   State<ImageEditor> createState() => _ImageEditorState();
 }
 
 class _ImageEditorState extends State<ImageEditor> {
-  late String _imageToTransform;
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<ImageController>(context, listen: false)
-        .imageTransformed
-        .clear();
-    _imageToTransform = widget.imageUrl;
-    print("ImageToTransform: $_imageToTransform");
-  }
-
-  bool _hasUnsavedChanges = false;
   Future<bool> _showExitConfirmationDialog() async {
     return await showDialog<bool>(
           context: context,
@@ -44,8 +37,11 @@ class _ImageEditorState extends State<ImageEditor> {
                   child: const Text("Cancel"),
                 ),
                 TextButton(
-                  onPressed: () =>
-                      Navigator.of(context).pop(true), // User chose to exit
+                  onPressed: () async {
+                    final imageController = context.read<ImageController>();
+                    imageController.clearTransformation(widget.image.publicId);
+                    Navigator.of(context).pop(true);
+                  },
                   child: const Text("Exit"),
                 ),
               ],
@@ -57,9 +53,10 @@ class _ImageEditorState extends State<ImageEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final imageController = context.watch<ImageController>();
     return WillPopScope(
       onWillPop: () async {
-        if (_hasUnsavedChanges) {
+        if (imageController.hasUnsavedChanges) {
           // Show the confirmation dialog if there are unsaved changes
           final exit = await _showExitConfirmationDialog();
           return exit; // Return true to exit, false to stay
@@ -70,60 +67,56 @@ class _ImageEditorState extends State<ImageEditor> {
         appBar: AppBar(
           title: const Text("Image Transformation"),
         ),
-        drawer: Drawer(
-          child: Consumer<ImageController>(
-            builder: (context, imageController, child) {
-              return ListView.builder(
-                itemCount: imageController.imageTransformed.length,
-                itemBuilder: (context, index) {
-                  final transform = imageController.imageTransformed[index]
-                      .contains("b_gen_fill");
-                  return ListTile(
-                    title: Text("$transform"),
-                  );
-                },
-              );
-            },
-          ),
-        ),
+        drawer: TransformationDrawer(image: widget.image),
         bottomNavigationBar: BottomNavigationBar(
           onTap: (index) async {
             switch (index) {
               case 0:
-                print("case 0 Share $index");
-                // Share.share(_imageToTransform);
-                final file = await UnsplashProvider()
-                    .downloadAndSaveImage(_imageToTransform, (progress) {
+                final file = await UnsplashProvider().downloadAndSaveImage(
+                    imageController.transformedImageUrl ??
+                        widget.image.secureUrl, (progress) {
                   print(progress);
                 });
                 if (file != null) {
-                  Share.shareXFiles([XFile(file.path)]);
+                  final params = ShareParams(
+                    files: [XFile(file.path)],
+                  );
+
+                  final result = await SharePlus.instance.share(params);
+
+                  if (result.status == ShareResultStatus.success) {
+                    print('Thank you for sharing the picture!');
+                  }
                 } else {
-                  Share.share(_imageToTransform);
+                  final params = ShareParams(
+                    uri: Uri.parse(widget.image.secureUrl),
+                  );
+
+                  final result = await SharePlus.instance.share(params);
+
+                  if (result.status == ShareResultStatus.success) {
+                    print('Thank you for sharing the picture!');
+                  }
                 }
                 break;
               case 1:
-                print("case 1 Edit $index");
                 showModalBottomSheet(
                   isScrollControlled: true,
                   context: context,
-                  builder: (context) {
-                    return GenerativeFillScreen(
-                      imageUrl: _imageToTransform,
-                    );
+                  builder: (modalContext) {
+                    return EditHelper(image: widget.image);
                   },
                 );
 
                 break;
               case 2:
-                print("case 2 Save $index");
-                setState(() {
-                  //to safely exit if something changes
-                  _hasUnsavedChanges = true;
-                });
+                await imageController.saveImage(widget.image.secureUrl);
+                handleMessage(context, imageController);
                 break;
               case 3:
-                print("case 3 Delete $index");
+                final success =
+                    await imageController.deleteImage(widget.image.id);
+                if (success) Navigator.pop(context);
                 break;
             }
           },
@@ -140,28 +133,46 @@ class _ImageEditorState extends State<ImageEditor> {
         ),
         body: Consumer<ImageController>(
           builder: (context, imageController, child) {
-            _imageToTransform = imageController.imageTransformed.isNotEmpty
-                ? imageController.imageTransformed.last
-                : widget.imageUrl;
-            print("Image Transformed Url: $_imageToTransform ");
             return SafeArea(
               child: Stack(
                 children: [
                   Center(
                     child: CachedNetworkImage(
                       errorWidget: (context, url, error) {
-                        imageController.imageTransformed.removeLast();
                         return const ErrorScreen(
-                            error: "Something not right,Try again");
+                            error: "Something not right, try again!");
                       },
                       placeholder: (context, url) => const ShimmerLoading(),
-                      imageUrl: _imageToTransform,
+                      imageUrl: imageController.transformedImageUrl ??
+                          widget.image.secureUrl,
                       fit: BoxFit.contain,
                     ),
                   ),
                   if (imageController.isTransforming)
-                    const Center(
-                      child: ShimmerLoading(),
+                    Container(
+                      height: double.maxFinite,
+                      color: whiteColor.withAlpha(75),
+                      child: Center(
+                        child: ShaderMask(
+                          shaderCallback: (bounds) {
+                            return const LinearGradient(
+                              colors: [
+                                Color(0xFF00F5A0),
+                                Color(0xFF00D9F5),
+                                Color(0xFF9D4DFF),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ).createShader(bounds);
+                          },
+                          blendMode: BlendMode.srcATop,
+                          child: Lottie.asset(
+                            'assets/anim/ai_animation.json',
+                            height: 90,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
                     ),
                 ],
               ),
