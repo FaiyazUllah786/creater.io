@@ -12,130 +12,106 @@ export const generateAccessRefreshToken = async (userId) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      throw new ApiError(400, "User does not exist");
+      throw new ApiError(404, "User not found");
     }
 
-    const accessToken = await user.generateAccessToken();
-    const refreshToken = await user.generateRefreshToken();
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
     if (!accessToken || !refreshToken) {
-      throw new ApiError(
-        400,
-        "Something went wrong during generation of access and refresh token"
-      );
+      throw new ApiError(500, "Failed to generate authentication tokens");
     }
 
     user.refreshToken = refreshToken;
-    const updatedUserWithRefreshToken = await user.save({
-      validateBeforeSave: false,
-    });
+    await user.save({ validateBeforeSave: false });
 
     return { accessToken, refreshToken };
   } catch (error) {
-    console.log("error on generating tokens:", error);
-    throw new ApiError(
-      400,
-      "Something went wrong during generation of access and refresh token"
-    );
+    console.log("Error generating tokens:", error);
+    throw new ApiError(500, "Failed to generate authentication tokens");
   }
 };
 
 export const verifyJWT = asyncHandler(async (req, _, next) => {
   try {
-    // If req.user is already set (e.g., by a test bypass or upstream middleware), skip JWT check
     if (req.user) {
       req._id = req.user._id;
       return next();
     }
 
-    //take cookies from req
     const token =
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
 
-    //validate cookies
     if (!token) {
-      throw new ApiError(400, "access token missing");
+      throw new ApiError(401, "Access token is missing");
     }
 
-    //extract data from cookies
     const decodedData = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     if (!decodedData) {
-      throw new ApiError(401, "invalid or expired token");
+      throw new ApiError(401, "Invalid or expired access token");
     }
-    console.log("verifiedJWT Data:", decodedData);
-    //set user id in req
+
     req._id = decodedData._id;
-    //move the control to next middleware
     next();
   } catch (error) {
-    console.log("Error during JWT verification:", error);
+    console.log("JWT verification failed:", error);
     throw error;
   }
 });
 
 export const refreshAccessToken = async (req, res) => {
   try {
-    //take refresh token from cookies or frontend
     const incomingRefreshToken =
       req.cookies.refreshToken || req.body.refreshToken;
-    //validate refresh token
+
     if (!incomingRefreshToken) {
-      throw new ApiError(401, "Refresh Token is missing");
+      throw new ApiError(401, "Refresh token is missing");
     }
-    //decode refresh token
+
     const decodedData = jwt.verify(
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECRET
     );
+
     const user = await User.findById(decodedData?._id);
-    //validate user
     if (!user) {
-      throw new ApiError(400, "User not found");
+      throw new ApiError(404, "User not found");
     }
-    //validate user with incomingrefreshtoken
-    const token = user?.refreshToken;
-    console.log("incoming refresh token :", incomingRefreshToken);
-    console.log("user refresh token :", token);
-    console.log(
-      "check whether they are not same: ",
-      token != incomingRefreshToken
-    );
-    if (user?.refreshToken != incomingRefreshToken) {
+
+    if (user.refreshToken !== incomingRefreshToken) {
       user.refreshToken = null;
       await user.save({ validateBeforeSave: false });
-      throw new ApiError(403, "Refresh Token expired");
+      throw new ApiError(403, "Refresh token has expired or been revoked");
     }
-    //get new access and refresh token
-    const { accessToken, refreshToken } = await generateAccessRefreshToken(
-      user._id
-    );
-    const updatedUserWithRefreshToken = await User.findById(user._id).select(
-      "-password -refreshToken"
-    );
-    //set access and refreshtoken
+
+    const { accessToken, refreshToken } = await generateAccessRefreshToken(user._id);
+
+    const updatedUser = await User.findById(user._id).select("-password -refreshToken");
+
     const opts = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // only HTTPS in prod
+      secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     };
+
     return res
       .status(200)
       .cookie("accessToken", accessToken, opts)
       .cookie("refreshToken", refreshToken, opts)
       .json(
         new ApiResponse(
-          201,
-          { updatedUserWithRefreshToken, accessToken, refreshToken },
-          "New access and refresh token generated"
+          200,
+          { user: updatedUser, accessToken, refreshToken },
+          "Tokens refreshed successfully"
         )
       );
   } catch (error) {
-    console.log("Somethin went wrong while refreshing access token: ", error);
+    console.log("Failed to refresh tokens:", error);
     return res
       .clearCookie("accessToken")
       .clearCookie("refreshToken")
-      .status(401)
-      .json(new ApiError(401, "Failed to refresh tokens"));
+      .status(error.statusCode ?? 401)
+      .json(new ApiError(error.statusCode ?? 401, error.message ?? "Failed to refresh tokens"));
   }
 };
 

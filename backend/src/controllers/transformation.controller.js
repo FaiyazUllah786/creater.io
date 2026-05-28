@@ -15,51 +15,44 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-//add transformation
 export const addTransformation = asyncHandler(async (req, res) => {
-  try {
-    const { imagePublicId, transformation } = req.body;
+  const { imagePublicId, transformation } = req.body;
 
-    if (!imagePublicId) {
-      throw new ApiError(400, "Image id is required.");
-    }
-
-    if (!transformation) {
-      throw new ApiError(400, "Transformation effect is required.");
-    }
-
-    const tranfomationFunction = transformationHelper(transformation);
-    const { resUrl, effect } = await tranfomationFunction(imagePublicId, transformation);
-
-    const transfomationList = await addTransformationToList(imagePublicId, {
-      transformation,
-      effect,
-    });
-
-    return res
-      .status(200)
-      .json(new ApiResponse(200, { resUrl, transfomationList }, "Transformation applied"));
-  } catch (error) {
-    res.status(400).json(new ApiError(400, "Error occured ", error.message));
+  if (!imagePublicId) {
+    throw new ApiError(422, "imagePublicId is required");
   }
+  if (!transformation) {
+    throw new ApiError(422, "transformation is required");
+  }
+
+  const transfomationFunction = transformationHelper(transformation);
+  const { resUrl, effect } = await transfomationFunction(imagePublicId, transformation);
+
+  const transfomationList = await addTransformationToList(imagePublicId, {
+    transformation,
+    effect,
+  });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { previewUrl: resUrl, transfomationList }, "Transformation added successfully"));
 });
 
 export const updateTransformation = asyncHandler(async (req, res) => {
   const { imagePublicId, transformation, transformationId } = req.body;
 
   if (!imagePublicId) {
-    throw new ApiError(400, "Image id is required.");
+    throw new ApiError(422, "imagePublicId is required");
   }
-
   if (!transformation) {
-    throw new ApiError(400, "Transformation effect is required.");
+    throw new ApiError(422, "transformation is required");
   }
   if (!transformationId) {
-    throw new ApiError(400, "transformation id is required.");
+    throw new ApiError(422, "transformationId is required");
   }
 
-  const tranfomationFunction = transformationHelper(transformation);
-  const { resUrl, effect } = await tranfomationFunction(imagePublicId, transformation);
+  const transfomationFunction = transformationHelper(transformation);
+  const { resUrl, effect } = await transfomationFunction(imagePublicId, transformation);
 
   const transfomationList = await modifyTransforamtionFromList(
     imagePublicId,
@@ -69,66 +62,63 @@ export const updateTransformation = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { resUrl, transfomationList }, "Transformation applied"));
+    .json(new ApiResponse(200, { previewUrl: resUrl, transfomationList }, "Transformation updated successfully"));
 });
 
 export const deleteTransformation = asyncHandler(async (req, res) => {
   const { imagePublicId, transformationId } = req.body;
 
   if (!imagePublicId) {
-    throw new ApiError(400, "Image id is required.");
+    throw new ApiError(422, "imagePublicId is required");
   }
-
   if (!transformationId) {
-    throw new ApiError(400, "Transformation id is required.");
+    throw new ApiError(422, "transformationId is required");
   }
 
   const transfomationList = await deleteTransformationFromList(imagePublicId, transformationId);
 
-  const tranfomationFunction = transformationHelper({ effectType: "del_transform" });
-  const resUrl = await tranfomationFunction(imagePublicId, transfomationList);
+  const transfomationFunction = transformationHelper({ effectType: "del_transform" });
+  const resUrl = await transfomationFunction(imagePublicId, transfomationList);
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { resUrl, transfomationList }, "Transformation applied"));
+    .json(new ApiResponse(200, { previewUrl: resUrl, transfomationList }, "Transformation removed successfully"));
 });
 
 export const clearTransformation = asyncHandler(async (req, res) => {
   const { imagePublicId } = req.body;
 
   if (!imagePublicId) {
-    throw new ApiError(400, "Image id is required.");
+    throw new ApiError(422, "imagePublicId is required");
   }
 
   const transfomationList = await clearTransformationList(imagePublicId);
 
-  const tranfomationFunction = transformationHelper({ effectType: "del_transform" });
-  const resUrl = await tranfomationFunction(imagePublicId);
+  const transfomationFunction = transformationHelper({ effectType: "del_transform" });
+  const resUrl = await transfomationFunction(imagePublicId);
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { resUrl, transfomationList }, "Transformation applied"));
+    .json(new ApiResponse(200, { previewUrl: resUrl, transfomationList }, "Transformation stack cleared successfully"));
 });
 
 export const saveTransformation = asyncHandler(async (req, res) => {
   const { imagePublicId } = req.body;
 
   if (!imagePublicId) {
-    throw new ApiError(400, "Image id is required.");
+    throw new ApiError(422, "imagePublicId is required");
   }
 
-  // Get Redis list — fall back to empty list if Redis is unavailable
   let list = [];
   try {
     const redis = getRedisInstance();
     list = await getCurrentList(redis, imagePublicId);
   } catch (_redisErr) {
-    // Redis unavailable; proceed with empty transformation list
+    // Redis unavailable — proceed with empty list, returning plain URL
   }
 
   const finalUrl = await universalTransformation(imagePublicId, list);
 
-  // Attempt to upload and persist; skip gracefully if services are unavailable
   let savedImage = null;
   try {
     const uploadResponse = await uploadOnCloudinary(finalUrl);
@@ -146,10 +136,10 @@ export const saveTransformation = asyncHandler(async (req, res) => {
       }
     }
   } catch (_saveErr) {
-    // Upload or DB unavailable; return the generated URL
+    // Upload or DB unavailable — return the generated URL as fallback
   }
 
   return res
-    .status(200)
-    .json(new ApiResponse(200, savedImage ?? { finalUrl }, "Image saved successfully."));
+    .status(201)
+    .json(new ApiResponse(201, savedImage ?? { finalUrl }, "Image saved successfully"));
 });
