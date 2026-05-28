@@ -1,5 +1,8 @@
 import 'dart:convert';
 import 'package:creatorio/common/ip.dart';
+import 'package:creatorio/core/network/dio_client.dart';
+import 'package:creatorio/core/network/token_manager.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:http/http.dart' as http;
@@ -11,262 +14,327 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class UserRepository {
   final GoogleSignIn _signIn = GoogleSignIn.instance;
-
+  final Dio dio = DioClient.dio;
   Future<ApiResponse?> registerUser(String userName, String email,
       String password, String profilePhoto) async {
     try {
-      final req =
-          http.MultipartRequest('POST', Uri.parse('$myIp/user/auth/register'));
-      req.fields['userName'] = userName;
-      req.fields['email'] = email;
-      req.fields['password'] = password;
+      FormData formData = FormData.fromMap({
+        'userName': userName,
+        'email': email,
+        'password': password,
+      });
 
       if (profilePhoto.isNotEmpty) {
-        final image =
-            await http.MultipartFile.fromPath('profilePhoto', profilePhoto);
-        req.files.add(image);
+        formData.files.add(
+          MapEntry(
+            'profilePhoto',
+            await MultipartFile.fromFile(profilePhoto),
+          ),
+        );
       }
 
-      final res = await http.Response.fromStream(await req.send());
-      final body = jsonDecode(res.body);
-      debugPrint("Register Response body: $body");
-      if (res.statusCode == 200) {
-        return ApiResponse.fromMap(body);
-      } else {
-        throw ApiError.fromMap(body);
+      final response = await dio.post(
+        '/user/auth/register',
+        data: formData,
+      );
+      return ApiResponse.fromMap(response.data);
+    } on DioException catch (e, stackTrace) {
+      debugPrint("Register Error: ${e.response?.data}");
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (e.response?.data != null) {
+        throw ApiError.fromMap(e.response!.data);
       }
-    } on ApiError {
-      rethrow;
+
+      throw ApiError(
+        statusCode: 500,
+        message: "Network error occurred",
+      );
     } catch (e, stackTrace) {
       debugPrint("Unexpected error during registration: $e");
+
       debugPrintStack(stackTrace: stackTrace);
+
       throw ApiError(
-          statusCode: 500, message: "Something went wrong. Please try again.");
+        statusCode: 500,
+        message: "Something went wrong. Please try again.",
+      );
     }
   }
 
   Future<ApiResponse?> loginUser(String email, String password) async {
     try {
-      final res = await http.post(Uri.parse('$myIp/user/auth/login'), body: {
+      final res = await dio.post('/user/auth/login', data: {
         'email': email,
         'password': password,
       });
-      final body = jsonDecode(res.body);
-      debugPrint("Login Response body: $body");
-      if (res.statusCode == 200) {
-        return ApiResponse.fromMap(body);
-      } else {
-        throw ApiError.fromMap(body);
-      }
-    } on ApiError {
-      rethrow;
-    } catch (e, stackTrace) {
-      debugPrint("Unexpected error during login: $e");
-      debugPrintStack(stackTrace: stackTrace);
-      throw ApiError(
-          statusCode: 500, message: "Something went wrong. Please try again.");
-    }
-  }
 
-  Future<bool> refreshTokens() async {
-    print("refreshing access and refresh token");
-    try {
-      final refreshToken = await storage.read(key: 'refreshToken');
-      if (refreshToken == null) return false;
-      print("found refreshToken: $refreshToken");
-      final response = await http.post(
-        Uri.parse('$myIp/user/auth/refresh-tokens'),
-        body: {'refreshToken': refreshToken},
+      debugPrint("Login Response: ${res.data}");
+
+      return ApiResponse.fromMap(
+        res.data,
       );
-      print("Response of refresh func: ${response.statusCode}");
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        print(body);
-        final res = ApiResponse.fromMap(body);
-        print(res);
-        final accessToken = res.data['accessToken'];
-        final refreshToken = res.data['refreshToken'];
-        await storeTokens(
-          accessToken: accessToken,
-          refreshToken: refreshToken,
+    } on DioException catch (e, stackTrace) {
+      debugPrint("Login Error: ${e.response?.data}");
+
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (e.response?.data != null) {
+        throw ApiError.fromMap(
+          e.response!.data,
         );
-        return true;
-        // return false;
       }
-      return false;
+
+      throw ApiError(
+        statusCode: 500,
+        message: "Network error occurred",
+      );
     } catch (e, stackTrace) {
       debugPrint("Unexpected error during login: $e");
+
       debugPrintStack(stackTrace: stackTrace);
+
       throw ApiError(
-          statusCode: 500, message: "Something went wrong. Please try again.");
+        statusCode: 500,
+        message: "Something went wrong. Please try again.",
+      );
     }
   }
 
   Future<ApiResponse?> logout() async {
     try {
-      final accessToken = await storage.read(key: "accessToken");
-      final res = await http.post(
-          Uri.parse(
-            '$myIp/user/auth/logout',
-          ),
-          headers: {"Authorization": "Bearer $accessToken"});
-      final body = jsonDecode(res.body);
-      debugPrint("Logout Response body: $body");
-      if (res.statusCode == 200) {
-        return ApiResponse.fromMap(body);
-      } else {
-        throw ApiError.fromMap(body);
-      }
-    } on ApiError {
-      rethrow;
-    } catch (e, stackTrace) {
-      debugPrint("Unexpected error during login: $e");
+      final res = await dio.post('/user/auth/logout');
+      debugPrint("Logout Response: ${res.data}");
+
+      return ApiResponse.fromMap(
+        res.data,
+      );
+    } on DioException catch (e, stackTrace) {
+      debugPrint("Logout Error: ${e.response?.data}");
+
       debugPrintStack(stackTrace: stackTrace);
+
+      if (e.response?.data != null) {
+        throw ApiError.fromMap(
+          e.response!.data,
+        );
+      }
+
       throw ApiError(
-          statusCode: 500, message: "Something went wrong. Please try again.");
+        statusCode: 500,
+        message: "Network error occurred",
+      );
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during logout: $e");
+
+      debugPrintStack(stackTrace: stackTrace);
+
+      throw ApiError(
+        statusCode: 500,
+        message: "Something went wrong. Please try again.",
+      );
     }
   }
 
   Future<ApiResponse?> deleteAccount() async {
     try {
-      final accessToken = await storage.read(key: "accessToken");
-      final res = await http.post(
-          Uri.parse(
-            '$myIp/user/delete-user',
-          ),
-          headers: {"Authorization": "Bearer $accessToken"});
-      final body = jsonDecode(res.body);
-      debugPrint("Logout Response body: $body");
-      if (res.statusCode == 200) {
-        return ApiResponse.fromMap(body);
-      } else {
-        throw ApiError.fromMap(body);
-      }
-    } on ApiError {
-      rethrow;
-    } catch (e, stackTrace) {
-      debugPrint("Unexpected error during login: $e");
+      final res = await dio.post('/user/delete-user');
+
+      debugPrint("Delete account Response: ${res.data}");
+
+      return ApiResponse.fromMap(
+        res.data,
+      );
+    } on DioException catch (e, stackTrace) {
+      debugPrint("Delete account Error: ${e.response?.data}");
+
       debugPrintStack(stackTrace: stackTrace);
+
+      if (e.response?.data != null) {
+        throw ApiError.fromMap(
+          e.response!.data,
+        );
+      }
+
       throw ApiError(
-          statusCode: 500, message: "Something went wrong. Please try again.");
+        statusCode: 500,
+        message: "Network error occurred",
+      );
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during delete account: $e");
+
+      debugPrintStack(stackTrace: stackTrace);
+
+      throw ApiError(
+        statusCode: 500,
+        message: "Something went wrong. Please try again.",
+      );
     }
   }
 
   Future<ApiResponse?> changePassword(
       String oldPassword, String newPassword) async {
     try {
-      final accessToken = await storage.read(key: "accessToken");
-      final res =
-          await http.post(Uri.parse('$myIp/user/update-password'), body: {
+      final res = await dio.post('/user/update-password', data: {
         'oldPassword': oldPassword,
         'newPassword': newPassword,
-      }, headers: {
-        "Authorization": "Bearer $accessToken"
       });
-      final body = jsonDecode(res.body);
-      debugPrint("Change Password Response body: $body");
-      if (res.statusCode == 200) {
-        return ApiResponse.fromMap(body);
-      } else {
-        throw ApiError.fromMap(body);
-      }
-    } on ApiError {
-      rethrow;
-    } catch (e, stackTrace) {
-      debugPrint("Unexpected error during login: $e");
+      debugPrint("change password Response: ${res.data}");
+
+      return ApiResponse.fromMap(
+        res.data,
+      );
+    } on DioException catch (e, stackTrace) {
+      debugPrint("Change password Error: ${e.response?.data}");
+
       debugPrintStack(stackTrace: stackTrace);
+
+      if (e.response?.data != null) {
+        throw ApiError.fromMap(
+          e.response!.data,
+        );
+      }
+
       throw ApiError(
-          statusCode: 500, message: "Something went wrong. Please try again.");
+        statusCode: 500,
+        message: "Network error occurred",
+      );
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during change password: $e");
+
+      debugPrintStack(stackTrace: stackTrace);
+
+      throw ApiError(
+        statusCode: 500,
+        message: "Something went wrong. Please try again.",
+      );
     }
   }
 
   Future<ApiResponse?> getCurrentUser() async {
     try {
-      final accessToken = await storage.read(key: 'accessToken');
-      final res = await http.get(Uri.parse('$myIp/user/current-user'),
-          headers: {"Authorization": "Bearer $accessToken"});
-      final body = jsonDecode(res.body);
-      debugPrint("Current user response body: $body");
-      if (res.statusCode == 200) {
-        return ApiResponse.fromMap(body);
-      } else {
-        throw ApiError.fromMap(body);
-      }
-    } on ApiError {
-      rethrow;
-    } catch (e, stackTrace) {
-      debugPrint("Unexpected error during login: $e");
+      final res = await dio.get('/user/current-user');
+      debugPrint("Current user Response: ${res.data}");
+
+      return ApiResponse.fromMap(
+        res.data,
+      );
+    } on DioException catch (e, stackTrace) {
+      debugPrint("Current user Error: ${e.response?.data}");
+
       debugPrintStack(stackTrace: stackTrace);
+
+      if (e.response?.data != null) {
+        throw ApiError.fromMap(
+          e.response!.data,
+        );
+      }
+
       throw ApiError(
-          statusCode: 500, message: "Something went wrong. Please try again.");
+        statusCode: 500,
+        message: "Network error occurred",
+      );
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during current user: $e");
+
+      debugPrintStack(stackTrace: stackTrace);
+
+      throw ApiError(
+        statusCode: 500,
+        message: "Something went wrong. Please try again.",
+      );
     }
   }
 
   Future<ApiResponse?> updateProfilePhoto(String profilePhoto) async {
     try {
-      final accessToken = await storage.read(key: "accessToken");
-      final req = http.MultipartRequest(
-        'POST',
-        Uri.parse('$myIp/user/profile-photo'),
-      );
+      FormData formData = FormData();
+
       if (profilePhoto.isNotEmpty) {
-        final image =
-            await http.MultipartFile.fromPath('profilePhoto', profilePhoto);
-        req.files.add(image);
-        req.headers["Authorization"] = "Bearer $accessToken";
-      } else {
-        throw ApiError(statusCode: 400, message: 'Profile photo is required');
+        formData.files.add(
+          MapEntry(
+            'profilePhoto',
+            await MultipartFile.fromFile(profilePhoto),
+          ),
+        );
       }
 
-      final res = await http.Response.fromStream(await req.send());
-      final body = jsonDecode(res.body);
-      debugPrint("Current user response body: $body");
-      if (res.statusCode == 200) {
-        return ApiResponse.fromMap(body);
-      } else {
-        throw ApiError.fromMap(body);
-      }
-    } on ApiError {
-      rethrow;
-    } catch (e, stackTrace) {
-      debugPrint("Unexpected error during login: $e");
+      final res = await dio.post(
+        '/user/profile-photo',
+        data: formData,
+      );
+
+      debugPrint("Update profile photo Response: ${res.data}");
+
+      return ApiResponse.fromMap(
+        res.data,
+      );
+    } on DioException catch (e, stackTrace) {
+      debugPrint("Update profile photo Error: ${e.response?.data}");
+
       debugPrintStack(stackTrace: stackTrace);
+
+      if (e.response?.data != null) {
+        throw ApiError.fromMap(
+          e.response!.data,
+        );
+      }
+
       throw ApiError(
-          statusCode: 500, message: "Something went wrong. Please try again.");
+        statusCode: 500,
+        message: "Network error occurred",
+      );
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during update profile photo: $e");
+
+      debugPrintStack(stackTrace: stackTrace);
+
+      throw ApiError(
+        statusCode: 500,
+        message: "Something went wrong. Please try again.",
+      );
     }
   }
 
   Future<ApiResponse?> updateUserProfile(
       String email, String userName, String firstName, String lastName) async {
     try {
-      final accessToken = await storage.read(key: "accessToken");
-      if (accessToken == null) {
-        throw ApiError(statusCode: 400, message: "AccessToken Expired");
-      }
-      final res =
-          await http.post(Uri.parse("$myIp/user/update-account"), headers: {
-        "Authorization": "Bearer $accessToken"
-      }, body: {
+      final res = await dio.post('/user/update-account', data: {
         "userName": userName,
         "email": email,
         "firstName": firstName,
         "lastName": lastName,
       });
 
-      final body = jsonDecode(res.body);
-      debugPrint("Current user response body: $body");
-      if (res.statusCode == 200) {
-        return ApiResponse.fromMap(body);
-      } else {
-        throw ApiError.fromMap(body);
-      }
-    } on ApiError {
-      rethrow;
-    } catch (e, stackTrace) {
-      debugPrint("Unexpected error during login: $e");
+      debugPrint("Update user profile Response: ${res.data}");
+
+      return ApiResponse.fromMap(
+        res.data,
+      );
+    } on DioException catch (e, stackTrace) {
+      debugPrint("Update user profile Error: ${e.response?.data}");
+
       debugPrintStack(stackTrace: stackTrace);
+
+      if (e.response?.data != null) {
+        throw ApiError.fromMap(
+          e.response!.data,
+        );
+      }
+
       throw ApiError(
-          statusCode: 500, message: "Something went wrong. Please try again.");
+        statusCode: 500,
+        message: "Network error occurred",
+      );
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected error during update user profile: $e");
+
+      debugPrintStack(stackTrace: stackTrace);
+
+      throw ApiError(
+        statusCode: 500,
+        message: "Something went wrong. Please try again.",
+      );
     }
   }
 

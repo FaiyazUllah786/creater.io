@@ -55,137 +55,129 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
         final userInfo = userProvider.userInfo;
         return AbsorbPointer(
           absorbing: userProvider.isLoading,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18.0),
-              child: SizedBox(
-                height:
-                    size.height - kToolbarHeight - kBottomNavigationBarHeight,
-                child: Form(
-                  key: _formKey,
-                  autovalidateMode: AutovalidateMode.disabled,
-                  child: Stack(
-                    // fit: StackFit.expand,
-                    alignment: Alignment.center,
-                    children: [
-                      Lottie.asset("assets/anim/form.json",
-                          height: size.width, fit: BoxFit.cover),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Spacer(flex: 1),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: 'Email',
-                              border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(30))),
-                              prefixIcon: Icon(Icons.email_outlined),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.disabled,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(30))),
+                        prefixIcon: Icon(Icons.email_outlined),
+                      ),
+                      validator: (email) {
+                        if (email == null || email.toString().trim().isEmpty) {
+                          return 'Email is required';
+                        } else if (!RegExp(
+                                r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
+                            .hasMatch(email)) {
+                          return 'Not a valid email';
+                        }
+                        return null;
+                      },
+                      onSaved: (email) {
+                        _email = email!;
+                      },
+                      initialValue: userInfo?.email ?? "",
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'Username',
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(30))),
+                        prefixIcon: Icon(Icons.account_circle_outlined),
+                      ),
+                      validator: (userName) {
+                        if (userName == null ||
+                            userName.toString().trim().isEmpty) {
+                          return 'userName is required';
+                        }
+                        return null;
+                      },
+                      onSaved: (userName) {
+                        _userName = userName!;
+                      },
+                      initialValue: userInfo?.userName ?? "",
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'First Name',
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(30))),
+                        prefixIcon: Icon(Icons.person_outline_rounded),
+                      ),
+                      onSaved: (firstName) {
+                        _firstName = firstName!;
+                      },
+                      initialValue: userInfo?.firstName ?? "",
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'LastName',
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(30))),
+                        prefixIcon: Icon(Icons.person_outline_rounded),
+                      ),
+                      onSaved: (lastName) {
+                        _lastName = lastName!;
+                      },
+                      initialValue: userInfo?.lastName ?? "",
+                    ),
+                    const SizedBox(height: 40),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 18,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: !userProvider.isLoading
+                                ? () => Navigator.pop(context)
+                                : null,
+                            child: const Text(
+                              "Cancel",
                             ),
-                            validator: (email) {
-                              if (email == null ||
-                                  email.toString().trim().isEmpty) {
-                                return 'Email is required';
-                              } else if (!RegExp(
-                                      r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
-                                  .hasMatch(email)) {
-                                return 'Not a valid email';
-                              }
-                              return null;
-                            },
-                            onSaved: (email) {
-                              _email = email!;
-                            },
-                            initialValue: userInfo?.email ?? "",
                           ),
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: 'Username',
-                              border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(30))),
-                              prefixIcon: Icon(Icons.account_circle_outlined),
-                            ),
-                            validator: (userName) {
-                              if (userName == null ||
-                                  userName.toString().trim().isEmpty) {
-                                return 'userName is required';
-                              }
-                              return null;
-                            },
-                            onSaved: (userName) {
-                              _userName = userName!;
-                            },
-                            initialValue: userInfo?.userName ?? "",
-                          ),
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: 'First Name',
-                              border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(30))),
-                              prefixIcon: Icon(Icons.person_outline_rounded),
-                            ),
-                            onSaved: (firstName) {
-                              _firstName = firstName!;
-                            },
-                            initialValue: userInfo?.firstName ?? "",
-                          ),
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: 'LastName',
-                              border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(30))),
-                              prefixIcon: Icon(Icons.person_outline_rounded),
-                            ),
-                            onSaved: (lastName) {
-                              _lastName = lastName!;
-                            },
-                            initialValue: userInfo?.lastName ?? "",
-                          ),
-                          const SizedBox(height: 40),
-                          ElevatedButton(
+                        ),
+                        Expanded(
+                          child: ElevatedButton(
                             onPressed: !userProvider.isLoading
                                 ? _updateUserProfile
                                 : () {},
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: whiteColor,
+                              backgroundColor: brownColor,
+                            ),
                             child: userProvider.isLoading
                                 ? const Padding(
                                     padding:
                                         EdgeInsets.symmetric(horizontal: 28.0),
                                     child: LinearProgressIndicator(
                                       backgroundColor: whiteColor,
-                                      color: blackColor,
+                                      color: redColor,
                                     ),
                                   )
                                 : const Text(
-                                    "Save",
-                                    style: TextStyle(
-                                        color: whiteColor, fontSize: 18),
+                                    "Update",
                                   ),
                           ),
-                          // const SizedBox(height: 20),
-                          const Spacer(flex: 1),
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text("Made with "),
-                              Icon(
-                                Icons.favorite,
-                                color: Colors.red,
-                              ),
-                              Text(" India"),
-                            ],
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
+                        )
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),

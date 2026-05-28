@@ -24,13 +24,13 @@ class _ImageGalleryState extends State<ImageGallery> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<ImageController>(context, listen: false).getAllImages();
+      if (context.read<ImageController>().images.isEmpty)
+        Provider.of<ImageController>(context, listen: false).getAllImages();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Creator.io"),
@@ -66,7 +66,7 @@ class _ImageGalleryState extends State<ImageGallery> {
                 },
               ),
             );
-          } else if (!imageController.isLoading &&
+          } else if (imageController.loadingState == ImageLoadingState.idle &&
               imageController.images.isEmpty) {
             return const Center(
               child: Text(

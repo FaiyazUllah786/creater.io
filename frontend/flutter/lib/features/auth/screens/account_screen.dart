@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:creatorio/common/theme/colors.dart';
+import 'package:creatorio/common/theme/theme_provider.dart';
 import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/source_sheet.dart';
 import 'package:creatorio/features/auth/controller/user_controller.dart';
@@ -285,6 +286,122 @@ class AccountScreenState extends State<AccountScreen> {
     return croppedFile;
   }
 
+  void _changeTheme() async {
+    showAdaptiveDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Consumer<ThemeProvider>(builder: (context, themeProvider, _) {
+          ThemeMode themeMode = themeProvider.themeMode;
+
+          return StatefulBuilder(builder: (context, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 0),
+                      child: Text(
+                        "Change theme",
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    RadioMenuButton<ThemeMode>(
+                      value: ThemeMode.system,
+                      groupValue: themeMode,
+                      onChanged: (mode) {
+                        setDialogState(() {
+                          themeMode = mode!;
+                        });
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text("System"),
+                        ],
+                      ),
+                    ),
+                    RadioMenuButton<ThemeMode>(
+                      value: ThemeMode.light,
+                      groupValue: themeMode,
+                      onChanged: (mode) {
+                        setDialogState(() {
+                          themeMode = mode!;
+                        });
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text("Light"),
+                        ],
+                      ),
+                    ),
+                    RadioMenuButton<ThemeMode>(
+                      value: ThemeMode.dark,
+                      groupValue: themeMode,
+                      onChanged: (mode) {
+                        setDialogState(() {
+                          themeMode = mode!;
+                        });
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text("Dark"),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: whiteColor,
+                                backgroundColor: blackColor,
+                              ),
+                              onPressed: () => Navigator.pop(dialogContext),
+                              child: Text("Cancel")),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: whiteColor,
+                              backgroundColor: redColor,
+                            ),
+                            onPressed: () {
+                              themeProvider.setTheme(themeMode);
+                              Navigator.pop(dialogContext);
+                            },
+                            child: Text("Apply"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          });
+        });
+      },
+    );
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -386,6 +503,25 @@ class AccountScreenState extends State<AccountScreen> {
                         height: 1,
                         color: blackColor),
                     //Functional parts
+                    InkWell(
+                      onTap: _changeTheme,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 15, horizontal: 28.0),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.brightness_4_outlined),
+                            SizedBox(width: 20),
+                            Text(
+                              "Change theme",
+                              style: TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                     InkWell(
                       onTap: () async {
                         final File? imageFile = await showSourceSheet(context);

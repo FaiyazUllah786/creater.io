@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:creatorio/common/provider/unsplash_provider.dart';
 import 'package:creatorio/common/theme/colors.dart';
+import 'package:creatorio/common/theme/theme_provider.dart';
 import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/error.dart';
 import 'package:creatorio/common/widgets/shimmer_loading.dart';
@@ -54,6 +55,8 @@ class _ImageEditorState extends State<ImageEditor> {
   @override
   Widget build(BuildContext context) {
     final imageController = context.watch<ImageController>();
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
     return WillPopScope(
       onWillPop: () async {
         if (imageController.hasUnsavedChanges) {
@@ -66,9 +69,25 @@ class _ImageEditorState extends State<ImageEditor> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Image Transformation"),
+          actionsPadding: EdgeInsets.only(right: 10),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                final success =
+                    await imageController.deleteImage(widget.image.id);
+                if (success) Navigator.pop(context);
+              },
+              icon: Icon(
+                Icons.delete_outline,
+                color: redColor,
+              ),
+            )
+          ],
         ),
         drawer: TransformationDrawer(image: widget.image),
         bottomNavigationBar: BottomNavigationBar(
+          showUnselectedLabels: false,
+          showSelectedLabels: false,
           onTap: (index) async {
             switch (index) {
               case 0:
@@ -113,22 +132,29 @@ class _ImageEditorState extends State<ImageEditor> {
                 await imageController.saveImage(widget.image.secureUrl);
                 handleMessage(context, imageController);
                 break;
-              case 3:
-                final success =
-                    await imageController.deleteImage(widget.image.id);
-                if (success) Navigator.pop(context);
-                break;
             }
           },
-          items: const [
+          items: [
             BottomNavigationBarItem(
-                icon: Icon(Icons.share_outlined), label: "Share"),
+              icon: Icon(
+                Icons.share_outlined,
+                color: !isDark ? blackColor : whiteColor,
+              ),
+              label: "Share",
+            ),
             BottomNavigationBarItem(
-                icon: Icon(Icons.edit_outlined), label: "Edit"),
+              icon: Icon(
+                Icons.edit_outlined,
+                color: !isDark ? blackColor : whiteColor,
+              ),
+              label: "Edit",
+            ),
             BottomNavigationBarItem(
-                icon: Icon(Icons.save_alt_outlined), label: "Save"),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.delete_outline), label: "Delete"),
+                icon: Icon(
+                  Icons.save_alt_outlined,
+                  color: !isDark ? blackColor : whiteColor,
+                ),
+                label: "Save"),
           ],
         ),
         body: Consumer<ImageController>(
@@ -142,13 +168,37 @@ class _ImageEditorState extends State<ImageEditor> {
                         return const ErrorScreen(
                             error: "Something not right, try again!");
                       },
-                      placeholder: (context, url) => const ShimmerLoading(),
                       imageUrl: imageController.transformedImageUrl ??
                           widget.image.secureUrl,
                       fit: BoxFit.contain,
+                      placeholder: (context, url) => SizedBox(
+                        height: double.maxFinite,
+                        child: Center(
+                          child: ShaderMask(
+                            shaderCallback: (bounds) {
+                              return const LinearGradient(
+                                colors: [
+                                  Color(0xFF00F5A0),
+                                  Color(0xFF00D9F5),
+                                  Color(0xFF9D4DFF),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ).createShader(bounds);
+                            },
+                            blendMode: BlendMode.srcATop,
+                            child: Lottie.asset(
+                              'assets/anim/ai_animation.json',
+                              height: 90,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  if (imageController.isTransforming)
+                  if (imageController.loadingState ==
+                      ImageLoadingState.transforming)
                     Container(
                       height: double.maxFinite,
                       color: whiteColor.withAlpha(75),

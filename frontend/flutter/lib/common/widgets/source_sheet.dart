@@ -76,6 +76,7 @@ Future<File?> showSourceSheet(BuildContext context) async {
 // Helper Widget for each source option
 Widget _buildSourceOption(BuildContext context, String iconPath, String label,
     Future<dynamic> Function() function) {
+  final iconTheme = Theme.of(context).iconTheme;
   return InkWell(
     onTap: () async {
       await function();
@@ -88,7 +89,7 @@ Widget _buildSourceOption(BuildContext context, String iconPath, String label,
         Image.asset(
           iconPath,
           height: 50,
-          color: blackColor.withOpacity(0.8),
+          color: iconTheme.color,
         ),
         const SizedBox(height: 8),
         Text(
@@ -96,7 +97,6 @@ Widget _buildSourceOption(BuildContext context, String iconPath, String label,
           style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
-            color: Colors.black87,
           ),
         ),
       ],

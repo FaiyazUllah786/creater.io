@@ -1,28 +1,66 @@
+import 'dart:convert';
+
+import 'package:creatorio/model/user_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-const storage = FlutterSecureStorage();
+class SecureStorageService {
+  SecureStorageService._();
 
-Future<void> storeTokens(
-    {required String accessToken, required String refreshToken}) async {
-  await storage.write(key: "refreshToken", value: refreshToken);
-  await storage.write(key: "accessToken", value: accessToken);
-  print('Tokens stored securely');
-}
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
-Future<Map<String, String>?> getTokens() async {
-  final accessToken = await storage.read(key: "accessToken");
-  final refreshToken = await storage.read(key: "refreshToken");
-  if (accessToken == null && refreshToken == null) {
-    return null;
+  static const String refreshTokenKey = 'refreshToken';
+  static const String accessTokenKey = 'accessToken';
+  static const String userKey = 'user';
+
+  static Future<void> saveRefreshToken(
+    String token,
+  ) async {
+    await _storage.write(
+      key: refreshTokenKey,
+      value: token,
+    );
   }
-  return {
-    "accessToken": accessToken ?? "",
-    "refreshToken": refreshToken ?? "",
-  };
-}
 
-Future<void> deleteToken() async {
-  await storage.delete(key: "accessToken");
-  await storage.delete(key: "refreshToken");
-  print('Token deleted');
+  static Future<void> saveAccessToken(
+    String token,
+  ) async {
+    await _storage.write(
+      key: accessTokenKey,
+      value: token,
+    );
+  }
+
+  static Future<String?> getRefreshToken() async {
+    return _storage.read(
+      key: refreshTokenKey,
+    );
+  }
+
+  static Future<String?> getAccessToken() async {
+    return _storage.read(
+      key: accessTokenKey,
+    );
+  }
+
+  static Future<void> saveUser(
+    UserModel user,
+  ) async {
+    final userData = jsonEncode(user.toMap());
+    await _storage.write(
+      key: userKey,
+      value: userData,
+    );
+  }
+
+  static Future<UserModel?> loadUser() async {
+    final data = await _storage.read(key: userKey);
+
+    if (data == null) return null;
+
+    return UserModel.fromMap(jsonDecode(data));
+  }
+
+  static Future<void> clear() async {
+    await _storage.deleteAll();
+  }
 }

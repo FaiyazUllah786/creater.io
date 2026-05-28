@@ -1,5 +1,5 @@
 import 'package:creatorio/common/theme/colors.dart';
-import 'package:creatorio/common/utils.dart';
+import 'package:creatorio/common/theme/theme_provider.dart';
 import 'package:creatorio/features/Image/controller/image_controller.dart';
 import 'package:creatorio/features/Image/widgets/gen_background_replace.dart';
 import 'package:creatorio/features/Image/widgets/gen_extract.dart';
@@ -113,7 +113,7 @@ class _TransformationDrawerState extends State<TransformationDrawer> {
             });
         break;
       case 'Content extraction':
-       final List<String> prompts = List<String>.from(
+        final List<String> prompts = List<String>.from(
           transformationEffect['prompts'] ?? [],
         );
         showModalBottomSheet(
@@ -122,7 +122,7 @@ class _TransformationDrawerState extends State<TransformationDrawer> {
             builder: (context) {
               return GenExtract(
                 imageId: widget.image.publicId,
-                 prompts: prompts,
+                prompts: prompts,
                 tranformationId: tranformationId,
               );
             });
@@ -132,6 +132,8 @@ class _TransformationDrawerState extends State<TransformationDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
     return Drawer(
       child: Consumer<ImageController>(
         builder: (context, imageController, child) {
@@ -139,58 +141,72 @@ class _TransformationDrawerState extends State<TransformationDrawer> {
 
           if (transformations.isEmpty) {
             return const Center(
-              child: Text("No transformations"),
+              child: Text("No transformations applied yet!"),
             );
           }
-          return ListView.builder(
-            itemCount: transformations.length,
-            itemBuilder: (context, index) {
-              final item = transformations[index];
+          return SafeArea(
+            child: ListView.builder(
+              itemCount: transformations.length,
+              itemBuilder: (context, index) {
+                final item = transformations[index];
 
-              final id = item['id'];
+                final id = item['id'];
 
-              final transformation = item['transformation'];
+                final transformation = item['transformation'];
 
-              final effectType = transformation['effectType'];
-              return ListTile(
-                tileColor: greyColor,
-                title: Text(
-                  transformationTypes[effectType] ?? 'Unknown',
-                  softWrap: true,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (effectType != "enhance" &&
-                        effectType != "gen_restore" &&
-                        effectType != "upscale" &&
-                        effectType != "background_removal")
-                      IconButton(
-                        onPressed: () {
-                          final label = transformationTypes[effectType] ?? '';
-                          Navigator.pop(context);
-                          callback(label, transformation, id);
-                        },
-                        icon: Icon(
-                          Icons.edit,
-                          color: blackColor,
-                        ),
-                      ),
-                    IconButton(
-                      onPressed: () {
-                        imageController.deleteTransformation(
-                            widget.image.publicId, id);
-                      },
-                      icon: Icon(
-                        Icons.delete,
-                        color: redColor,
-                      ),
+                final effectType = transformation['effectType'];
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
+                  child: ListTile(
+                    tileColor: isDark ? oledBlack : greyColor,
+                    shape: ContinuousRectangleBorder(
+                        borderRadius: BorderRadiusGeometry.circular(20)),
+                    title: Text(
+                      transformationTypes[effectType] ?? 'Unknown',
+                      softWrap: true,
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                  ],
-                ),
-              );
-            },
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (effectType != "enhance" &&
+                            effectType != "gen_restore" &&
+                            effectType != "upscale" &&
+                            effectType != "background_removal")
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () {
+                              final label =
+                                  transformationTypes[effectType] ?? '';
+                              Navigator.pop(context);
+                              callback(label, transformation, id);
+                            },
+                            icon: Icon(
+                              Icons.edit,
+                            ),
+                          ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () {
+                            imageController.deleteTransformation(
+                                widget.image.publicId, id);
+                          },
+                          icon: Icon(
+                            Icons.delete,
+                            color: redColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
           );
         },
       ),

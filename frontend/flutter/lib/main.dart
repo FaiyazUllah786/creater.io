@@ -1,3 +1,9 @@
+import 'package:creatorio/app_launcher.dart';
+import 'package:creatorio/common/navigator_key.dart';
+import 'package:creatorio/common/theme/app_theme.dart';
+import 'package:creatorio/common/theme/theme_provider.dart';
+import 'package:creatorio/core/network/auth_service.dart';
+import 'package:creatorio/core/network/dio_client.dart';
 import 'package:creatorio/features/Image/controller/image_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,24 +11,30 @@ import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '/common/provider/unsplash_provider.dart';
-import '/common/theme/colors.dart';
-import '/common/theme/fonts.dart';
-import '/features/auth/controller/tokens_controller.dart';
 import '/features/auth/controller/user_controller.dart';
 import '/router.dart';
-import 'splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.transparent,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.dark,
       statusBarIconBrightness: Brightness.dark,
-      statusBarColor: Colors.transparent));
-  runApp(const MyApp());
+      statusBarColor: Colors.transparent,
+    ),
+  );
+  DioClient.initializeInterceptors();
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -30,92 +42,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final themeProvider = context.watch<ThemeProvider>();
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => UserController()),
-        ChangeNotifierProvider(create: (context) => TokensController()),
         ChangeNotifierProvider(create: (context) => UnsplashProvider()),
         ChangeNotifierProvider(create: (context) => ImageController()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        navigatorKey: navigatorKey,
         title: "Creator.io",
-        theme: ThemeData(
-            floatingActionButtonTheme: const FloatingActionButtonThemeData(
-                shape: CircleBorder(),
-                backgroundColor: whiteColor,
-                foregroundColor: blackColor),
-            elevatedButtonTheme: ElevatedButtonThemeData(
-              style: ElevatedButton.styleFrom(
-                foregroundColor: whiteColor,
-                backgroundColor: blackColor,
-                textStyle: TextStyle(fontSize: 16, color: whiteColor),
-                minimumSize: Size(size.width, 50),
-                shape: ContinuousRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-            ),
-            appBarTheme: const AppBarTheme(
-              elevation: 0,
-              leadingWidth: 30,
-              backgroundColor: whiteColor,
-              foregroundColor: blackColor,
-              surfaceTintColor: whiteColor,
-              titleTextStyle: TextStyle(
-                fontFamily: "Nunito",
-                fontSize: 20,
-                color: blackColor,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            scaffoldBackgroundColor: whiteColor,
-            textTheme: textTheme,
-            bottomSheetTheme: const BottomSheetThemeData(
-              backgroundColor: whiteColor,
-              shape: ContinuousRectangleBorder(
-                side: BorderSide(color: blackColor, width: 2),
-                borderRadius: BorderRadiusGeometry.only(
-                    topLeft: Radius.circular(28),
-                    topRight: Radius.circular(28)),
-              ),
-            ),
-            bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-              backgroundColor: whiteColor,
-              selectedItemColor: blackColor,
-              unselectedItemColor: blackColor,
-              showSelectedLabels: true,
-              showUnselectedLabels: true,
-              elevation: 0,
-            ),
-            dialogTheme: DialogThemeData(backgroundColor: whiteColor),
-            inputDecorationTheme: InputDecorationTheme(
-              labelStyle: TextStyle(
-                color: blackColor,
-              ),
-              floatingLabelStyle: TextStyle(
-                color: blackColor,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(30)),
-                borderSide: BorderSide(
-                  color: Color(0xFFBFC9D1),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(30)),
-                borderSide: BorderSide(
-                  color: blackColor,
-                  width: 2,
-                ),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(30)),
-              ),
-            )),
+        themeMode: themeProvider.themeMode,
+        darkTheme: AppTheme.darkTheme,
+        theme: AppTheme.lightTheme,
         onGenerateRoute: onGenerateRoute,
-        home: const SplashScreen(),
+        home: const AppLauncher(),
       ),
     );
   }

@@ -46,8 +46,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final imageController = context.read<ImageController>();
+    final theme = Theme.of(context);
+    final navTheme = theme.bottomNavigationBarTheme;
     return Scaffold(
       extendBody: true,
       floatingActionButton: FloatingActionButton(
@@ -62,8 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: AnimatedBottomNavigationBar.builder(
-        backgroundColor: whiteColor,
-        shadow: Shadow(color: greyColor, blurRadius: 15),
+        backgroundColor: navTheme.backgroundColor,
+        shadow: Shadow(color: blackColorOpacity25, blurRadius: 5),
         activeIndex: _bottomNavIndex,
         gapLocation: GapLocation.center,
         notchSmoothness: NotchSmoothness.verySmoothEdge,
@@ -80,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return Icon(
             iconList[index],
             size: 24,
-            color: isActive ? brownColor : blackColor,
+            color: isActive ? brownColor : navTheme.unselectedItemColor,
           );
         },
       ),

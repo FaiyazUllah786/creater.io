@@ -1,10 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 
 import 'package:creatorio/common/message.dart';
 import 'package:creatorio/features/Image/repository/image_repository.dart';
 import 'package:creatorio/model/image_model.dart';
-import 'package:flutter/material.dart';
 
 import '../../../common/widgets/api_error.dart';
 
@@ -37,20 +36,15 @@ class ImageController extends ChangeNotifier {
 
   final imageRepository = ImageRepository();
   final List<ImageModel> _images = [];
-  bool _isLoading = false;
   bool _hasUnsavedChanges = false;
 
   List<ImageModel> get images => _images;
-  bool get isLoading => _isLoading;
   bool get hasUnsavedChanges => _hasUnsavedChanges;
 
   String? _transformedImageUrl;
   List<Map<String, dynamic>>? _transfomationList;
   List<dynamic>? get transfomationList => _transfomationList;
   String? get transformedImageUrl => _transformedImageUrl;
-
-  bool _isTransforming = false;
-  bool get isTransforming => _isTransforming;
 
   Future<bool> uploadImage(File images) async {
     try {
@@ -305,60 +299,4 @@ class ImageController extends ChangeNotifier {
       _setLoading(ImageLoadingState.idle);
     }
   }
-
-  // Future<void> generativeFill({
-  //   required String imageUrl,
-  //   String aspectRatio = "1:1",
-  //   int? height,
-  //   int? width,
-  //   String gravity = "center",
-  // }) async {
-  //   try {
-  //     _isTransforming = true;
-  //     notifyListeners();
-  //     final res = await imageRepository.generativeFill(
-  //       imageUrl: imageUrl,
-  //       aspectRatio: aspectRatio,
-  //       gravity: gravity,
-  //     );
-
-  //     if (res != null && res.statusCode == 200) {
-  //       final transformedUrl = res.data;
-  //       print("Transformed Url: $transformedUrl");
-  //       // if (!_imageTransformed.contains(transformedUrl)) {
-  //       // }
-  //       _imageTransformed.add(transformedUrl);
-  //       print("Length: ${_imageTransformed.length}");
-  //     }
-  //   } on ApiError catch (e) {
-  //     print("Error in generativeFill: $e");
-  //   } catch (e) {
-  //     print("Unexpected error in generativeFill: $e");
-  //   }
-  //   _isTransforming = false;
-  //   notifyListeners();
-  // }
-
-  // Future<void> upscaleImage({required String imageUrl}) async {
-  //   try {
-  //     _isTransforming = true;
-  //     notifyListeners();
-  //     final res = await imageRepository.upscaleImage(imageUrl);
-
-  //     if (res != null && res.statusCode == 200) {
-  //       final transformedUrl = res.data;
-  //       print("Transformed Url: $transformedUrl");
-  //       // if (!_imageTransformed.contains(transformedUrl)) {
-  //       // }
-  //       _imageTransformed.add(transformedUrl);
-  //       print("Length: ${_imageTransformed.length}");
-  //     }
-  //   } on ApiError catch (e) {
-  //     print("Error in upscael: $e");
-  //   } catch (e) {
-  //     print("Unexpected error in upscale: $e");
-  //   }
-  //   _isTransforming = false;
-  //   notifyListeners();
-  // }
 }

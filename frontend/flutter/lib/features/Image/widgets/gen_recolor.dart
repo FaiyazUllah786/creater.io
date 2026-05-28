@@ -166,6 +166,7 @@ class _GenRecolorState extends State<GenRecolor> {
               SizedBox(height: 40),
               Row(
                 spacing: 20,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Flexible(
                     child: ElevatedButton(

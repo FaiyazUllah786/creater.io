@@ -1,11 +1,11 @@
+import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:convert';
 import 'package:creatorio/common/message.dart';
 import 'package:creatorio/common/storage.dart';
 import 'package:creatorio/common/widgets/api_error.dart';
+import 'package:creatorio/core/network/token_manager.dart';
 import 'package:creatorio/features/auth/repository/user_repository.dart';
 import 'package:creatorio/model/user_model.dart';
-import 'package:flutter/material.dart';
 
 class UserController extends ChangeNotifier {
   final userRepository = UserRepository();
@@ -97,10 +97,21 @@ class UserController extends ChangeNotifier {
         _message = Message("Invalid server response", MessageType.error);
         return false;
       }
-      await storeTokens(
-        accessToken: accessToken,
-        refreshToken: refreshToken,
+
+      /// Save in memory
+      await TokenManager.setAccessToken(
+        accessToken,
       );
+
+      /// Save in storage
+      await SecureStorageService.saveAccessToken(
+        accessToken,
+      );
+
+      await SecureStorageService.saveRefreshToken(
+        refreshToken,
+      );
+
       _message = Message("Logged in successfully", MessageType.success);
       return true;
     } on ApiError catch (e) {
@@ -124,8 +135,9 @@ class UserController extends ChangeNotifier {
             "Logout request failed. Please try again.", MessageType.error);
         return false;
       }
-      await storage.delete(key: 'user');
-      await storage.deleteAll();
+      TokenManager.clear();
+
+      await SecureStorageService.clear();
       _userInfo = null;
       _message = Message("Logged out successfully", MessageType.success);
       return true;
@@ -150,8 +162,9 @@ class UserController extends ChangeNotifier {
             MessageType.error);
         return false;
       }
-      await storage.delete(key: 'user');
-      await storage.deleteAll();
+      TokenManager.clear();
+
+      await SecureStorageService.clear();
       _userInfo = null;
       _message = Message("Account deleted successfully", MessageType.success);
       return true;
@@ -207,7 +220,7 @@ class UserController extends ChangeNotifier {
       final user = UserModel.fromMap(res.data);
 
       _userInfo = user;
-      await saveUser(user);
+      await SecureStorageService.saveUser(user);
     } on ApiError catch (e) {
       _message = Message(e.message, MessageType.error);
       return;
@@ -236,7 +249,7 @@ class UserController extends ChangeNotifier {
       final user = UserModel.fromMap(res.data);
 
       _userInfo = user;
-      await saveUser(user);
+      await SecureStorageService.saveUser(user);
       _message = Message("Avatar successfully updated", MessageType.success);
       notifyListeners();
       return true;
@@ -266,7 +279,7 @@ class UserController extends ChangeNotifier {
           Message("User profile successfully updated", MessageType.success);
       final user = UserModel.fromMap(res.data["updatedUser"]);
       _userInfo = user;
-      await saveUser(user);
+      await SecureStorageService.saveUser(user);
       notifyListeners();
       return true;
     } on ApiError catch (e) {
@@ -295,9 +308,19 @@ class UserController extends ChangeNotifier {
         _message = Message("Invalid server response", MessageType.error);
         return false;
       }
-      await storeTokens(
-        accessToken: accessToken,
-        refreshToken: refreshToken,
+
+      /// Save in memory
+      await TokenManager.setAccessToken(
+        accessToken,
+      );
+
+      /// Save in storage
+      await SecureStorageService.saveAccessToken(
+        accessToken,
+      );
+
+      await SecureStorageService.saveRefreshToken(
+        refreshToken,
       );
       _message = Message("Logged in successfully", MessageType.success);
       return true;
@@ -327,9 +350,19 @@ class UserController extends ChangeNotifier {
         _message = Message("Invalid server response", MessageType.error);
         return false;
       }
-      await storeTokens(
-        accessToken: accessToken,
-        refreshToken: refreshToken,
+
+      /// Save in memory
+      await TokenManager.setAccessToken(
+        accessToken,
+      );
+
+      /// Save in storage
+      await SecureStorageService.saveAccessToken(
+        accessToken,
+      );
+
+      await SecureStorageService.saveRefreshToken(
+        refreshToken,
       );
       _message = Message("Logged in successfully", MessageType.success);
       return true;
@@ -342,25 +375,8 @@ class UserController extends ChangeNotifier {
     }
   }
 
-  Future<void> saveUser(UserModel user) async {
-    final jsonString = jsonEncode(user.toMap());
-    debugPrint("saveUser: $jsonString");
-    await storage.write(key: 'user', value: jsonString);
-  }
-
-  Future<UserModel?> loadUser() async {
-    final data = await storage.read(key: 'user');
-    debugPrint("loadUser: $data");
-
-    if (data == null) return null;
-
-    return UserModel.fromMap(jsonDecode(data));
-  }
-
   Future<void> loadUserFromStorage() async {
-    final user = await loadUser();
-    debugPrint("loadUserFromStorage: $user");
-
+    final user = await SecureStorageService.loadUser();
     if (user != null) {
       _userInfo = user;
       notifyListeners();
