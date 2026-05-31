@@ -23,13 +23,6 @@ class AccountScreen extends StatefulWidget {
 class AccountScreenState extends State<AccountScreen> {
   final TextEditingController _cofirmEditingController =
       TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey();
-
-  bool _seePassword = false;
-  String _oldPassword = "";
-  String _newPassword = "";
-  String _confirmPassword = "";
-
   void _logout() async {
     await showAdaptiveDialog<bool>(
       context: context,
@@ -268,7 +261,7 @@ class AccountScreenState extends State<AccountScreen> {
   Future<CroppedFile?> _changeAvatar(File? imageFile) async {
     if (imageFile == null) return null;
     final croppedFile = await ImageCropper().cropImage(
-      sourcePath: imageFile!.path,
+      sourcePath: imageFile.path,
       aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
       uiSettings: [
         AndroidUiSettings(
@@ -466,7 +459,7 @@ class AccountScreenState extends State<AccountScreen> {
                                           CachedNetworkImageProvider(photo),
                                     ),
                             ),
-                            if (userController.isLoading)
+                            if (userController.profilePhotoLoading)
                               Container(
                                 margin: const EdgeInsets.symmetric(vertical: 8),
                                 alignment: Alignment.center,

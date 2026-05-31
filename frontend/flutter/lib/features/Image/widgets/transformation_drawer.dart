@@ -133,6 +133,7 @@ class _TransformationDrawerState extends State<TransformationDrawer> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
+    final textTheme = Theme.of(context).textTheme;
     final isDark = themeProvider.isDarkMode;
     return Drawer(
       child: Consumer<ImageController>(
@@ -145,67 +146,86 @@ class _TransformationDrawerState extends State<TransformationDrawer> {
             );
           }
           return SafeArea(
-            child: ListView.builder(
-              itemCount: transformations.length,
-              itemBuilder: (context, index) {
-                final item = transformations[index];
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Transformations:",
+                    style: textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: transformations.length,
+                      itemBuilder: (context, index) {
+                        final item = transformations[index];
 
-                final id = item['id'];
+                        final id = item['id'];
 
-                final transformation = item['transformation'];
+                        final transformation = item['transformation'];
 
-                final effectType = transformation['effectType'];
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
-                  child: ListTile(
-                    tileColor: isDark ? oledBlack : greyColor,
-                    shape: ContinuousRectangleBorder(
-                        borderRadius: BorderRadiusGeometry.circular(20)),
-                    title: Text(
-                      transformationTypes[effectType] ?? 'Unknown',
-                      softWrap: true,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (effectType != "enhance" &&
-                            effectType != "gen_restore" &&
-                            effectType != "upscale" &&
-                            effectType != "background_removal")
-                          IconButton(
-                            visualDensity: VisualDensity.compact,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            onPressed: () {
-                              final label =
-                                  transformationTypes[effectType] ?? '';
-                              Navigator.pop(context);
-                              callback(label, transformation, id);
-                            },
-                            icon: Icon(
-                              Icons.edit,
+                        final effectType = transformation['effectType'];
+                        return Container(
+                          margin: EdgeInsets.symmetric(vertical: 6),
+                          child: ListTile(
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 10,
+                            ),
+                            tileColor: isDark ? oledBlack : glassBlack,
+                            shape: ContinuousRectangleBorder(
+                              borderRadius: BorderRadiusGeometry.circular(20),
+                            ),
+                            title: Text(
+                              transformationTypes[effectType] ?? 'Unknown',
+                              softWrap: true,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (effectType != "enhance" &&
+                                    effectType != "gen_restore" &&
+                                    effectType != "upscale" &&
+                                    effectType != "background_removal")
+                                  IconButton(
+                                    visualDensity: VisualDensity.compact,
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    onPressed: () {
+                                      final label =
+                                          transformationTypes[effectType] ?? '';
+                                      Navigator.pop(context);
+                                      callback(label, transformation, id);
+                                    },
+                                    icon: Icon(
+                                      Icons.edit,
+                                    ),
+                                  ),
+                                IconButton(
+                                  visualDensity: VisualDensity.compact,
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () {
+                                    imageController.deleteTransformation(
+                                        widget.image.publicId, id);
+                                  },
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: redColor,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          onPressed: () {
-                            imageController.deleteTransformation(
-                                widget.image.publicId, id);
-                          },
-                          icon: Icon(
-                            Icons.delete,
-                            color: redColor,
-                          ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
-                );
-              },
+                ],
+              ),
             ),
           );
         },

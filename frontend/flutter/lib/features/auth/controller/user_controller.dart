@@ -14,6 +14,10 @@ class UserController extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
+  bool _profilePhotoLoading = false;
+
+  bool get profilePhotoLoading => _profilePhotoLoading;
+
   bool _googleLoading = false;
 
   bool get isGoogleLoading => _googleLoading;
@@ -232,7 +236,7 @@ class UserController extends ChangeNotifier {
 
   Future<bool> updateProfilePhoto(String profilePhoto) async {
     try {
-      _isLoading = true;
+      _profilePhotoLoading = true;
       _message = null;
       notifyListeners();
       if (profilePhoto.isEmpty) {
@@ -257,7 +261,7 @@ class UserController extends ChangeNotifier {
       _message = Message(e.message, MessageType.error);
       return false;
     } finally {
-      _isLoading = false;
+      _profilePhotoLoading = false;
       notifyListeners();
     }
   }

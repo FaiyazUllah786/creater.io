@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'colors.dart';
 import 'fonts.dart';
 
@@ -7,11 +10,13 @@ class AppTheme {
     iconTheme: IconThemeData(color: blackColor),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       shape: CircleBorder(),
-      backgroundColor: whiteColor,
-      foregroundColor: blackColor,
+      backgroundColor: brownColor,
+      foregroundColor: whiteColor,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
+        fixedSize: Size(double.maxFinite, 50),
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         foregroundColor: whiteColor,
         backgroundColor: blackColor,
         textStyle: const TextStyle(fontSize: 16, color: whiteColor),
@@ -26,27 +31,62 @@ class AppTheme {
       backgroundColor: whiteColor,
       foregroundColor: blackColor,
       surfaceTintColor: whiteColor,
-      titleTextStyle: TextStyle(
-        fontFamily: "Nunito",
-        fontSize: 20,
-        color: blackColor,
-        fontWeight: FontWeight.bold,
-      ),
+      centerTitle: false,
     ),
     scaffoldBackgroundColor: whiteColor,
-    textTheme: textTheme,
+    textTheme: GoogleFonts.poppinsTextTheme().copyWith(
+      headlineLarge: GoogleFonts.poppins(
+        fontSize: 36,
+        fontWeight: FontWeight.bold,
+      ),
+      headlineSmall: GoogleFonts.poppins(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+      ),
+      titleMedium: GoogleFonts.poppins(
+        fontSize: 16,
+        fontWeight: FontWeight.normal,
+      ),
+      labelMedium: GoogleFonts.poppins(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+      bodyLarge: GoogleFonts.poppins(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+      bodyMedium: GoogleFonts.poppins(
+        fontSize: 14,
+        fontWeight: FontWeight.normal,
+      ),
+      bodySmall: GoogleFonts.poppins(
+        fontSize: 12,
+        color: greyColor,
+      ),
+    ),
     bottomSheetTheme: const BottomSheetThemeData(
       backgroundColor: whiteColor,
+      modalBackgroundColor: whiteColor,
       shape: ContinuousRectangleBorder(
         side: BorderSide(color: blackColor, width: 2),
         borderRadius: BorderRadiusGeometry.only(
-            topLeft: Radius.circular(28), topRight: Radius.circular(28)),
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
+        ),
       ),
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      elevation: 10,
       backgroundColor: whiteColor,
       selectedItemColor: brownColor,
-      unselectedItemColor: greyColor,
+      unselectedItemColor: blackColor,
+    ),
+    bottomAppBarTheme: BottomAppBarThemeData(
+      color: whiteColor,
+      shadowColor: blackColor,
+      elevation: 10,
+      height: 60,
+      padding: EdgeInsets.all(0),
     ),
     dialogTheme: const DialogThemeData(backgroundColor: whiteColor),
     inputDecorationTheme: const InputDecorationTheme(
@@ -94,19 +134,13 @@ class AppTheme {
       foregroundColor: primaryTextDark,
       surfaceTintColor: Colors.transparent,
       centerTitle: false,
-      titleTextStyle: TextStyle(
-        fontFamily: "Nunito",
-        fontSize: 20,
-        color: primaryTextDark,
-        fontWeight: FontWeight.bold,
-      ),
     ),
 
     // Floating Button
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       shape: CircleBorder(),
-      backgroundColor: blackColor,
-      foregroundColor: primaryTextDark,
+      backgroundColor: brownColor,
+      foregroundColor: whiteColor,
       elevation: 8,
     ),
     // Bottom Navigation
@@ -114,14 +148,24 @@ class AppTheme {
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: glassBlack,
       selectedItemColor: brownColor,
-      unselectedItemColor: blackColor,
+      unselectedItemColor: whiteColor,
+    ),
+
+    bottomAppBarTheme: BottomAppBarThemeData(
+      color: glassBlack,
+      shadowColor: whiteColor,
+      elevation: 10,
+      height: 60,
+      padding: EdgeInsets.all(0),
     ),
 
     // Elevated Button
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        foregroundColor: blackColor,
-        backgroundColor: primaryTextDark,
+        fixedSize: Size(double.maxFinite, 50),
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        foregroundColor: whiteColor,
+        backgroundColor: blackColor,
         textStyle: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
@@ -134,24 +178,67 @@ class AppTheme {
     ),
 
     // Text Theme
-    textTheme: textTheme.apply(
-      bodyColor: primaryTextDark,
-      displayColor: primaryTextDark,
+    textTheme: GoogleFonts.poppinsTextTheme().copyWith(
+      headlineLarge: GoogleFonts.poppins(
+        color: whiteColor,
+        fontSize: 36,
+        fontWeight: FontWeight.bold,
+      ),
+      headlineSmall: GoogleFonts.poppins(
+        color: whiteColor,
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+      ),
+      titleMedium: GoogleFonts.poppins(
+        color: whiteColor,
+        fontSize: 16,
+        fontWeight: FontWeight.normal,
+      ),
+      labelMedium: GoogleFonts.poppins(
+        color: whiteColor,
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+      bodyLarge: GoogleFonts.poppins(
+        color: whiteColor,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+      bodyMedium: GoogleFonts.poppins(
+        color: whiteColor,
+        fontSize: 14,
+        fontWeight: FontWeight.normal,
+      ),
+      bodySmall: GoogleFonts.poppins(
+        fontSize: 12,
+        color: greyColor,
+      ),
     ),
 
-    // Bottom Sheet (Glassy Dark)
+    // // Bottom Sheet (Glassy Dark)
+    // bottomSheetTheme: const BottomSheetThemeData(
+    //   surfaceTintColor: Colors.transparent,
+    //   modalBackgroundColor: glassBlack,
+    //   shape: ContinuousRectangleBorder(
+    //     side: BorderSide(
+    //       color: borderDark,
+    //       width: 1.5,
+    //     ),
+    //     borderRadius: BorderRadius.only(
+    //       topLeft: Radius.circular(32),
+    //       topRight: Radius.circular(32),
+    //     ),
+    //   ),
+    // ),
+
     bottomSheetTheme: const BottomSheetThemeData(
       backgroundColor: glassBlack,
-      surfaceTintColor: Colors.transparent,
-      modalBackgroundColor: glassBlack,
+      modalBackgroundColor: oledBlack,
       shape: ContinuousRectangleBorder(
-        side: BorderSide(
-          color: borderDark,
-          width: 1.5,
-        ),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(32),
-          topRight: Radius.circular(32),
+        side: BorderSide(color: whiteColor, width: 2),
+        borderRadius: BorderRadiusGeometry.only(
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
         ),
       ),
     ),
@@ -230,7 +317,7 @@ class AppTheme {
       onSurface: primaryTextDark,
     ),
     drawerTheme: DrawerThemeData(
-      backgroundColor: blackColor,
+      backgroundColor: oledBlack,
     ),
   );
 }

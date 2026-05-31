@@ -2,7 +2,6 @@ import 'package:creatorio/app_launcher.dart';
 import 'package:creatorio/common/navigator_key.dart';
 import 'package:creatorio/common/theme/app_theme.dart';
 import 'package:creatorio/common/theme/theme_provider.dart';
-import 'package:creatorio/core/network/auth_service.dart';
 import 'package:creatorio/core/network/dio_client.dart';
 import 'package:creatorio/features/Image/controller/image_controller.dart';
 import 'package:flutter/material.dart';

@@ -138,7 +138,6 @@ Future<File?> pickImageFromUnsplash(unsplashImageUrl, onProgress) async {
   if (imageFile == null) {
     return null;
   }
-  print(imageFile);
   return imageFile;
 }
 

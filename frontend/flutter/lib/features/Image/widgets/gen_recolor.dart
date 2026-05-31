@@ -2,7 +2,6 @@ import 'package:creatorio/common/theme/colors.dart';
 import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/features/Image/controller/image_controller.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

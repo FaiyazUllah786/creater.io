@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/features/Image/controller/image_controller.dart';
 import 'package:creatorio/features/Image/screens/image_editor.dart';
 import 'package:flutter/material.dart';
@@ -16,16 +15,19 @@ class ImageGallery extends StatefulWidget {
 }
 
 class _ImageGalleryState extends State<ImageGallery> {
+  final hasTransformationChange = false;
   void getImages() async {
-    await Provider.of<ImageController>(context, listen: false).getAllImages();
+    await context.read<ImageController>().getAllImages();
   }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.read<ImageController>().images.isEmpty)
-        Provider.of<ImageController>(context, listen: false).getAllImages();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final imageController = context.read<ImageController>();
+      if (imageController.images.isEmpty) {
+        await imageController.getAllImages();
+      }
     });
   }
 
@@ -40,11 +42,6 @@ class _ImageGalleryState extends State<ImageGallery> {
       ),
       body: Consumer<ImageController>(
         builder: (context, imageController, child) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (imageController.message != null) {
-              handleMessage(context, imageController);
-            }
-          });
           if (imageController.loadingState == ImageLoadingState.uploading ||
               imageController.loadingState == ImageLoadingState.fetching) {
             return Padding(
@@ -97,6 +94,7 @@ class _ImageGalleryState extends State<ImageGallery> {
                   final image = imageController.images[index];
                   return InkWell(
                     onTap: () async {
+                      imageController.settransformedImageUrl(image.secureUrl);
                       Navigator.push(
                         context,
                         MaterialPageRoute(

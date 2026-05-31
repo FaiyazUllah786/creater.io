@@ -8,7 +8,7 @@ class ApiError extends Error {
   ApiError({
     required this.statusCode,
     required this.message,
-    this.data = null,
+    this.data,
     this.errors = const [],
     this.success = false,
   });

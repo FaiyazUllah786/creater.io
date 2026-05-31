@@ -3,8 +3,8 @@ import 'package:creatorio/common/provider/unsplash_provider.dart';
 import 'package:creatorio/common/theme/colors.dart';
 import 'package:creatorio/common/theme/theme_provider.dart';
 import 'package:creatorio/common/utils.dart';
+import 'package:creatorio/common/widgets/app_snackbar.dart';
 import 'package:creatorio/common/widgets/error.dart';
-import 'package:creatorio/common/widgets/shimmer_loading.dart';
 import 'package:creatorio/features/Image/controller/image_controller.dart';
 import 'package:creatorio/features/Image/widgets/edit_widget.dart';
 import 'package:creatorio/features/Image/widgets/transformation_drawer.dart';
@@ -23,46 +23,95 @@ class ImageEditor extends StatefulWidget {
 }
 
 class _ImageEditorState extends State<ImageEditor> {
-  Future<bool> _showExitConfirmationDialog() async {
+  Future<bool?> _showExitConfirmationDialog() async {
     return await showDialog<bool>(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text("Are you sure?"),
-              content: const Text(
-                  "All changes will be discarded if you don't save."),
-              actions: [
-                TextButton(
-                  onPressed: () =>
-                      Navigator.of(context).pop(false), // User chose to stay
-                  child: const Text("Cancel"),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    final imageController = context.read<ImageController>();
-                    imageController.clearTransformation(widget.image.publicId);
-                    Navigator.of(context).pop(true);
-                  },
-                  child: const Text("Exit"),
-                ),
-              ],
-            );
-          },
-        ) ??
-        false; // Default to false if dialog is dismissed
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Are you sure?"),
+          content:
+              const Text("All changes will be discarded if you don't save."),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(context).pop(false), // User chose to stay
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () async {
+                final imageController = context.read<ImageController>();
+                imageController.clearTransformation(widget.image.publicId);
+
+                Navigator.of(context).pop(true);
+              },
+              child: const Text("Exit"),
+            ),
+          ],
+        );
+      },
+    ); // Default to false if dialog is dismissed
+  }
+
+  Future<bool?> _deleteImageModal() async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (deleteModalContext) {
+        return AlertDialog(
+          title: const Text("Are you sure?"),
+          content:
+              const Text("Once the image is deleted, it cannot be restored."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(deleteModalContext)
+                  .pop(false), // User chose to stay
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(deleteModalContext).pop(true),
+              child: const Text(
+                "Delete",
+                style: TextStyle(color: redColor),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _share() async {
+    final imageController = context.read<ImageController>();
+    final file = await UnsplashProvider().downloadAndSaveImage(
+        imageController.transformedImageUrl, (progress) {});
+    if (file != null) {
+      final params = ShareParams(
+        files: [XFile(file.path)],
+      );
+
+      final result = await SharePlus.instance.share(params);
+
+      if (result.status == ShareResultStatus.success) {}
+    } else {
+      final params = ShareParams(
+        uri: Uri.parse(imageController.transformedImageUrl),
+      );
+
+      final result = await SharePlus.instance.share(params);
+
+      if (result.status == ShareResultStatus.success) {}
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final imageController = context.watch<ImageController>();
-    final themeProvider = context.watch<ThemeProvider>();
-    final isDark = themeProvider.isDarkMode;
+
     return WillPopScope(
       onWillPop: () async {
         if (imageController.hasUnsavedChanges) {
           // Show the confirmation dialog if there are unsaved changes
           final exit = await _showExitConfirmationDialog();
-          return exit; // Return true to exit, false to stay
+          return exit == true; // Return true to exit, false to stay
         }
         return true; // No unsaved changes, allow exit
       },
@@ -73,9 +122,24 @@ class _ImageEditorState extends State<ImageEditor> {
           actions: [
             IconButton(
               onPressed: () async {
+                final confirmed = await _deleteImageModal();
+                if (confirmed != true) return;
                 final success =
                     await imageController.deleteImage(widget.image.id);
-                if (success) Navigator.pop(context);
+                final message = imageController.message;
+                if (message != null) {
+                  AppSnackbar.show(
+                    context,
+                    message: message.message,
+                    type: message.messageType,
+                  );
+                }
+                if (success) {
+                  imageController.getAllImages();
+
+                  if (!mounted) return;
+                  Navigator.pop(context);
+                }
               },
               icon: Icon(
                 Icons.delete_outline,
@@ -85,77 +149,42 @@ class _ImageEditorState extends State<ImageEditor> {
           ],
         ),
         drawer: TransformationDrawer(image: widget.image),
-        bottomNavigationBar: BottomNavigationBar(
-          showUnselectedLabels: false,
-          showSelectedLabels: false,
-          onTap: (index) async {
-            switch (index) {
-              case 0:
-                final file = await UnsplashProvider().downloadAndSaveImage(
-                    imageController.transformedImageUrl ??
-                        widget.image.secureUrl, (progress) {
-                  print(progress);
-                });
-                if (file != null) {
-                  final params = ShareParams(
-                    files: [XFile(file.path)],
-                  );
-
-                  final result = await SharePlus.instance.share(params);
-
-                  if (result.status == ShareResultStatus.success) {
-                    print('Thank you for sharing the picture!');
-                  }
-                } else {
-                  final params = ShareParams(
-                    uri: Uri.parse(widget.image.secureUrl),
-                  );
-
-                  final result = await SharePlus.instance.share(params);
-
-                  if (result.status == ShareResultStatus.success) {
-                    print('Thank you for sharing the picture!');
-                  }
-                }
-                break;
-              case 1:
-                showModalBottomSheet(
+        bottomNavigationBar: BottomAppBar(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.share_outlined),
+                onPressed: _share,
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () => showModalBottomSheet(
                   isScrollControlled: true,
                   context: context,
                   builder: (modalContext) {
                     return EditHelper(image: widget.image);
                   },
-                );
-
-                break;
-              case 2:
-                await imageController.saveImage(widget.image.secureUrl);
-                handleMessage(context, imageController);
-                break;
-            }
-          },
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.share_outlined,
-                color: !isDark ? blackColor : whiteColor,
-              ),
-              label: "Share",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.edit_outlined,
-                color: !isDark ? blackColor : whiteColor,
-              ),
-              label: "Edit",
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.save_alt_outlined,
-                  color: !isDark ? blackColor : whiteColor,
                 ),
-                label: "Save"),
-          ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.save_alt_outlined),
+                onPressed: () async {
+                  await imageController
+                      .saveImage(imageController.transformedImageUrl);
+                  final message = imageController.message;
+                  if (message != null) {
+                    AppSnackbar.show(
+                      context,
+                      message: message.message,
+                      type: message.messageType,
+                    );
+                  }
+                  imageController.getAllImages();
+                },
+              ),
+            ],
+          ),
         ),
         body: Consumer<ImageController>(
           builder: (context, imageController, child) {
@@ -168,62 +197,35 @@ class _ImageEditorState extends State<ImageEditor> {
                         return const ErrorScreen(
                             error: "Something not right, try again!");
                       },
-                      imageUrl: imageController.transformedImageUrl ??
-                          widget.image.secureUrl,
+                      imageUrl: imageController.transformedImageUrl,
                       fit: BoxFit.contain,
-                      placeholder: (context, url) => SizedBox(
-                        height: double.maxFinite,
-                        child: Center(
-                          child: ShaderMask(
-                            shaderCallback: (bounds) {
-                              return const LinearGradient(
-                                colors: [
-                                  Color(0xFF00F5A0),
-                                  Color(0xFF00D9F5),
-                                  Color(0xFF9D4DFF),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ).createShader(bounds);
-                            },
-                            blendMode: BlendMode.srcATop,
-                            child: Lottie.asset(
-                              'assets/anim/ai_animation.json',
-                              height: 90,
-                              fit: BoxFit.contain,
-                            ),
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) {
+                        final progress = (downloadProgress.progress ?? 0) * 100;
+
+                        return Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(
+                                value: downloadProgress.progress,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                '${progress.toStringAsFixed(0)}%',
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
                   if (imageController.loadingState ==
+                      ImageLoadingState.deleting)
+                    Center(child: CircularProgressIndicator()),
+                  if (imageController.loadingState ==
                       ImageLoadingState.transforming)
-                    Container(
-                      height: double.maxFinite,
-                      color: whiteColor.withAlpha(75),
-                      child: Center(
-                        child: ShaderMask(
-                          shaderCallback: (bounds) {
-                            return const LinearGradient(
-                              colors: [
-                                Color(0xFF00F5A0),
-                                Color(0xFF00D9F5),
-                                Color(0xFF9D4DFF),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ).createShader(bounds);
-                          },
-                          blendMode: BlendMode.srcATop,
-                          child: Lottie.asset(
-                            'assets/anim/ai_animation.json',
-                            height: 90,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                    ),
+                    Center(child: CircularProgressIndicator()),
                 ],
               ),
             );

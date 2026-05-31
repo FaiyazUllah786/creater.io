@@ -1,7 +1,6 @@
 import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/features/auth/controller/user_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common/theme/colors.dart';

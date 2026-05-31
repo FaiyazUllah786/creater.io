@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:creatorio/common/theme/colors.dart';
 import 'package:creatorio/common/utils.dart';
 import 'package:flutter/material.dart';
 

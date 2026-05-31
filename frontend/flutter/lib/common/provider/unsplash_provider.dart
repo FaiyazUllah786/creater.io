@@ -78,8 +78,6 @@ class UnsplashProvider extends ChangeNotifier {
       final filePath = File('${directory.path}/$fileName');
 
       //start download
-      print("Unsplash Image Url: $url");
-      // Fetch the image bytes from the URL
       final response = await dio.download(
         url,
         filePath.path,
@@ -89,8 +87,7 @@ class UnsplashProvider extends ChangeNotifier {
           }
         },
       );
-      print("Image downloaded successfully $filePath");
-      print(response.data);
+      debugPrint('$response');
       return filePath;
     } catch (e) {
       debugPrint('Error downloading image: $e');

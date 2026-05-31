@@ -37,6 +37,8 @@ class AuthInterceptor extends Interceptor {
     '/user/auth/login',
     '/user/auth/register',
     '/user/auth/refresh-tokens',
+    '/auth/google/mobile',
+    '/auth/github/mobile'
   ];
 
   bool _isPublicRoute(String path) {

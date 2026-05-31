@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class AnimatedSearchField extends StatefulWidget {
-  Function performAction;
-  AnimatedSearchField({required this.performAction});
+  final Function performAction;
+  const AnimatedSearchField({super.key, required this.performAction});
 
   @override
-  _AnimatedSearchFieldState createState() => _AnimatedSearchFieldState();
+  State<AnimatedSearchField> createState() => _AnimatedSearchFieldState();
 }
 
 class _AnimatedSearchFieldState extends State<AnimatedSearchField>

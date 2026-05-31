@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'package:creatorio/common/ip.dart';
 import 'package:creatorio/core/network/dio_client.dart';
-import 'package:creatorio/core/network/token_manager.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:http/http.dart' as http;
 
-import '/common/storage.dart';
 import '/common/widgets/api_error.dart';
 import '/common/widgets/api_response.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -351,37 +350,47 @@ class UserRepository {
       if (idToken == null) {
         throw ApiError(statusCode: 400, message: "No ID token found");
       }
-      final res = await http.post(
-        Uri.parse('$myIp/auth/google/mobile'),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "idToken": idToken,
-        }),
-      );
-      final body = jsonDecode(res.body);
-      debugPrint("Current user response body: $body");
-      if (res.statusCode == 200) {
-        return ApiResponse.fromMap(body);
-      } else {
-        throw ApiError.fromMap(body);
-      }
-    } on ApiError {
-      rethrow;
-    } catch (e, stackTrace) {
-      debugPrint("Unexpected error during login: $e");
+
+      final res = await dio.post('/auth/google/mobile', data: {
+        "idToken": idToken,
+      });
+
+      debugPrint("Current user response body: ${res.data}");
+      return ApiResponse.fromMap(res.data);
+    } on DioException catch (e, stackTrace) {
+      debugPrint("Signin with google error: ${e.response?.data}");
+
       debugPrintStack(stackTrace: stackTrace);
+
+      if (e.response?.data != null) {
+        throw ApiError.fromMap(
+          e.response!.data,
+        );
+      }
+
       throw ApiError(
-          statusCode: 500, message: "Something went wrong. Please try again.");
+        statusCode: 500,
+        message: "Network error occurred",
+      );
+    } catch (e, stackTrace) {
+      debugPrint("Signin with google error: $e");
+
+      debugPrintStack(stackTrace: stackTrace);
+
+      throw ApiError(
+        statusCode: 500,
+        message: "Something went wrong. Please try again.",
+      );
     }
   }
 
   Future<ApiResponse?> signInWithGithub() async {
     try {
+      final clientId = dotenv.env['GITHUB_CLIENT_ID'] ?? '';
+
       final result = await FlutterWebAuth2.authenticate(
         url: "https://github.com/login/oauth/authorize"
-            "?client_id=Ov23lijSn5Gpp1EEBtzi"
+            "?client_id=$clientId"
             "&scope=user:email",
         callbackUrlScheme: "createrio",
       );
@@ -390,31 +399,38 @@ class UserRepository {
       final code = uri.queryParameters['code'];
 
       if (code == null) {
-        throw ApiError(statusCode: 400, message: "No code received");
+        throw ApiError(statusCode: 404, message: "No code received");
       }
-      final res = await http.post(
-        Uri.parse('$myIp/auth/github/mobile'),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "code": code,
-        }),
-      );
-      final body = jsonDecode(res.body);
-      debugPrint("Github user response body: $body");
-      if (res.statusCode == 200) {
-        return ApiResponse.fromMap(body);
-      } else {
-        throw ApiError.fromMap(body);
-      }
-    } on ApiError {
-      rethrow;
-    } catch (e, stackTrace) {
-      debugPrint("Unexpected error during login: $e");
+      final res = await dio.post('/auth/github/mobile', data: {
+        "code": code,
+      });
+
+      debugPrint("Github user response body: ${res.data}");
+      return ApiResponse.fromMap(res.data);
+    } on DioException catch (e, stackTrace) {
+      debugPrint("Signin with github error: ${e.response?.data}");
+
       debugPrintStack(stackTrace: stackTrace);
+
+      if (e.response?.data != null) {
+        throw ApiError.fromMap(
+          e.response!.data,
+        );
+      }
+
       throw ApiError(
-          statusCode: 500, message: "Something went wrong. Please try again.");
+        statusCode: 500,
+        message: "Network error occurred",
+      );
+    } catch (e, stackTrace) {
+      debugPrint("Signin with github error: $e");
+
+      debugPrintStack(stackTrace: stackTrace);
+
+      throw ApiError(
+        statusCode: 500,
+        message: "Something went wrong. Please try again.",
+      );
     }
   }
 }

@@ -36,15 +36,22 @@ class ImageController extends ChangeNotifier {
 
   final imageRepository = ImageRepository();
   final List<ImageModel> _images = [];
-  bool _hasUnsavedChanges = false;
 
   List<ImageModel> get images => _images;
+
+  bool _hasUnsavedChanges = false;
+
   bool get hasUnsavedChanges => _hasUnsavedChanges;
 
-  String? _transformedImageUrl;
+  String _transformedImageUrl = '';
+  String get transformedImageUrl => _transformedImageUrl;
+  void settransformedImageUrl(String value) {
+    _transformedImageUrl = value;
+    notifyListeners();
+  }
+
   List<Map<String, dynamic>>? _transfomationList;
   List<dynamic>? get transfomationList => _transfomationList;
-  String? get transformedImageUrl => _transformedImageUrl;
 
   Future<bool> uploadImage(File images) async {
     try {
@@ -73,6 +80,8 @@ class ImageController extends ChangeNotifier {
       _message = Message("Image uploaded successfully", MessageType.success);
       return true;
     } on ApiError catch (e) {
+      debugPrint("Unexpected error during image upload: $e");
+
       return false;
     } catch (e, stackTrace) {
       debugPrint("Unexpected error during image upload: $e");
@@ -93,12 +102,12 @@ class ImageController extends ChangeNotifier {
         _message = Message("Refresh failed....", MessageType.error);
         return false;
       }
+      _images.clear();
+
       final images = res.data;
       for (int i = 0; i < images.length; i++) {
         final ImageModel imageModel = ImageModel.fromMap(images[i]);
-        if (!_images.any((image) => image.id == imageModel.id)) {
-          _images.add(imageModel);
-        }
+        _images.add(imageModel);
       }
       _images.sort(
         (a, b) =>
@@ -108,9 +117,11 @@ class ImageController extends ChangeNotifier {
       _message = Message("Your gallery is updated", MessageType.success);
       return true;
     } on ApiError catch (e) {
+      debugPrint("Unexpected error during image fetch: $e");
+
       return false;
     } catch (e, stackTrace) {
-      debugPrint("Unexpected error during image upload: $e");
+      debugPrint("Unexpected error during image fetch: $e");
       debugPrintStack(stackTrace: stackTrace);
       return false;
     } finally {
@@ -130,14 +141,17 @@ class ImageController extends ChangeNotifier {
 
         return false;
       }
-      _images.removeWhere((image) => image.id == imageId);
+      _hasUnsavedChanges = false;
+      _transformedImageUrl = '';
       _message = Message("Image deleted successfully", MessageType.success);
 
       return true;
     } on ApiError catch (e) {
+      debugPrint("Unexpected error during image delete: $e");
+
       return false;
     } catch (e, stackTrace) {
-      debugPrint("Unexpected error during image upload: $e");
+      debugPrint("Unexpected error during image delete: $e");
       debugPrintStack(stackTrace: stackTrace);
       return false;
     } finally {
@@ -155,10 +169,13 @@ class ImageController extends ChangeNotifier {
         _message = Message("Failed to save image", MessageType.error);
         return false;
       }
+      _hasUnsavedChanges = false;
       _message = Message("Image saved successfully", MessageType.success);
       return true;
     } on ApiError catch (e) {
       _message = Message("Failed to save image", MessageType.error);
+      debugPrint("Unexpected error during image save: $e");
+
       return false;
     } catch (e, stackTrace) {
       debugPrint("Unexpected error during image save: $e");
@@ -181,11 +198,10 @@ class ImageController extends ChangeNotifier {
         _message = Message("Failed to add transformation", MessageType.error);
         return false;
       }
-      _transformedImageUrl = res.data?['resUrl'];
+      _transformedImageUrl = res.data?['previewUrl'];
       _transfomationList = List<Map<String, dynamic>>.from(
         res.data?['transfomationList'] ?? [],
       );
-      print(_transfomationList);
 
       _hasUnsavedChanges = true;
       _message =
@@ -193,6 +209,7 @@ class ImageController extends ChangeNotifier {
       return true;
     } on ApiError catch (e) {
       _message = Message("Failed to add transformation", MessageType.error);
+      debugPrint("Unexpected error during add transformation: $e");
       return false;
     } catch (e, stackTrace) {
       debugPrint("Unexpected error during image transformation: $e");
@@ -216,11 +233,10 @@ class ImageController extends ChangeNotifier {
             Message("Failed to update transformation", MessageType.error);
         return false;
       }
-      _transformedImageUrl = res.data?['resUrl'];
+      _transformedImageUrl = res.data?['previewUrl'];
       _transfomationList = List<Map<String, dynamic>>.from(
         res.data?['transfomationList'] ?? [],
       );
-      print(_transfomationList);
 
       _hasUnsavedChanges = true;
       _message =
@@ -228,6 +244,8 @@ class ImageController extends ChangeNotifier {
       return true;
     } on ApiError catch (e) {
       _message = Message("Failed to update transformation", MessageType.error);
+      debugPrint("Unexpected error during update transformation: $e");
+
       return false;
     } catch (e, stackTrace) {
       debugPrint("Unexpected error during image transformation: $e");
@@ -251,18 +269,17 @@ class ImageController extends ChangeNotifier {
             Message("Failed to delete transformation", MessageType.error);
         return false;
       }
-      _transformedImageUrl = res.data?['resUrl'];
+      _transformedImageUrl = res.data?['previewUrl'];
       _transfomationList = List<Map<String, dynamic>>.from(
         res.data?['transfomationList'] ?? [],
       );
-      print(_transfomationList);
 
-      _hasUnsavedChanges = true;
       _message =
           Message("Tranfomation delete successfully", MessageType.success);
       return true;
     } on ApiError catch (e) {
       _message = Message("Failed to delete transformation", MessageType.error);
+      debugPrint("Unexpected error during image transformation: $e");
       return false;
     } catch (e, stackTrace) {
       debugPrint("Unexpected error during image transformation delete: $e");
@@ -277,19 +294,22 @@ class ImageController extends ChangeNotifier {
     try {
       clearMessage();
       _setLoading(ImageLoadingState.transforming);
+      _hasUnsavedChanges = false;
+      _transfomationList = [];
+      _transformedImageUrl = "";
 
       final res = await imageRepository.clearTransformation(imagePublicId);
       if (res == null) {
         _message = Message("Failed to clear transformation", MessageType.error);
         return false;
       }
-      _transformedImageUrl = res.data?['resUrl'];
-      _hasUnsavedChanges = false;
+      _transformedImageUrl = res.data?['previewUrl'];
       _message =
           Message("Tranfomation cleared successfully", MessageType.success);
       return true;
     } on ApiError catch (e) {
       _message = Message("Failed to clear transformation", MessageType.error);
+      debugPrint("Unexpected error during transformation clear: $e");
       return false;
     } catch (e, stackTrace) {
       debugPrint("Unexpected error during image transformation clear: $e");

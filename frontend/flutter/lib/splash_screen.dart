@@ -1,4 +1,3 @@
-import 'package:creatorio/common/navigator_key.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {

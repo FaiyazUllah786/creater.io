@@ -6,15 +6,15 @@ import 'package:provider/provider.dart';
 import '../../../common/theme/colors.dart';
 
 enum Direction {
-  north_west,
+  northWest,
   north,
-  north_east,
+  northEast,
   west,
   center,
   east,
-  south_west,
+  southWest,
   south,
-  south_east,
+  southEast,
 }
 
 class GenerativeFill extends StatefulWidget {
@@ -54,24 +54,24 @@ class _GenerativeFillState extends State<GenerativeFill> {
 
   Direction fetchGravity(String gravity) {
     switch (gravity) {
-      case "north_west":
-        return Direction.north_west;
+      case "northWest":
+        return Direction.northWest;
       case "north":
         return Direction.north;
-      case "north_east":
-        return Direction.north_east;
+      case "northEast":
+        return Direction.northEast;
       case "west":
         return Direction.west;
       case "center":
         return Direction.center;
       case "east":
         return Direction.east;
-      case "south_west":
-        return Direction.south_west;
+      case "southWest":
+        return Direction.southWest;
       case "south":
         return Direction.south;
-      case "south_east":
-        return Direction.south_east;
+      case "southEast":
+        return Direction.southEast;
       default:
         return Direction.center;
     }
@@ -105,7 +105,7 @@ class _GenerativeFillState extends State<GenerativeFill> {
                 enableTapToDismiss: true,
                 constraints: BoxConstraints(maxWidth: 200),
                 message:
-                    "The compass direction represents a location in the image, for example, north_east represents the top right corner.",
+                    "The compass direction represents a location in the image, for example, northEast represents the top right corner.",
                 child: Icon(
                   Icons.info_outlined,
                   size: 20,
@@ -163,7 +163,6 @@ class _GenerativeFillState extends State<GenerativeFill> {
                           setState(
                             () {
                               _selectedDirection = direction;
-                              print(direction);
                             },
                           );
                         },

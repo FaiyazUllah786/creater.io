@@ -10,10 +10,10 @@ import '/common/widgets/seach_field.dart';
 import 'shimmer_loading.dart';
 
 class UnsplashScreen extends StatefulWidget {
-  Function pickImageFromUnsplash;
+  final Function pickImageFromUnsplash;
   static const String routeName = "/unsplash";
 
-  UnsplashScreen({super.key, required this.pickImageFromUnsplash});
+  const UnsplashScreen({super.key, required this.pickImageFromUnsplash});
 
   @override
   State<UnsplashScreen> createState() => UnsplashScreenState();
@@ -56,8 +56,6 @@ class UnsplashScreenState extends State<UnsplashScreen> {
     }
     unsplash.photos.clear();
     await unsplash.fetchPhotos(_query);
-    print("query: $_query");
-    print("photos length: ${unsplash.photos.length}");
   }
 
   @override
@@ -67,7 +65,7 @@ class UnsplashScreenState extends State<UnsplashScreen> {
   }
 
   bool _openSearchBox = false;
-  Map<String, double> _progressMap = {};
+  final Map<String, double> _progressMap = {};
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +163,6 @@ class UnsplashScreenState extends State<UnsplashScreen> {
                       final image = unsplashProvider.photos[index];
                       return InkWell(
                         onTap: () async {
-                          print("Unsplash Url is passed here");
                           final imageFile = await widget.pickImageFromUnsplash(
                               image.urls.regular, (progress) {
                             setState(() {
@@ -173,11 +170,11 @@ class UnsplashScreenState extends State<UnsplashScreen> {
                                   progress;
                             });
                           });
-                          print(_progressMap[image.urls.regular.toString()]);
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ImageViewer(imageFile),
+                                builder: (context) =>
+                                    ImageViewer(imageFile: imageFile),
                               ));
                           setState(() {
                             _progressMap.remove(image.urls.regular.toString());

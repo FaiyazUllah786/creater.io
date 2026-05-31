@@ -1,19 +1,17 @@
 import 'dart:io';
 
-import 'package:creatorio/common/utils.dart';
-import 'package:creatorio/features/Image/controller/image_controller.dart';
 import 'package:creatorio/features/auth/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/colors.dart';
 
 class ImageViewer extends StatefulWidget {
-  File imageFile;
+  final File imageFile;
 
-  ImageViewer(this.imageFile);
+  const ImageViewer({required this.imageFile, super.key});
 
   @override
-  _ImageViewerState createState() => _ImageViewerState();
+  State<ImageViewer> createState() => _ImageViewerState();
 }
 
 class _ImageViewerState extends State<ImageViewer> {
@@ -35,91 +33,85 @@ class _ImageViewerState extends State<ImageViewer> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Scaffold(
-      body: widget.imageFile != null
-          ? Center(
-              child: Stack(
-                fit: StackFit.expand,
+        body: Center(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Listener(
+            onPointerDown: (_) => _hideButtons(),
+            onPointerUp: (_) => _showButtons(),
+            child: Container(
+              // margin: const EdgeInsets.symmetric(horizontal: 20),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    fit: BoxFit.contain,
+                    image: FileImage(
+                      widget.imageFile,
+                    )),
+              ),
+              // child: CircleAvatar(
+              //   radius: size.width * 0.5 - 20,
+              //   // maxRadius: 70,
+              //   backgroundImage: FileImage(
+              //     widget.imageFile,
+              //   ),
+              // ),
+            ),
+          ),
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(
+                backgroundColor: transparentColor,
+                color: blackColor,
+              ),
+            ),
+          if (_buttonsVisible && !_isLoading)
+            Positioned(
+              bottom: 20,
+              left: 20,
+              right: 20,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Listener(
-                    onPointerDown: (_) => _hideButtons(),
-                    onPointerUp: (_) => _showButtons(),
-                    child: Container(
-                      // margin: const EdgeInsets.symmetric(horizontal: 20),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                            fit: BoxFit.contain,
-                            image: FileImage(
-                              widget.imageFile,
-                            )),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: whiteColor,
+                        backgroundColor: brownColor,
                       ),
-                      // child: CircleAvatar(
-                      //   radius: size.width * 0.5 - 20,
-                      //   // maxRadius: 70,
-                      //   backgroundImage: FileImage(
-                      //     widget.imageFile,
-                      //   ),
-                      // ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Discard"),
                     ),
                   ),
-                  if (_isLoading)
-                    const Center(
-                      child: CircularProgressIndicator(
-                        backgroundColor: transparentColor,
-                        color: blackColor,
-                      ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        // await UserController().updateProfilePhoto(
+                        //     context, widget.imageFile.path);
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        await Provider.of<UserController>(context,
+                                listen: false)
+                            .updateProfilePhoto(widget.imageFile.path);
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Select"),
                     ),
-                  if (_buttonsVisible && !_isLoading)
-                    Positioned(
-                      bottom: 20,
-                      left: 20,
-                      right: 20,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: whiteColor,
-                                backgroundColor: brownColor,
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Text("Discard"),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                // await UserController().updateProfilePhoto(
-                                //     context, widget.imageFile.path);
-                                setState(() {
-                                  _isLoading = true;
-                                });
-                                await Provider.of<UserController>(context,
-                                        listen: false)
-                                    .updateProfilePhoto(widget.imageFile.path);
-                                setState(() {
-                                  _isLoading = false;
-                                });
-                                Navigator.pop(context);
-                              },
-                              child: const Text("Select"),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  ),
                 ],
               ),
-            )
-          : const Center(
-              child: Text("No Image Selected!!!"),
             ),
-    );
+        ],
+      ),
+    ));
   }
 }

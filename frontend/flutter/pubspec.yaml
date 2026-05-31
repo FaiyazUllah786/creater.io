@@ -60,6 +60,7 @@ dependencies:
   image_cropper: ^12.2.1
   flex_color_picker: ^3.8.0
   shared_preferences: ^2.5.5
+  google_fonts: ^8.1.0
 
 dev_dependencies:
   flutter_test:
@@ -87,7 +88,6 @@ flutter:
     - assets/
     - assets/icons/
     - assets/anim/
-    - fonts/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -101,23 +101,23 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  fonts:
-    - family: Nunito
-      fonts:
-        - asset: fonts/Nunito-Light.ttf
-          weight: 100
-        - asset: fonts/Nunito-Regular.ttf
-        - asset: fonts/Nunito-Medium.ttf
-          weight: 500
-        - asset: fonts/Nunito-Bold.ttf
-          weight: 700
-        - asset: fonts/Nunito-ExtraBold.ttf
-          weight: 900
-        - asset: fonts/Nunito-Italic.ttf
-          style: italic
-        - asset: fonts/Nunito-BoldItalic.ttf
-          weight: 700
-          style: italic
+  # fonts:
+  #   - family: Nunito
+  #     fonts:
+  #       - asset: fonts/Nunito-Light.ttf
+  #         weight: 100
+  #       - asset: fonts/Nunito-Regular.ttf
+  #       - asset: fonts/Nunito-Medium.ttf
+  #         weight: 500
+  #       - asset: fonts/Nunito-Bold.ttf
+  #         weight: 700
+  #       - asset: fonts/Nunito-ExtraBold.ttf
+  #         weight: 900
+  #       - asset: fonts/Nunito-Italic.ttf
+  #         style: italic
+  #       - asset: fonts/Nunito-BoldItalic.ttf
+  #         weight: 700
+  #         style: italic
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
