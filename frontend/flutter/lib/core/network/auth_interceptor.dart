@@ -112,9 +112,9 @@ class AuthInterceptor extends Interceptor {
       return handler.next(err);
     }
 
-    try {
-      /// Wait if another refresh is happening
-      if (_isRefreshing) {
+    /// Wait if another refresh is happening
+    if (_isRefreshing) {
+      try {
         await _refreshCompleter?.future;
 
         final response = await _retryRequest(
@@ -122,12 +122,20 @@ class AuthInterceptor extends Interceptor {
         );
 
         return handler.resolve(response);
-      }
+      } catch (e) {
+        await _logout();
 
-      /// Start refresh process
+        return handler.next(err);
+      }
+    }
+
+    /// Start refresh process
+    try {
       _isRefreshing = true;
 
       _refreshCompleter = Completer<void>();
+      
+      _refreshCompleter?.future.catchError((_) {});
 
       await _refreshToken();
 
@@ -139,7 +147,9 @@ class AuthInterceptor extends Interceptor {
 
       return handler.resolve(response);
     } catch (e) {
-      _refreshCompleter?.completeError(e);
+      if (!(_refreshCompleter?.isCompleted ?? true)) {
+        _refreshCompleter?.completeError(e);
+      }
 
       await _logout();
 
@@ -218,12 +228,16 @@ class AuthInterceptor extends Interceptor {
       _isRefreshing = true;
 
       _refreshCompleter = Completer<void>();
+      
+      _refreshCompleter?.future.catchError((_) {});
 
       await _refreshToken();
 
       _refreshCompleter?.complete();
     } catch (e) {
-      _refreshCompleter?.completeError(e);
+      if (!(_refreshCompleter?.isCompleted ?? true)) {
+        _refreshCompleter?.completeError(e);
+      }
 
       rethrow;
     } finally {
