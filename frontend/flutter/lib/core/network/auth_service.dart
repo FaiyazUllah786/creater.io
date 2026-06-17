@@ -26,10 +26,11 @@ class AuthService {
       final accessToken = await SecureStorageService.getAccessToken();
       TokenManager.setAccessToken(accessToken);
 
-      /// Restore access token immediately
-      if (TokenManager.shouldRefreshToken()) {
+      /// If the restored access token is still valid, use it directly
+      /// without making a network refresh call.
+      if (TokenManager.hasValidAccessToken()) {
         debugPrint(
-          'Access token restored from storage',
+          'Valid access token restored from storage',
         );
 
         AuthBootstrap.complete();
