@@ -21,7 +21,7 @@ class _AppLauncherState extends State<AppLauncher> {
   }
 
   Future<void> _init() async {
-    AuthService.initializeAuth();
+    await AuthService.initializeAuth();
 
     if (!mounted) return;
 
