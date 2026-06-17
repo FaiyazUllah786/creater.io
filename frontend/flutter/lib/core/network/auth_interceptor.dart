@@ -3,6 +3,7 @@ import 'package:creatorio/common/navigator_key.dart';
 import 'package:creatorio/common/storage.dart';
 import 'package:creatorio/core/network/auth_bootstrap.dart';
 import 'package:creatorio/core/network/token_manager.dart';
+import 'package:creatorio/common/widgets/api_response.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -172,9 +173,11 @@ class AuthInterceptor extends Interceptor {
       },
     );
 
-    final newAccessToken = response.data['accessToken'];
+    final resMap = ApiResponse.fromMap(response.data);
 
-    final newRefreshToken = response.data['refreshToken'];
+    final newAccessToken = resMap.data['accessToken'];
+
+    final newRefreshToken = resMap.data['refreshToken'];
 
     if (newAccessToken == null || newRefreshToken == null) {
       throw Exception(
