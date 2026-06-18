@@ -12,7 +12,11 @@ import {
   googleCallbackMiddleware,
 } from "../middlewares/auth.middleware.js";
 
+import { authLimiter } from "../middlewares/rateLimit.middleware.js";
+
 const router = Router();
+
+router.use(authLimiter);
 
 router.route("/github").get(githubAuthMiddleware);
 

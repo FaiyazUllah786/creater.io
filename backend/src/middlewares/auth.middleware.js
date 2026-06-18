@@ -47,7 +47,13 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
       throw new ApiError(401, "Invalid or expired access token");
     }
 
-    req._id = decodedData._id;
+    const user = await User.findById(decodedData._id).select("-password -refreshToken");
+    if (!user) {
+      throw new ApiError(401, "Invalid access token or user does not exist");
+    }
+
+    req.user = user;
+    req._id = user._id;
     next();
   } catch (error) {
     console.log("JWT verification failed:", error);

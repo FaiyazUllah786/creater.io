@@ -15,7 +15,11 @@ import {
   saveTransformation,
 } from "../controllers/transformation.controller.js";
 
+import { cloudinaryLimiter } from "../middlewares/rateLimit.middleware.js";
+
 const router = Router();
+
+router.use(cloudinaryLimiter);
 
 //http:localhost:8000/image/upload
 router.route("/upload").post(verifyJWT, upload.array("images"), imageUploads);

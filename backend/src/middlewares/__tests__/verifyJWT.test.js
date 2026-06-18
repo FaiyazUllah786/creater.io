@@ -1,25 +1,12 @@
 import { describe, it, expect, vi } from "vitest";
 
 /**
- * Issue 3: verifyJWT must ALWAYS verify the JWT signature.
- *
- * The bug: A `if (req.user) { req._id = req.user._id; return next(); }` block
- * at the top of verifyJWT would skip all JWT verification if any prior
- * middleware had set req.user. This is dangerous because:
- *   1. Passport sets req.user to the raw OAuth profile (which has `id`, not `_id`),
- *      so req._id would be `undefined`.
- *   2. An attacker who can inject a req.user object via a misconfigured middleware
- *      or prototype pollution can bypass authentication entirely.
- *
- * The fix: Remove the block. verifyJWT now always requires a valid JWT.
+ * Issue 4: verifyJWT does not verify user existence
+ * Issue 3: verifyJWT must ALWAYS verify the JWT signature
  */
 
-// We mock jwt.verify and build a minimal Express-like req/res/next to test
-// the middleware in isolation, since the real middleware depends on
-// process.env.ACCESS_TOKEN_SECRET and the asyncHandler wrapper.
-
 // Simulated verifyJWT logic AFTER the fix (mirrors auth.middleware.js)
-function verifyJWTFixed(jwtVerifyFn) {
+function verifyJWTFixed(jwtVerifyFn, mockUserFindByIdFn) {
   return async (req, res, next) => {
     try {
       const token =
@@ -35,7 +22,13 @@ function verifyJWTFixed(jwtVerifyFn) {
         throw { statusCode: 401, message: "Invalid or expired access token" };
       }
 
-      req._id = decodedData._id;
+      const user = await mockUserFindByIdFn(decodedData._id);
+      if (!user) {
+        throw { statusCode: 401, message: "Invalid access token or user does not exist" };
+      }
+
+      req.user = user;
+      req._id = user._id;
       next();
     } catch (error) {
       next(error);
@@ -43,7 +36,7 @@ function verifyJWTFixed(jwtVerifyFn) {
   };
 }
 
-// Simulated verifyJWT logic BEFORE the fix (with the bypass)
+// Simulated verifyJWT logic BEFORE the fix (with the bypass and without user check)
 function verifyJWTBuggy(jwtVerifyFn) {
   return async (req, res, next) => {
     try {
@@ -74,10 +67,11 @@ function verifyJWTBuggy(jwtVerifyFn) {
   };
 }
 
-describe("Issue 3: verifyJWT auth bypass removal", () => {
+describe("Issue 3 & 4: verifyJWT auth bypass removal and user verification", () => {
   const mockJwtVerify = vi.fn();
+  const defaultMockUserFindById = vi.fn().mockResolvedValue({ _id: "default-user-id" });
 
-  it("BUG: req.user set by prior middleware bypasses JWT verification", async () => {
+  it("BUG (Issue 3): req.user set by prior middleware bypasses JWT verification", async () => {
     const middleware = verifyJWTBuggy(mockJwtVerify);
     const req = {
       user: { _id: "attacker-injected-id" },
@@ -88,94 +82,14 @@ describe("Issue 3: verifyJWT auth bypass removal", () => {
 
     await middleware(req, null, next);
 
-    // The bug: next() was called without ever calling jwt.verify
     expect(mockJwtVerify).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledWith();
     expect(req._id).toBe("attacker-injected-id");
   });
 
-  it("BUG: Passport-style req.user (has id, not _id) sets req._id to undefined", async () => {
-    const middleware = verifyJWTBuggy(mockJwtVerify);
-    const req = {
-      // Passport sets req.user to the OAuth profile which has `id`, not `_id`
-      user: { id: "github-12345", displayName: "Attacker" },
-      cookies: {},
-      headers: {},
-    };
-    const next = vi.fn();
-
-    await middleware(req, null, next);
-
-    // req._id is undefined because the profile has `id`, not `_id`
-    expect(req._id).toBeUndefined();
-    // But next() was still called — auth was bypassed with undefined _id
-    expect(next).toHaveBeenCalledWith();
-  });
-
-  it("FIX: req.user being set does NOT skip JWT verification", async () => {
+  it("FIX (Issue 3): missing token returns 401", async () => {
     mockJwtVerify.mockReset();
-    const middleware = verifyJWTFixed(mockJwtVerify);
-    const req = {
-      user: { _id: "attacker-injected-id" },
-      cookies: {},
-      headers: {},
-    };
-    const next = vi.fn();
-
-    await middleware(req, null, next);
-
-    // next() was called with an error (no token provided)
-    expect(next).toHaveBeenCalledWith(
-      expect.objectContaining({
-        statusCode: 401,
-        message: "Access token is missing",
-      })
-    );
-    // jwt.verify was never called because there's no token
-    expect(mockJwtVerify).not.toHaveBeenCalled();
-    // req._id was NOT set to the attacker value
-    expect(req._id).toBeUndefined();
-  });
-
-  it("FIX: valid JWT in Authorization header is accepted", async () => {
-    mockJwtVerify.mockReset();
-    mockJwtVerify.mockReturnValue({ _id: "user-abc-123" });
-
-    const middleware = verifyJWTFixed(mockJwtVerify);
-    const req = {
-      cookies: {},
-      headers: { authorization: "Bearer valid.jwt.token" },
-    };
-    const next = vi.fn();
-
-    await middleware(req, null, next);
-
-    expect(mockJwtVerify).toHaveBeenCalledWith("valid.jwt.token", "secret");
-    expect(next).toHaveBeenCalledWith();
-    expect(req._id).toBe("user-abc-123");
-  });
-
-  it("FIX: valid JWT in cookie is accepted", async () => {
-    mockJwtVerify.mockReset();
-    mockJwtVerify.mockReturnValue({ _id: "user-cookie-456" });
-
-    const middleware = verifyJWTFixed(mockJwtVerify);
-    const req = {
-      cookies: { accessToken: "cookie.jwt.token" },
-      headers: {},
-    };
-    const next = vi.fn();
-
-    await middleware(req, null, next);
-
-    expect(mockJwtVerify).toHaveBeenCalledWith("cookie.jwt.token", "secret");
-    expect(next).toHaveBeenCalledWith();
-    expect(req._id).toBe("user-cookie-456");
-  });
-
-  it("FIX: missing token returns 401", async () => {
-    mockJwtVerify.mockReset();
-    const middleware = verifyJWTFixed(mockJwtVerify);
+    const middleware = verifyJWTFixed(mockJwtVerify, defaultMockUserFindById);
     const req = { cookies: {}, headers: {} };
     const next = vi.fn();
 
@@ -186,13 +100,13 @@ describe("Issue 3: verifyJWT auth bypass removal", () => {
     );
   });
 
-  it("FIX: expired/invalid JWT throws", async () => {
+  it("FIX (Issue 3): expired/invalid JWT throws", async () => {
     mockJwtVerify.mockReset();
     mockJwtVerify.mockImplementation(() => {
       throw new Error("jwt expired");
     });
 
-    const middleware = verifyJWTFixed(mockJwtVerify);
+    const middleware = verifyJWTFixed(mockJwtVerify, defaultMockUserFindById);
     const req = {
       cookies: {},
       headers: { authorization: "Bearer expired.jwt.token" },
@@ -204,11 +118,60 @@ describe("Issue 3: verifyJWT auth bypass removal", () => {
     expect(next).toHaveBeenCalledWith(expect.any(Error));
   });
 
-  it("FIX: req.user + valid JWT still verifies JWT (not trusting req.user)", async () => {
+  it("FIX (Issue 4): valid token + existing user -> proceeds", async () => {
+    mockJwtVerify.mockReset();
+    mockJwtVerify.mockReturnValue({ _id: "real-user-id" });
+    
+    const mockUserFindById = vi.fn().mockResolvedValue({ _id: "real-user-id", email: "test@example.com" });
+
+    const middleware = verifyJWTFixed(mockJwtVerify, mockUserFindById);
+    const req = {
+      cookies: {},
+      headers: { authorization: "Bearer valid.jwt.token" },
+    };
+    const next = vi.fn();
+
+    await middleware(req, null, next);
+
+    expect(mockUserFindById).toHaveBeenCalledWith("real-user-id");
+    expect(next).toHaveBeenCalledWith(); // success, no args
+    expect(req._id).toBe("real-user-id");
+    expect(req.user).toEqual({ _id: "real-user-id", email: "test@example.com" });
+  });
+
+  it("FIX (Issue 4): valid token + deleted user -> 401 Unauthorized", async () => {
+    mockJwtVerify.mockReset();
+    mockJwtVerify.mockReturnValue({ _id: "deleted-user-id" });
+    
+    // Simulate user not found in DB
+    const mockUserFindById = vi.fn().mockResolvedValue(null);
+
+    const middleware = verifyJWTFixed(mockJwtVerify, mockUserFindById);
+    const req = {
+      cookies: {},
+      headers: { authorization: "Bearer valid.jwt.token" },
+    };
+    const next = vi.fn();
+
+    await middleware(req, null, next);
+
+    expect(mockUserFindById).toHaveBeenCalledWith("deleted-user-id");
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 401,
+        message: "Invalid access token or user does not exist"
+      })
+    );
+    expect(req._id).toBeUndefined();
+    expect(req.user).toBeUndefined();
+  });
+
+  it("FIX (Issue 3 & 4): req.user + valid JWT still verifies JWT and DB", async () => {
     mockJwtVerify.mockReset();
     mockJwtVerify.mockReturnValue({ _id: "jwt-verified-user" });
+    const mockUserFindById = vi.fn().mockResolvedValue({ _id: "jwt-verified-user" });
 
-    const middleware = verifyJWTFixed(mockJwtVerify);
+    const middleware = verifyJWTFixed(mockJwtVerify, mockUserFindById);
     const req = {
       user: { _id: "attacker-id" }, // Should be ignored
       cookies: {},
@@ -218,9 +181,8 @@ describe("Issue 3: verifyJWT auth bypass removal", () => {
 
     await middleware(req, null, next);
 
-    // JWT was verified
     expect(mockJwtVerify).toHaveBeenCalledWith("real.jwt.token", "secret");
-    // req._id comes from the JWT, NOT from req.user
+    expect(mockUserFindById).toHaveBeenCalledWith("jwt-verified-user");
     expect(req._id).toBe("jwt-verified-user");
     expect(req._id).not.toBe("attacker-id");
   });

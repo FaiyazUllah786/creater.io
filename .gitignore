@@ -125,3 +125,5 @@ dist
 /frontend/flutter/.pub-cache
 /frontend/flutter/.dart
 /frontend/flutter/test/test_driver
+
+/backend/package-lock.json

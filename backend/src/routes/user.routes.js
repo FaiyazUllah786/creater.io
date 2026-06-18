@@ -3,6 +3,7 @@ import {
   refreshAccessToken,
   verifyJWT,
 } from "../middlewares/auth.middleware.js";
+import { authLimiter, refreshLimiter } from "../middlewares/rateLimit.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import {
   deleteUser,
@@ -20,16 +21,16 @@ const router = Router();
 //http://localhost:8000/user/auth/register
 router
   .route("/auth/register")
-  .post(upload.single("profilePhoto"), registerUser);
+  .post(authLimiter, upload.single("profilePhoto"), registerUser);
 
 //http://localhost:8000/user/auth/login
-router.route("/auth/login").post(loginUser);
+router.route("/auth/login").post(authLimiter, loginUser);
 
 //http://localhost:8000/user/auth/logout
 router.route("/auth/logout").post(verifyJWT, logoutUser);
 
 //http://localhost:8000/user/auth/refresh-token
-router.route("/auth/refresh-tokens").post(refreshAccessToken);
+router.route("/auth/refresh-tokens").post(refreshLimiter, refreshAccessToken);
 
 //http://localhost:8000/user/current-user
 router.route("/current-user").get(verifyJWT, getCurrentUser);

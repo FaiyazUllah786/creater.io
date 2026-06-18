@@ -8,6 +8,8 @@ dotenv.config();
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(cookieParser());
 
 app.use(
@@ -26,6 +28,10 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 import userRouter from "./routes/user.routes.js";
 import imageRouter from "./routes/image.routes.js";
 import authRouter from "./routes/auth.routes.js";
+import { generalLimiter } from "./middlewares/rateLimit.middleware.js";
+
+app.use(generalLimiter);
+
 //User Route
 app.use("/user", userRouter);
 //image Route

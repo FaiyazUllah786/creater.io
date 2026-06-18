@@ -24,7 +24,7 @@ const startApp = async () => {
       console.log("Server is running on PORT:", process.env.PORT);
     });
   } catch (error) {
-    console.log("App is failed to initialize", err);
+    console.log("App is failed to initialize", error);
     process.exit(1);
   }
 };
