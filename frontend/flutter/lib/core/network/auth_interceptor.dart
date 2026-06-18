@@ -289,17 +289,21 @@ class AuthInterceptor extends Interceptor {
 
     _isLoggingOut = true;
 
-    if (kDebugMode) {
-      debugPrint('Logging out user...');
+    try {
+      if (kDebugMode) {
+        debugPrint('Logging out user...');
+      }
+
+      TokenManager.clear();
+
+      await SecureStorageService.clear();
+
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        '/login',
+        (route) => false,
+      );
+    } finally {
+      _isLoggingOut = false;
     }
-
-    TokenManager.clear();
-
-    await SecureStorageService.clear();
-
-    navigatorKey.currentState?.pushNamedAndRemoveUntil(
-      '/login',
-      (route) => false,
-    );
   }
 }
