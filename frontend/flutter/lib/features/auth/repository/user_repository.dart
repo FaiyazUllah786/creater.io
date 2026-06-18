@@ -68,7 +68,7 @@ class UserRepository {
         'password': password,
       });
 
-      debugPrint("Login Response: ${res.data}");
+
 
       return ApiResponse.fromMap(
         res.data,
@@ -178,7 +178,7 @@ class UserRepository {
         'oldPassword': oldPassword,
         'newPassword': newPassword,
       });
-      debugPrint("change password Response: ${res.data}");
+
 
       return ApiResponse.fromMap(
         res.data,
@@ -213,7 +213,7 @@ class UserRepository {
   Future<ApiResponse?> getCurrentUser() async {
     try {
       final res = await dio.get('/user/current-user');
-      debugPrint("Current user Response: ${res.data}");
+
 
       return ApiResponse.fromMap(
         res.data,
@@ -263,7 +263,7 @@ class UserRepository {
         data: formData,
       );
 
-      debugPrint("Update profile photo Response: ${res.data}");
+
 
       return ApiResponse.fromMap(
         res.data,
@@ -305,7 +305,7 @@ class UserRepository {
         "lastName": lastName,
       });
 
-      debugPrint("Update user profile Response: ${res.data}");
+
 
       return ApiResponse.fromMap(
         res.data,
@@ -355,7 +355,7 @@ class UserRepository {
         "idToken": idToken,
       });
 
-      debugPrint("Current user response body: ${res.data}");
+
       return ApiResponse.fromMap(res.data);
     } on DioException catch (e, stackTrace) {
       debugPrint("Signin with google error: ${e.response?.data}");
@@ -405,7 +405,7 @@ class UserRepository {
         "code": code,
       });
 
-      debugPrint("Github user response body: ${res.data}");
+
       return ApiResponse.fromMap(res.data);
     } on DioException catch (e, stackTrace) {
       debugPrint("Signin with github error: ${e.response?.data}");

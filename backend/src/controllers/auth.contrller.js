@@ -24,7 +24,6 @@ export const githubCallbackHandler = asyncHandler(async (req, res) => {
       displayName,
       photos,
     } = githubProfile;
-    console.log(githubProfile);
 
     const email = `${githubId}@github.user`;
     const profilePhoto =
@@ -87,8 +86,6 @@ export const googleCallbackHandler = asyncHandler(async (req, res) => {
     }
 
     const { id: googleId, displayName, name, photos, emails } = googleProfile;
-    console.log(googleProfile);
-    console.log(googleId);
 
     const email = emails?.[0]?.value || `${googleId}@github.user`;
     const profilePhoto =
@@ -147,8 +144,6 @@ export const googleMobileAuthHandler = asyncHandler(async (req, res) => {
 
   const { idToken } = req.body;
 
-  console.log(req.body)
-
   if (!idToken) {
     throw new ApiError(400, "No tokens provided!");
   }
@@ -165,7 +160,6 @@ export const googleMobileAuthHandler = asyncHandler(async (req, res) => {
   }
 
   const { sub: googleId, name, givenName, familyName, picture, email } = googleProfile;
-  console.log(googleProfile);
 
   const profilePhoto =
     picture || "";
@@ -197,7 +191,6 @@ export const googleMobileAuthHandler = asyncHandler(async (req, res) => {
     "-password"
   );
 
-  console.log("User:", user);
   return res
     .status(200)
     .json(
@@ -236,7 +229,6 @@ export const githubMobileAuthHandler = asyncHandler(async (req, res) => {
     headers: { Authorization: `Bearer ${access_token}` },
   });
 
-  console.log(response?.data, '[------------]');
   const githubProfile = response?.data;
 
   if (!githubProfile) {
@@ -249,7 +241,6 @@ export const githubMobileAuthHandler = asyncHandler(async (req, res) => {
     name,
     avatar_url,
   } = githubProfile;
-  console.log(githubProfile);
 
   const email = `${githubId}@github.user`;
   const profilePhoto =
@@ -283,7 +274,6 @@ export const githubMobileAuthHandler = asyncHandler(async (req, res) => {
     "-password"
   );
 
-  console.log("User:", user);
   return res
     .status(200)
     .json(

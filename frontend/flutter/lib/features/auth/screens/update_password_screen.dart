@@ -148,7 +148,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                         } else if (confirm.length < 6) {
                           return 'Password must contain 6 or more characters';
                         } else if (confirm != newPass) {
-                          debugPrint("confirm='$confirm' | new='$newPass'");
+
                           return "Passwords must match";
                         }
                         return null;
