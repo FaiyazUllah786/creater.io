@@ -33,10 +33,6 @@ export const generateAccessRefreshToken = async (userId) => {
 
 export const verifyJWT = asyncHandler(async (req, _, next) => {
   try {
-    if (req.user) {
-      req._id = req.user._id;
-      return next();
-    }
 
     const token =
       req.cookies?.accessToken ||
