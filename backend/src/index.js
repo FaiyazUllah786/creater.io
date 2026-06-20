@@ -2,11 +2,15 @@ import { app } from "./app.js";
 import { connectDB } from "./db/db.js";
 import { connectRedis } from "./redis/redis.js";
 import { ApiError } from "./utils/ApiError.js";
+import { validateEnv } from "./utils/validateEnv.js";
 import dotenv from "dotenv";
 
 dotenv.config({
   path: ".env",
 });
+
+// Validate environment variables before doing anything else
+validateEnv();
 
 const startApp = async () => {
   try {
