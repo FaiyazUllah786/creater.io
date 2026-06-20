@@ -29,6 +29,7 @@ import userRouter from "./routes/user.routes.js";
 import imageRouter from "./routes/image.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import { generalLimiter } from "./middlewares/rateLimit.middleware.js";
+import healthRouter from "./routes/health.routes.js";
 
 app.use(generalLimiter);
 
@@ -38,4 +39,7 @@ app.use("/user", userRouter);
 app.use("/image", imageRouter);
 
 app.use("/auth", authRouter);
+
+app.use("/health", healthRouter);
+
 export { app };

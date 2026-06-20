@@ -109,13 +109,8 @@ export const saveTransformation = asyncHandler(async (req, res) => {
     throw new ApiError(422, "imagePublicId is required");
   }
 
-  let list = [];
-  try {
-    const redis = getRedisInstance();
-    list = await getCurrentList(redis, imagePublicId);
-  } catch (_redisErr) {
-    // Redis unavailable — proceed with empty list, returning plain URL
-  }
+  const redis = getRedisInstance();
+  const list = await getCurrentList(redis, imagePublicId);
 
   const finalUrl = await universalTransformation(imagePublicId, list);
 
