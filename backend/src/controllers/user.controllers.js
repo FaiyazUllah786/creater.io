@@ -14,6 +14,18 @@ export const registerUser = asyncHandler(async (req, res) => {
   if (!email || email.trim() === "") {
     throw new ApiError(422, "Email is required");
   }
+
+  // Basic email format validation and block reserved OAuth synthetic domains
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new ApiError(422, "Invalid email format");
+  }
+  const reservedDomains = ["github.user", "google.user"];
+  const emailDomain = email.split("@")[1]?.toLowerCase();
+  if (reservedDomains.includes(emailDomain)) {
+    throw new ApiError(422, "This email domain is not allowed for registration");
+  }
+
   if (!password || password.trim() === "") {
     throw new ApiError(422, "Password is required");
   }

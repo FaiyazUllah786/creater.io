@@ -87,7 +87,7 @@ export const googleCallbackHandler = asyncHandler(async (req, res) => {
 
     const { id: googleId, displayName, name, photos, emails } = googleProfile;
 
-    const email = emails?.[0]?.value || `${googleId}@github.user`;
+    const email = emails?.[0]?.value || `${googleId}@google.user`;
     const profilePhoto =
       photos?.[0]?.value || "https://www.gravatar.com/avatar/?d=mp&s=200";
     const firstName = name?.givenName || displayName?.split(" ")[0] || "";
