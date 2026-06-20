@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { accessTokenCookieOptions, refreshTokenCookieOptions } from "../utils/cookieOptions.js";
 import configurePassport from "../passport/auth.passport.js";
 
 const passport = configurePassport();
@@ -90,16 +91,10 @@ export const refreshAccessToken = async (req, res) => {
 
     const updatedUser = await User.findById(user._id).select("-password -refreshToken");
 
-    const opts = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    };
-
     return res
       .status(200)
-      .cookie("accessToken", accessToken, opts)
-      .cookie("refreshToken", refreshToken, opts)
+      .cookie("accessToken", accessToken, accessTokenCookieOptions)
+      .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
       .json(
         new ApiResponse(
           200,

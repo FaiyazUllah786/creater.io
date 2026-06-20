@@ -7,7 +7,7 @@ import { generateAccessRefreshToken } from "../middlewares/auth.middleware.js";
 import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
 import axios from "axios";
-import { cookieOptions } from "../utils/cookieOptions.js";
+import { accessTokenCookieOptions, refreshTokenCookieOptions } from "../utils/cookieOptions.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_ANDROID_CLIENT_ID);
 
@@ -52,8 +52,8 @@ export const githubCallbackHandler = asyncHandler(async (req, res) => {
 
     // Set cookies and redirect (no tokens in URL!)
     res
-      .cookie("accessToken", accessToken, cookieOptions)
-      .cookie("refreshToken", refreshToken, cookieOptions)
+      .cookie("accessToken", accessToken, accessTokenCookieOptions)
+      .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
       .redirect(`${process.env.CLIENT_URL}/`);
   } catch (error) {
     console.error("Error in GitHub callback:", error);
@@ -105,8 +105,8 @@ export const googleCallbackHandler = asyncHandler(async (req, res) => {
 
     // Set cookies and redirect (no tokens in URL!)
     res
-      .cookie("accessToken", accessToken, cookieOptions)
-      .cookie("refreshToken", refreshToken, cookieOptions)
+      .cookie("accessToken", accessToken, accessTokenCookieOptions)
+      .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
       .redirect(`${process.env.CLIENT_URL}/`);
   } catch (error) {
     console.error("Error in google callback:", error);

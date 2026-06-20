@@ -4,7 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../services/cloudinary/cloudinary.js";
 import { generateAccessRefreshToken } from "../middlewares/auth.middleware.js";
-import { cookieOptions } from "../utils/cookieOptions.js";
+import { cookieOptions, accessTokenCookieOptions, refreshTokenCookieOptions } from "../utils/cookieOptions.js";
 
 const validateEmailFormatAndDomain = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -104,8 +104,8 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .cookie("accessToken", accessToken, cookieOptions)
-    .cookie("refreshToken", refreshToken, cookieOptions)
+    .cookie("accessToken", accessToken, accessTokenCookieOptions)
+    .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
     .json(new ApiResponse(200, { user: loggedInUser, accessToken, refreshToken }, "Logged in successfully"));
 });
 
