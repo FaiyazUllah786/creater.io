@@ -49,8 +49,6 @@ export const githubCallbackHandler = asyncHandler(async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessRefreshToken(
       user._id
     );
-    user.refreshToken = refreshToken;
-    await user.save({ validateBeforeSave: false });
 
     // Set cookies and redirect (no tokens in URL!)
     res
@@ -104,8 +102,6 @@ export const googleCallbackHandler = asyncHandler(async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessRefreshToken(
       user._id
     );
-    user.refreshToken = refreshToken;
-    await user.save({ validateBeforeSave: false });
 
     // Set cookies and redirect (no tokens in URL!)
     res
@@ -171,8 +167,6 @@ export const googleMobileAuthHandler = asyncHandler(async (req, res) => {
   const { accessToken, refreshToken } = await generateAccessRefreshToken(
     user._id
   );
-  user.refreshToken = refreshToken;
-  await user.save({ validateBeforeSave: false });
 
   const userWithoutPass = await User.findById(user._id).select(
     "-password"
@@ -254,8 +248,6 @@ export const githubMobileAuthHandler = asyncHandler(async (req, res) => {
   const { accessToken, refreshToken } = await generateAccessRefreshToken(
     user._id
   );
-  user.refreshToken = refreshToken;
-  await user.save({ validateBeforeSave: false });
 
   const userWithoutPass = await User.findById(user._id).select(
     "-password"
