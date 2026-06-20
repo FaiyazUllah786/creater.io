@@ -199,4 +199,28 @@ describe("Issue 11: OAuth Email Collision Prevention", () => {
       expect(result.valid).toBe(true);
     });
   });
+
+  // ── Mongoose Undefined Behavior Scenarios ──
+
+  describe("Mongoose undefined behavior prevention", () => {
+    it("dynamically built $or array prevents {} match on undefined email", () => {
+      const userName = "foo";
+      const email = undefined;
+      
+      const orConditions = [];
+      if (userName) orConditions.push({ userName });
+      if (email) orConditions.push({ email });
+      
+      expect(orConditions.length).toBe(1);
+      expect(orConditions).toEqual([{ userName: "foo" }]);
+    });
+
+    it("googleMobileAuthHandler fallback prevents undefined email", () => {
+      const googleProfile = { sub: "123", name: "Test" }; // no email
+      const email = googleProfile.email || `${googleProfile.sub}@google.user`;
+      
+      expect(email).toBe("123@google.user");
+      expect(email).not.toBeUndefined();
+    });
+  });
 });

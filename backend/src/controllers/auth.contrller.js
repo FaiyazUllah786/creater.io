@@ -159,10 +159,10 @@ export const googleMobileAuthHandler = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Google profile not found!");
   }
 
-  const { sub: googleId, name, givenName, familyName, picture, email } = googleProfile;
+  const { sub: googleId, name, givenName, familyName, picture } = googleProfile;
+  const email = googleProfile.email || `${googleId}@google.user`;
 
-  const profilePhoto =
-    picture || "";
+  const profilePhoto = picture || "";
   const firstName = givenName || name?.split(" ")[0] || "";
   const lastName = familyName || name?.split(" ")[1] || "";
   let user = await User.findOne({ $or: [{ googleId }, { email }] });

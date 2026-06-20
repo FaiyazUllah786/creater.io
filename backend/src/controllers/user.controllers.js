@@ -5,6 +5,18 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../services/cloudinary/cloudinary.js";
 import { generateAccessRefreshToken } from "../middlewares/auth.middleware.js";
 
+const validateEmailFormatAndDomain = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new ApiError(422, "Invalid email format");
+  }
+  const reservedDomains = ["github.user", "google.user"];
+  const emailDomain = email.split("@")[1]?.toLowerCase();
+  if (reservedDomains.includes(emailDomain)) {
+    throw new ApiError(422, "This email domain is not allowed for registration");
+  }
+};
+
 export const registerUser = asyncHandler(async (req, res) => {
   const { userName, email, password, firstName, lastName } = req.body;
 
@@ -16,15 +28,7 @@ export const registerUser = asyncHandler(async (req, res) => {
   }
 
   // Basic email format validation and block reserved OAuth synthetic domains
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    throw new ApiError(422, "Invalid email format");
-  }
-  const reservedDomains = ["github.user", "google.user"];
-  const emailDomain = email.split("@")[1]?.toLowerCase();
-  if (reservedDomains.includes(emailDomain)) {
-    throw new ApiError(422, "This email domain is not allowed for registration");
-  }
+  validateEmailFormatAndDomain(email);
 
   if (!password || password.trim() === "") {
     throw new ApiError(422, "Password is required");
@@ -77,7 +81,13 @@ export const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(422, "Password is required");
   }
 
-  const existedUser = await User.findOne({ $or: [{ userName }, { email }] });
+  const orConditions = [];
+  if (userName) orConditions.push({ userName });
+  if (email) orConditions.push({ email });
+
+  const existedUser = await User.findOne({
+    $or: orConditions,
+  });
   if (!existedUser) {
     throw new ApiError(404, "No account found with the provided credentials");
   }
@@ -189,6 +199,7 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
   }
 
   if (email && email.trim() !== "") {
+    validateEmailFormatAndDomain(email);
     const existedEmail = await User.findOne({ email });
     if (existedEmail && existedEmail.email !== user.email) {
       throw new ApiError(409, "Email is already associated with another account");
