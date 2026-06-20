@@ -7,6 +7,7 @@ import { generateAccessRefreshToken } from "../middlewares/auth.middleware.js";
 import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
 import axios from "axios";
+import { cookieOptions } from "../utils/cookieOptions.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_ANDROID_CLIENT_ID);
 
@@ -51,17 +52,10 @@ export const githubCallbackHandler = asyncHandler(async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
 
-    // Cookie options (same as your local login)
-    const opts = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    };
-
     // Set cookies and redirect (no tokens in URL!)
     res
-      .cookie("accessToken", accessToken, opts)
-      .cookie("refreshToken", refreshToken, opts)
+      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("refreshToken", refreshToken, cookieOptions)
       .redirect(`${process.env.CLIENT_URL}/`);
   } catch (error) {
     console.error("Error in GitHub callback:", error);
@@ -113,17 +107,10 @@ export const googleCallbackHandler = asyncHandler(async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
 
-    // Cookie options (same as your local login)
-    const opts = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    };
-
     // Set cookies and redirect (no tokens in URL!)
     res
-      .cookie("accessToken", accessToken, opts)
-      .cookie("refreshToken", refreshToken, opts)
+      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("refreshToken", refreshToken, cookieOptions)
       .redirect(`${process.env.CLIENT_URL}/`);
   } catch (error) {
     console.error("Error in google callback:", error);

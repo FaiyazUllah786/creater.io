@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../services/cloudinary/cloudinary.js";
 import { generateAccessRefreshToken } from "../middlewares/auth.middleware.js";
+import { cookieOptions } from "../utils/cookieOptions.js";
 
 const validateEmailFormatAndDomain = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -101,16 +102,10 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   const loggedInUser = await User.findById(existedUser._id).select("-password -refreshToken");
 
-  const opts = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-  };
-
   return res
     .status(200)
-    .cookie("accessToken", accessToken, opts)
-    .cookie("refreshToken", refreshToken, opts)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
     .json(new ApiResponse(200, { user: loggedInUser, accessToken, refreshToken }, "Logged in successfully"));
 });
 
@@ -123,16 +118,10 @@ export const logoutUser = asyncHandler(async (req, res) => {
   user.refreshToken = null;
   await user.save({ validateBeforeSave: false });
 
-  const opts = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-  };
-
   return res
     .status(200)
-    .clearCookie("accessToken", opts)
-    .clearCookie("refreshToken", opts)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
     .json(new ApiResponse(200, {}, "Logged out successfully"));
 });
 
@@ -154,8 +143,8 @@ export const deleteUser = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .clearCookie("accessToken")
-    .clearCookie("refreshToken")
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
     .json(new ApiResponse(200, {}, "Account deleted successfully"));
 });
 
