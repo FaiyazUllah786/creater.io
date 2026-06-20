@@ -77,7 +77,7 @@ export const refreshAccessToken = async (req, res) => {
 
     const user = await User.findById(decodedData?._id);
     if (!user) {
-      throw new ApiError(404, "User not found");
+      throw new ApiError(401, "Refresh token is invalid or user no longer exists");
     }
 
     if (user.refreshToken !== incomingRefreshToken) {

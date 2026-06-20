@@ -75,12 +75,15 @@ class AuthInterceptor extends Interceptor {
 
       handler.next(options);
     } catch (e) {
-      await _logout();
+      if (_isAuthFailure(e)) {
+        await _logout();
+      }
 
       handler.reject(
         DioException(
           requestOptions: options,
-          error: 'Session expired',
+          error: e is DioException ? e.message : 'Session expired',
+          type: e is DioException ? e.type : DioExceptionType.unknown,
         ),
       );
     }
@@ -123,8 +126,13 @@ class AuthInterceptor extends Interceptor {
 
         return handler.resolve(response);
       } catch (e) {
-        await _logout();
+        if (_isAuthFailure(e)) {
+          await _logout();
+        }
 
+        if (e is DioException) {
+          return handler.next(e);
+        }
         return handler.next(err);
       }
     }
@@ -134,7 +142,7 @@ class AuthInterceptor extends Interceptor {
       _isRefreshing = true;
 
       _refreshCompleter = Completer<void>();
-      
+
       _refreshCompleter?.future.catchError((_) {});
 
       await _refreshToken();
@@ -151,8 +159,13 @@ class AuthInterceptor extends Interceptor {
         _refreshCompleter?.completeError(e);
       }
 
-      await _logout();
+      if (_isAuthFailure(e)) {
+        await _logout();
+      }
 
+      if (e is DioException) {
+        return handler.next(e);
+      }
       return handler.next(err);
     } finally {
       _isRefreshing = false;
@@ -228,7 +241,7 @@ class AuthInterceptor extends Interceptor {
       _isRefreshing = true;
 
       _refreshCompleter = Completer<void>();
-      
+
       _refreshCompleter?.future.catchError((_) {});
 
       await _refreshToken();
@@ -237,6 +250,10 @@ class AuthInterceptor extends Interceptor {
     } catch (e) {
       if (!(_refreshCompleter?.isCompleted ?? true)) {
         _refreshCompleter?.completeError(e);
+      }
+
+      if (_isAuthFailure(e)) {
+        await _logout();
       }
 
       rethrow;
@@ -305,5 +322,16 @@ class AuthInterceptor extends Interceptor {
     } finally {
       _isLoggingOut = false;
     }
+  }
+
+  bool _isAuthFailure(dynamic e) {
+    if (e is DioException) {
+      if (e.type == DioExceptionType.badResponse) {
+        final statusCode = e.response?.statusCode ?? 0;
+        return statusCode == 401 || statusCode == 403;
+      }
+      return false;
+    }
+    return true;
   }
 }

@@ -81,11 +81,23 @@ class AuthService {
         'Session restore failed: $e',
       );
 
-      await SecureStorageService.clear();
-
-      TokenManager.clear();
+      if (_isAuthFailure(e)) {
+        await SecureStorageService.clear();
+        TokenManager.clear();
+      }
 
       AuthBootstrap.completeError(e);
     }
+  }
+
+  static bool _isAuthFailure(dynamic e) {
+    if (e is DioException) {
+      if (e.type == DioExceptionType.badResponse) {
+        final statusCode = e.response?.statusCode ?? 0;
+        return statusCode == 401 || statusCode == 403;
+      }
+      return false;
+    }
+    return true;
   }
 }
