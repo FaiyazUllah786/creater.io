@@ -14,9 +14,8 @@ export const connectRedis = async () => {
     const redis = new Redis(process.env.REDIS_URL, {
       maxRetriesPerRequest: 1,
       retryStrategy(times) {
-        // Retry a few times on startup before failing, or during runtime to reconnect
-        if (times > 3) return null; // Stop retrying after 3 attempts
-        return Math.min(times * 50, 2000);
+        // Reconnect indefinitely with a max backoff of 3 seconds
+        return Math.min(times * 100, 3000);
       }
     });
 
