@@ -36,7 +36,7 @@ router.route("/auth/refresh-tokens").post(refreshLimiter, refreshAccessToken);
 router.route("/current-user").get(verifyJWT, getCurrentUser);
 
 //http://localhost:8000/user/delete-user
-router.route("/delete-user").post(verifyJWT, deleteUser);
+router.route("/delete-user").post(verifyJWT, authLimiter, deleteUser);
 
 //http://localhost:8000/user/profile-photo
 router
@@ -47,6 +47,6 @@ router
 router.route("/update-account").post(verifyJWT, updateUserProfile);
 
 //http://localhost:8000/user/update-password
-router.route("/update-password").post(verifyJWT, updatePassword);
+router.route("/update-password").post(verifyJWT, authLimiter, updatePassword);
 
 export default router;
