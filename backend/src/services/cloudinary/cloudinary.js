@@ -4,6 +4,24 @@ import fs from "fs";
 import { ApiError } from "../../utils/ApiError.js";
 
 //TODO:upload any file
+export const extractPublicId = (url) => {
+  if (!url) return null;
+  try {
+    const parts = url.split('/upload/');
+    if (parts.length < 2) return null;
+    const pathAndVersion = parts[1];
+    // Remove version (e.g. v123456789/) if present
+    const withoutVersion = pathAndVersion.replace(/^v\d+\//, '');
+    // Remove extension
+    const publicId = withoutVersion.includes('.') 
+      ? withoutVersion.substring(0, withoutVersion.lastIndexOf('.')) 
+      : withoutVersion;
+    return publicId;
+  } catch (err) {
+    return null;
+  }
+};
+
 export const uploadOnCloudinary = async (localFilePath) => {
   try {
     // const temp = await fetch(localFilePath);

@@ -2,7 +2,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../services/cloudinary/cloudinary.js";
+import { Image } from "../models/image.model.js";
+import { uploadOnCloudinary, deleteImageFromCloudinary, extractPublicId } from "../services/cloudinary/cloudinary.js";
 import { generateAccessRefreshToken } from "../middlewares/auth.middleware.js";
 import { cookieOptions, accessTokenCookieOptions, refreshTokenCookieOptions } from "../utils/cookieOptions.js";
 
@@ -139,6 +140,23 @@ export const deleteUser = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User not found");
   }
 
+  // Cloudinary Cleanup
+  const userImages = await Image.find({ author: req._id });
+  const deletePromises = userImages.map((img) => 
+    deleteImageFromCloudinary(img.publicId).catch((err) => console.error("Failed to delete orphaned image", err))
+  );
+  
+  if (user.profilePhoto) {
+    const profilePublicId = extractPublicId(user.profilePhoto);
+    if (profilePublicId) {
+      deletePromises.push(deleteImageFromCloudinary(profilePublicId).catch(() => null));
+    }
+  }
+  
+  await Promise.all(deletePromises);
+
+  // DB Cleanup
+  await Image.deleteMany({ author: req._id });
   await user.deleteOne();
 
   return res
@@ -157,6 +175,14 @@ export const updateUserProfilePhoto = asyncHandler(async (req, res) => {
   const uploadProfilePhotoRes = await uploadOnCloudinary(profilePhotoLocalPath);
   if (!uploadProfilePhotoRes) {
     throw new ApiError(502, "Failed to upload profile photo");
+  }
+
+  const currentUser = await User.findById(req._id);
+  if (currentUser && currentUser.profilePhoto) {
+    const oldPublicId = extractPublicId(currentUser.profilePhoto);
+    if (oldPublicId) {
+      await deleteImageFromCloudinary(oldPublicId).catch(() => null);
+    }
   }
 
   const user = await User.findByIdAndUpdate(

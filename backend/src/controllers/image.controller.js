@@ -117,6 +117,10 @@ export const deleteImage = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Image not found");
   }
 
+  if (image.author.toString() !== req._id.toString()) {
+    throw new ApiError(403, "You do not have permission to delete this image");
+  }
+
   await deleteImageFromCloudinary(image.publicId);
   await Image.findByIdAndDelete(imageId);
 
