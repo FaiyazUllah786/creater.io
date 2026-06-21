@@ -14,7 +14,7 @@ const validateEmailFormatAndDomain = (email) => {
   const reservedDomains = ["github.user", "google.user"];
   const emailDomain = email.split("@")[1]?.toLowerCase();
   if (reservedDomains.includes(emailDomain)) {
-    throw new ApiError(422, "This email domain is not allowed for registration");
+    throw new ApiError(422, "This email domain is not allowed");
   }
 };
 

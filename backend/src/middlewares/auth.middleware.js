@@ -43,9 +43,16 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
       throw new ApiError(401, "Access token is missing");
     }
 
-    const decodedData = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    if (!decodedData) {
-      throw new ApiError(401, "Invalid or expired access token");
+    let decodedData;
+    try {
+      decodedData = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, {
+        algorithms: ["HS256"],
+      });
+    } catch (error) {
+      throw new ApiError(
+        401,
+        error.name === "TokenExpiredError" ? "Access token expired" : "Invalid access token"
+      );
     }
 
     const user = await User.findById(decodedData._id).select("-password -refreshToken");
@@ -71,10 +78,19 @@ export const refreshAccessToken = async (req, res) => {
       throw new ApiError(401, "Refresh token is missing");
     }
 
-    const decodedData = jwt.verify(
-      incomingRefreshToken,
-      process.env.REFRESH_TOKEN_SECRET
-    );
+    let decodedData;
+    try {
+      decodedData = jwt.verify(
+        incomingRefreshToken,
+        process.env.REFRESH_TOKEN_SECRET,
+        { algorithms: ["HS256"] }
+      );
+    } catch (error) {
+      throw new ApiError(
+        401,
+        error.name === "TokenExpiredError" ? "Refresh token expired" : "Invalid refresh token"
+      );
+    }
 
     const user = await User.findById(decodedData?._id);
     if (!user) {
