@@ -4,6 +4,8 @@ import { ApiError } from "../../utils/ApiError.js";
 import { getRedisInstance } from "../../redis/redis.js";
 import { getCurrentList } from "../redisServices/transformation.js";
 
+const sanitize = (str) => typeof str === "string" ? str.replace(/[;,/\\]/g, "").trim() : "";
+
 export const generativeBackgroundReplace = async (imagePublicId, { prompt = "", id: effectId }) => {
   console.log("Prompt is here: ", prompt);
 
@@ -28,7 +30,7 @@ export const generativeBackgroundReplace = async (imagePublicId, { prompt = "", 
     };
   } else {
     effect = {
-      effect: `gen_background_replace:prompt_${prompt.trim()}`,
+      effect: `gen_background_replace:prompt_${sanitize(prompt)}`,
     };
   }
   const resUrl = cloudinary.url(imagePublicId, {
@@ -136,7 +138,7 @@ export const generativeObjectReplace = async (
   cloudinaryConfig();
 
   const effect = {
-    effect: `gen_replace:from_${itemToReplace.trim()};to_${replaceWith.trim()}`,
+    effect: `gen_replace:from_${sanitize(itemToReplace)};to_${sanitize(replaceWith)}`,
   };
   const resUrl = cloudinary.url(imagePublicId, {
     transformation: [...previousEffects, effect],
@@ -169,8 +171,8 @@ export const generativeObjectRemove = async (imagePublicId, { prompts = [], id: 
 
   const promptValue =
     prompts.length === 1
-      ? prompts[0].trim()
-      : `(${prompts.map((p) => p.trim()).join(";")})`;
+      ? sanitize(prompts[0])
+      : `(${prompts.map((p) => sanitize(p)).join(";")})`;
 
   const effect = { effect: `gen_remove:prompt_${promptValue}` };
   const resUrl = cloudinary.url(imagePublicId, {
@@ -239,10 +241,10 @@ export const generativeRecolor = async (imagePublicId, { prompts = [], color, id
 
   const promptValue =
     prompts.length === 1
-      ? prompts[0].trim()
-      : `(${prompts.map((p) => p.trim()).join(";")})`;
+      ? sanitize(prompts[0])
+      : `(${prompts.map((p) => sanitize(p)).join(";")})`;
 
-  const effect = { effect: `gen_recolor:prompt_${promptValue};to-color_rgb:${hexColor};multiple_true` };
+  const effect = { effect: `gen_recolor:prompt_${promptValue};to-color_rgb:${sanitize(hexColor)};multiple_true` };
   const resUrl = cloudinary.url(imagePublicId, {
     transformation: [...previousEffects, effect],
   });
@@ -328,8 +330,8 @@ export const contentExtraction = async (imagePublicId, { prompts = [], id: effec
 
   const promptValue =
     prompts.length === 1
-      ? prompts[0].trim()
-      : `(${prompts.map((p) => p.trim()).join(";")})`;
+      ? sanitize(prompts[0])
+      : `(${prompts.map((p) => sanitize(p)).join(";")})`;
 
   const effect = { effect: `extract:prompt_${promptValue};mode_content;multiple_true;preserve-alpha_true` };
   const resUrl = cloudinary.url(imagePublicId, {

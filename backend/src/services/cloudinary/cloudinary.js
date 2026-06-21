@@ -14,7 +14,8 @@ export const uploadOnCloudinary = async (localFilePath) => {
     }
     const uploadResponse = await cloudinary.uploader.upload(localFilePath, {
       upload_preset: "creater.io",
-      resource_type: "auto",
+      resource_type: "image",
+      allowed_formats: ["jpg", "png", "webp", "jpeg"],
     });
     console.log(uploadResponse);
     return uploadResponse;

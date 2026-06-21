@@ -68,6 +68,15 @@ export const saveImageToDatabase = asyncHandler(async (req, res) => {
     throw new ApiError(422, "Image URL is required");
   }
 
+  try {
+    const parsedUrl = new URL(imageUrl);
+    if (parsedUrl.protocol !== "https:" || parsedUrl.hostname !== "res.cloudinary.com") {
+      throw new Error("unauthorized");
+    }
+  } catch (error) {
+    throw new ApiError(422, "Invalid image URL format or unauthorized domain");
+  }
+
   const urlCheck = await fetch(imageUrl).catch(() => null);
   if (!urlCheck || urlCheck.status !== 200) {
     throw new ApiError(422, "Provided image URL is not accessible");
