@@ -12,9 +12,26 @@ app.set("trust proxy", 1);
 
 app.use(cookieParser());
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.CLIENT_URL,
+  ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",") : []),
+]
+  .filter(Boolean)
+  .map((url) => url.trim().replace(/\/$/, "")); // Normalize origins by removing trailing slashes
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, or server-to-server)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
