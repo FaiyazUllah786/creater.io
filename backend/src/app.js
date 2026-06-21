@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
+import helmet from "helmet";
 
 //import dotenv here cause index.js execute app module first without env
 dotenv.config();
@@ -9,6 +10,13 @@ dotenv.config();
 const app = express();
 
 app.set("trust proxy", 1);
+
+// Configure HTTP security headers
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 
 app.use(cookieParser());
 
