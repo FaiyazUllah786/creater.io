@@ -1,7 +1,7 @@
 import 'package:creatorio/common/navigator_key.dart';
 import 'package:creatorio/common/theme/colors.dart';
 import 'package:creatorio/common/widgets/app_snackbar.dart';
-import 'package:creatorio/features/auth/controller/user_controller.dart';
+import 'package:creatorio/features/auth/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -27,13 +27,13 @@ class _SingUpState extends State<LoginScreen> {
     });
   }
 
-  late UserController userController;
+  late AuthController userController;
 
   void _login() async {
     FocusManager.instance.primaryFocus?.unfocus();
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final userController = context.read<UserController>();
+      final userController = context.read<AuthController>();
       final success = await userController.loginUser(_email, _password);
       if (!mounted) return;
 
@@ -54,7 +54,7 @@ class _SingUpState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userController = context.watch<UserController>();
+    final userController = context.watch<AuthController>();
 
     final textTheme = Theme.of(context).textTheme;
 

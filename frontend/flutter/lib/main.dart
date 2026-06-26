@@ -3,14 +3,15 @@ import 'package:creatorio/common/navigator_key.dart';
 import 'package:creatorio/common/theme/app_theme.dart';
 import 'package:creatorio/common/theme/theme_provider.dart';
 import 'package:creatorio/core/network/dio_client.dart';
-import 'package:creatorio/features/Image/controller/image_controller.dart';
+import 'package:creatorio/features/image/controller/image_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '/common/provider/unsplash_provider.dart';
-import '/features/auth/controller/user_controller.dart';
+import '/features/auth/controller/auth_controller.dart';
+import '/features/auth/controller/profile_controller.dart';
 import '/router.dart';
 
 Future<void> main() async {
@@ -44,7 +45,8 @@ class MyApp extends StatelessWidget {
     final themeProvider = context.watch<ThemeProvider>();
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => UserController()),
+        ChangeNotifierProvider(create: (context) => AuthController()),
+        ChangeNotifierProvider(create: (context) => ProfileController()),
         ChangeNotifierProvider(create: (context) => UnsplashProvider()),
         ChangeNotifierProvider(create: (context) => ImageController()),
       ],

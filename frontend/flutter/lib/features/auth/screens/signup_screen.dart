@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:creatorio/common/navigator_key.dart';
 import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/app_snackbar.dart';
-import 'package:creatorio/features/auth/controller/user_controller.dart';
+import 'package:creatorio/features/auth/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
@@ -43,7 +43,7 @@ class _SingUpState extends State<SignupScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final userController = context.read<UserController>();
+      final userController = context.read<AuthController>();
       final success = await userController.registerUser(
           _userName, _email, _password, _profilePhoto);
       if (!mounted) return;
@@ -111,7 +111,7 @@ class _SingUpState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userController = context.watch<UserController>();
+    final userController = context.watch<AuthController>();
 
     final textTheme = Theme.of(context).textTheme;
 

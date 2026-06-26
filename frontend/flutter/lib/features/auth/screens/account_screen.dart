@@ -5,7 +5,8 @@ import 'package:creatorio/common/theme/colors.dart';
 import 'package:creatorio/common/theme/theme_provider.dart';
 import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/source_sheet.dart';
-import 'package:creatorio/features/auth/controller/user_controller.dart';
+import 'package:creatorio/features/auth/controller/auth_controller.dart';
+import 'package:creatorio/features/auth/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,7 @@ class AccountScreenState extends State<AccountScreen> {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
-        return Consumer<UserController>(
+        return Consumer<AuthController>(
           builder: (context, userController, _) => Dialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
@@ -74,6 +75,7 @@ class AccountScreenState extends State<AccountScreen> {
                               : () async {
                                   final success = await userController.logout();
                                   if (!mounted) return;
+                                  context.read<ProfileController>().clearProfile();
                                   handleMessage(context, userController);
                                   if (success) {
                                     Navigator.pushNamedAndRemoveUntil(
@@ -115,7 +117,7 @@ class AccountScreenState extends State<AccountScreen> {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
-        return Consumer<UserController>(
+        return Consumer<ProfileController>(
           builder: (context, userController, _) =>
               StatefulBuilder(builder: (context, setState) {
             return Dialog(
@@ -404,7 +406,7 @@ class AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final userController = context.watch<UserController>();
+    final userController = context.watch<ProfileController>();
     final userInfo = userController.userInfo;
     final photo = userInfo?.profilePhoto;
 

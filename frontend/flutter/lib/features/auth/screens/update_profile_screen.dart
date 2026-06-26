@@ -1,5 +1,5 @@
 import 'package:creatorio/common/utils.dart';
-import 'package:creatorio/features/auth/controller/user_controller.dart';
+import 'package:creatorio/features/auth/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -26,7 +26,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final userController = context.read<UserController>();
+      final userController = context.read<ProfileController>();
       final success = await userController.updateUserProfile(
           _email, _userName, _firstName, _lastName);
       if (!mounted) return;
@@ -44,7 +44,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
           "Update Profile",
         ),
       ),
-      body: Consumer<UserController>(builder: (context, userProvider, child) {
+      body: Consumer<ProfileController>(builder: (context, userProvider, child) {
         if (userProvider.userInfo == null) {
           return const Center(
             child: Text("User data not found!"),

@@ -1,5 +1,5 @@
 import 'package:creatorio/common/utils.dart';
-import 'package:creatorio/features/auth/controller/user_controller.dart';
+import 'package:creatorio/features/auth/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -28,7 +28,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final userController = context.read<UserController>();
+      final userController = context.read<ProfileController>();
       final success =
           await userController.changePassword(_oldPassword, _newPassword);
       debugPrint("_changeUserPassword: $success");
@@ -46,7 +46,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
           "Update Password",
         ),
       ),
-      body: Consumer<UserController>(builder: (context, userProvider, child) {
+      body: Consumer<ProfileController>(builder: (context, userProvider, child) {
         if (userProvider.userInfo == null) {
           return const Center(
             child: Text("User data not found!"),
