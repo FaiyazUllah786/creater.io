@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:creatorio/core/config/app_config.dart';
 import 'package:unsplash_client/unsplash_client.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -15,8 +15,8 @@ class UnsplashProvider extends ChangeNotifier {
       settings: ClientSettings(
         debug: true,
         credentials: AppCredentials(
-          accessKey: dotenv.env['UNSPLASH_ACCESS_KEY'] ?? '',
-          secretKey: dotenv.env['UNSPLASH_SECRET_KEY'] ?? '',
+          accessKey: AppConfig.unsplashAccessKey,
+          secretKey: AppConfig.unsplashSecretKey,
         ),
       ),
     );

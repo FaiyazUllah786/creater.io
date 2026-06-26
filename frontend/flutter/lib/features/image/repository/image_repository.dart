@@ -39,6 +39,7 @@ class ImageRepository implements IImageRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   Future<ApiResponse?> getImages() async {
     try {
@@ -49,6 +50,7 @@ class ImageRepository implements IImageRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   Future<ApiResponse?> deleteImage(String imageId) async {
     try {
@@ -64,6 +66,7 @@ class ImageRepository implements IImageRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   Future<ApiResponse?> saveImage(String imageUrl) async {
     try {
@@ -79,6 +82,7 @@ class ImageRepository implements IImageRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   Future<ApiResponse?> addTransformation(
       String imagePublicId, Map<String, dynamic> transformation) async {
@@ -96,6 +100,7 @@ class ImageRepository implements IImageRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   Future<ApiResponse?> updateTransformation(String imagePublicId,
       Map<String, dynamic> transformation, String transformationId) async {
@@ -111,6 +116,7 @@ class ImageRepository implements IImageRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   Future<ApiResponse?> deleteTransformation(
       String imagePublicId, String transformationId) async {
@@ -125,6 +131,7 @@ class ImageRepository implements IImageRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   Future<ApiResponse?> clearTransformation(String imagePublicId) async {
     try {
@@ -137,6 +144,7 @@ class ImageRepository implements IImageRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   Future<ApiResponse?> saveTransformation(
       {required String imagePublicId}) async {

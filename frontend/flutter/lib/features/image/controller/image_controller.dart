@@ -7,7 +7,6 @@ import 'package:creatorio/features/image/repository/image_repository.dart';
 import 'package:creatorio/features/image/repository/i_image_repository.dart';
 import 'package:creatorio/model/image_model.dart';
 
-
 enum ImageLoadingState {
   idle,
   uploading,

@@ -31,12 +31,12 @@ class TokenManager {
   }
 
   static bool hasValidAccessToken() {
-  if (_accessToken == null) {
-    return false;
-  }
+    if (_accessToken == null) {
+      return false;
+    }
 
-  return !JwtDecoder.isExpired(
-    _accessToken!,
-  );
-}
+    return !JwtDecoder.isExpired(
+      _accessToken!,
+    );
+  }
 }

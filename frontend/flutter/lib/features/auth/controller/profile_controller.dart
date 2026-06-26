@@ -11,7 +11,7 @@ import 'package:creatorio/model/user_model.dart';
 class ProfileController extends ChangeNotifier {
   final IUserRepository _userRepository;
 
-  ProfileController({IUserRepository? userRepository}) 
+  ProfileController({IUserRepository? userRepository})
       : _userRepository = userRepository ?? UserRepository();
 
   bool _isLoading = false;
@@ -29,7 +29,7 @@ class ProfileController extends ChangeNotifier {
   void clearMessage() {
     _message = null;
   }
-  
+
   void clearProfile() {
     _userInfo = null;
     notifyListeners();
@@ -43,7 +43,8 @@ class ProfileController extends ChangeNotifier {
 
       final data = await _userRepository.deleteAccount();
       if (data == null) {
-        _message = Message("Delete account request failed. Please try again.", MessageType.error);
+        _message = Message("Delete account request failed. Please try again.",
+            MessageType.error);
         return false;
       }
       TokenManager.clear();
@@ -72,9 +73,11 @@ class ProfileController extends ChangeNotifier {
         _message = Message("Passwords are required", MessageType.info);
         return false;
       }
-      final res = await _userRepository.changePassword(oldPassword, newPassword);
+      final res =
+          await _userRepository.changePassword(oldPassword, newPassword);
       if (res == null) {
-        _message = Message("Change password request failed. Please try again.", MessageType.error);
+        _message = Message("Change password request failed. Please try again.",
+            MessageType.error);
         return false;
       }
       _message = Message("Password updated successfully", MessageType.success);
@@ -95,7 +98,8 @@ class ProfileController extends ChangeNotifier {
       notifyListeners();
       final res = await _userRepository.getCurrentUser();
       if (res == null) {
-        _message = Message("User data not found. Please try again.", MessageType.error);
+        _message = Message(
+            "User data not found. Please try again.", MessageType.error);
         return;
       }
       final user = UserModel.fromMap(res.data);
@@ -121,7 +125,8 @@ class ProfileController extends ChangeNotifier {
       }
       final res = await _userRepository.updateProfilePhoto(profilePhoto);
       if (res == null) {
-        _message = Message("Change avatar request failed. Please try again.", MessageType.error);
+        _message = Message("Change avatar request failed. Please try again.",
+            MessageType.error);
         return false;
       }
       final user = UserModel.fromMap(res.data);
@@ -138,17 +143,21 @@ class ProfileController extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateUserProfile(String email, String userName, String firstName, String lastName) async {
+  Future<bool> updateUserProfile(
+      String email, String userName, String firstName, String lastName) async {
     try {
       _isLoading = true;
       _message = null;
       notifyListeners();
-      final res = await _userRepository.updateUserProfile(email, userName, firstName, lastName);
+      final res = await _userRepository.updateUserProfile(
+          email, userName, firstName, lastName);
       if (res == null) {
-        _message = Message("Profile update request failed. Please try again.", MessageType.error);
+        _message = Message("Profile update request failed. Please try again.",
+            MessageType.error);
         return false;
       }
-      _message = Message("User profile successfully updated", MessageType.success);
+      _message =
+          Message("User profile successfully updated", MessageType.success);
       final user = UserModel.fromMap(res.data);
       _userInfo = user;
       await SecureStorageService.saveUser(user);

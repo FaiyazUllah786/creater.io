@@ -27,8 +27,7 @@ class ThemeProvider extends ChangeNotifier {
   Future<void> loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final savedTheme =
-        prefs.getString(themeKey) ?? ThemeMode.system.name;
+    final savedTheme = prefs.getString(themeKey) ?? ThemeMode.system.name;
 
     _themeMode = ThemeMode.values.firstWhere(
       (element) => element.name == savedTheme,

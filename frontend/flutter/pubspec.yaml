@@ -52,7 +52,6 @@ dependencies:
   dio: ^5.7.0
   cached_video_player_plus: ^4.1.0
   share_plus: ^12.0.1
-  flutter_dotenv: ^6.0.0
   flutter_svg: ^2.2.4
   google_sign_in: ^7.2.0
   flutter_web_auth_2: ^5.0.1
@@ -87,7 +86,6 @@ flutter:
     - assets/
     - assets/icons/
     - assets/anim/
-    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

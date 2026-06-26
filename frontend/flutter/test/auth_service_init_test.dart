@@ -94,7 +94,8 @@ void main() {
       expect(TokenManager.hasValidAccessToken(), isTrue);
     });
 
-    test('near-expiry token (<2min remaining): shouldRefresh=true, hasValid=true',
+    test(
+        'near-expiry token (<2min remaining): shouldRefresh=true, hasValid=true',
         () async {
       final token = _createTestJwt(
         expiry: DateTime.now().add(const Duration(seconds: 90)),
@@ -120,7 +121,9 @@ void main() {
   // ===========================================================================
   // UNIT TESTS: The bug vs the fix — decision logic
   // ===========================================================================
-  group('initializeAuth decision logic — shouldRefreshToken vs hasValidAccessToken', () {
+  group(
+      'initializeAuth decision logic — shouldRefreshToken vs hasValidAccessToken',
+      () {
     // These tests simulate the decision point in initializeAuth() without
     // actually calling the network. They verify that the correct method
     // produces the correct "should we skip the refresh?" decision.
@@ -140,7 +143,8 @@ void main() {
           reason: 'Bug: valid token does NOT trigger early return');
     });
 
-    test('BUG: shouldRefreshToken() early-returns for near-expiry tokens (wrong)',
+    test(
+        'BUG: shouldRefreshToken() early-returns for near-expiry tokens (wrong)',
         () async {
       // Near-expiry token → shouldRefreshToken() = true
       // Buggy code: if (shouldRefreshToken()) return; → RETURNS
@@ -152,7 +156,8 @@ void main() {
 
       final buggySkipRefresh = TokenManager.shouldRefreshToken();
       expect(buggySkipRefresh, isTrue,
-          reason: 'Bug: near-expiry token DOES trigger early return, skipping refresh');
+          reason:
+              'Bug: near-expiry token DOES trigger early return, skipping refresh');
     });
 
     test('BUG: shouldRefreshToken() early-returns for expired tokens (wrong)',
@@ -167,7 +172,8 @@ void main() {
 
       final buggySkipRefresh = TokenManager.shouldRefreshToken();
       expect(buggySkipRefresh, isTrue,
-          reason: 'Bug: expired token DOES trigger early return, skipping refresh');
+          reason:
+              'Bug: expired token DOES trigger early return, skipping refresh');
     });
 
     test('FIX: hasValidAccessToken() correctly skips refresh for valid tokens',
@@ -179,10 +185,12 @@ void main() {
 
       final fixedSkipRefresh = TokenManager.hasValidAccessToken();
       expect(fixedSkipRefresh, isTrue,
-          reason: 'Fix: valid token triggers early return, no network call needed');
+          reason:
+              'Fix: valid token triggers early return, no network call needed');
     });
 
-    test('FIX: hasValidAccessToken() correctly falls through for expired tokens',
+    test(
+        'FIX: hasValidAccessToken() correctly falls through for expired tokens',
         () async {
       final token = _createTestJwt(
         expiry: DateTime.now().subtract(const Duration(minutes: 10)),
@@ -191,7 +199,8 @@ void main() {
 
       final fixedSkipRefresh = TokenManager.hasValidAccessToken();
       expect(fixedSkipRefresh, isFalse,
-          reason: 'Fix: expired token does NOT trigger early return, refresh proceeds');
+          reason:
+              'Fix: expired token does NOT trigger early return, refresh proceeds');
     });
 
     test('FIX: hasValidAccessToken() correctly falls through for null token',
@@ -199,10 +208,12 @@ void main() {
       // No token → hasValidAccessToken() = false → fall through to refresh
       final fixedSkipRefresh = TokenManager.hasValidAccessToken();
       expect(fixedSkipRefresh, isFalse,
-          reason: 'Fix: null token does NOT trigger early return, refresh proceeds');
+          reason:
+              'Fix: null token does NOT trigger early return, refresh proceeds');
     });
 
-    test('EDGE CASE: near-expiry token (<2min) — hasValidAccessToken() returns true',
+    test(
+        'EDGE CASE: near-expiry token (<2min) — hasValidAccessToken() returns true',
         () async {
       // Near-expiry: hasValidAccessToken() = true → early return → skip refresh
       // This is ACCEPTABLE: the interceptor's proactive refresh (line 64)
@@ -214,7 +225,8 @@ void main() {
 
       final fixedSkipRefresh = TokenManager.hasValidAccessToken();
       expect(fixedSkipRefresh, isTrue,
-          reason: 'Near-expiry token skips startup refresh — interceptor handles it');
+          reason:
+              'Near-expiry token skips startup refresh — interceptor handles it');
     });
   });
 

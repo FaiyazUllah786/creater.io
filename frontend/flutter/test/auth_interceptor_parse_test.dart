@@ -61,7 +61,7 @@ void main() {
       };
 
       final resMap = ApiResponse.fromMap(malformedResponse);
-      
+
       expect(resMap.data['accessToken'], equals('only_access_token'));
       expect(resMap.data['refreshToken'], isNull);
     });

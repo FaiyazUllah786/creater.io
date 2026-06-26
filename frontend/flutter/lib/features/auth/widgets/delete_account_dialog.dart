@@ -13,7 +13,8 @@ class DeleteAccountDialog extends StatefulWidget {
 }
 
 class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
-  final TextEditingController _confirmEditingController = TextEditingController();
+  final TextEditingController _confirmEditingController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -102,14 +103,19 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                         foregroundColor: whiteColor,
                         backgroundColor: redColor,
                       ),
-                      onPressed: _confirmEditingController.text.trim().toLowerCase() != 'confirm'
+                      onPressed: _confirmEditingController.text
+                                  .trim()
+                                  .toLowerCase() !=
+                              'confirm'
                           ? null
                           : userController.isLoading
                               ? () {}
                               : () async {
                                   FocusManager.instance.primaryFocus?.unfocus();
-                                  await Future.delayed(const Duration(milliseconds: 100));
-                                  final success = await userController.deleteAccount();
+                                  await Future.delayed(
+                                      const Duration(milliseconds: 100));
+                                  final success =
+                                      await userController.deleteAccount();
                                   if (!mounted) return;
                                   handleMessage(context, userController);
                                   if (success) {

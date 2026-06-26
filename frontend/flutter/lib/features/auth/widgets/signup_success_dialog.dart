@@ -42,7 +42,8 @@ class SignupSuccessDialog extends StatelessWidget {
                   foregroundColor: whiteColor,
                   backgroundColor: blackColor,
                 ),
-                onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, '/login'),
                 child: const Text("Login to get started")),
           ],
         ),

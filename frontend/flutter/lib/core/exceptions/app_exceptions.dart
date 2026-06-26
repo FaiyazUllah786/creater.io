@@ -17,7 +17,8 @@ class NetworkException extends AppException {
 
 class ServerException extends AppException {
   final int statusCode;
-  ServerException(this.statusCode, [String message = "Server returned an error."])
+  ServerException(this.statusCode,
+      [String message = "Server returned an error."])
       : super(message, "Server Error");
 }
 

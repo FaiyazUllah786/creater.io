@@ -37,14 +37,14 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           "Update Profile",
         ),
       ),
-      body: Consumer<ProfileController>(builder: (context, userProvider, child) {
+      body:
+          Consumer<ProfileController>(builder: (context, userProvider, child) {
         if (userProvider.userInfo == null) {
           return const Center(
             child: Text("User data not found!"),

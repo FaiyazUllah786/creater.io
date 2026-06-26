@@ -46,7 +46,8 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
           "Update Password",
         ),
       ),
-      body: Consumer<ProfileController>(builder: (context, userProvider, child) {
+      body:
+          Consumer<ProfileController>(builder: (context, userProvider, child) {
         if (userProvider.userInfo == null) {
           return const Center(
             child: Text("User data not found!"),
@@ -148,7 +149,6 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                         } else if (confirm.length < 6) {
                           return 'Password must contain 6 or more characters';
                         } else if (confirm != newPass) {
-
                           return "Passwords must match";
                         }
                         return null;

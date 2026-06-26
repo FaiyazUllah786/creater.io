@@ -107,7 +107,7 @@ class _ImageEditorState extends State<ImageEditor> {
       canPop: !imageController.hasUnsavedChanges,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        
+
         if (imageController.hasUnsavedChanges) {
           final exit = await _showExitConfirmationDialog();
           if (exit == true) {

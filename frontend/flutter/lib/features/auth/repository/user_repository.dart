@@ -1,7 +1,7 @@
 import 'package:creatorio/core/network/dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:creatorio/core/config/app_config.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 import 'package:creatorio/core/models/api_error.dart';
@@ -43,6 +43,7 @@ class UserRepository implements IUserRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   @override
   Future<ApiResponse?> loginUser(String email, String password) async {
@@ -52,8 +53,6 @@ class UserRepository implements IUserRepository {
         'password': password,
       });
 
-
-
       return ApiResponse.fromMap(
         res.data,
       );
@@ -61,6 +60,7 @@ class UserRepository implements IUserRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   @override
   Future<ApiResponse?> logout() async {
@@ -75,6 +75,7 @@ class UserRepository implements IUserRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   @override
   Future<ApiResponse?> deleteAccount() async {
@@ -90,6 +91,7 @@ class UserRepository implements IUserRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   @override
   Future<ApiResponse?> changePassword(
@@ -100,7 +102,6 @@ class UserRepository implements IUserRepository {
         'newPassword': newPassword,
       });
 
-
       return ApiResponse.fromMap(
         res.data,
       );
@@ -108,13 +109,13 @@ class UserRepository implements IUserRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   @override
   Future<ApiResponse?> getCurrentUser() async {
     try {
       final res = await dio.get('/user/current-user');
 
-
       return ApiResponse.fromMap(
         res.data,
       );
@@ -122,6 +123,7 @@ class UserRepository implements IUserRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   @override
   Future<ApiResponse?> updateProfilePhoto(String profilePhoto) async {
@@ -142,8 +144,6 @@ class UserRepository implements IUserRepository {
         data: formData,
       );
 
-
-
       return ApiResponse.fromMap(
         res.data,
       );
@@ -151,6 +151,7 @@ class UserRepository implements IUserRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   @override
   Future<ApiResponse?> updateUserProfile(
@@ -163,8 +164,6 @@ class UserRepository implements IUserRepository {
         "lastName": lastName,
       });
 
-
-
       return ApiResponse.fromMap(
         res.data,
       );
@@ -172,6 +171,7 @@ class UserRepository implements IUserRepository {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   @override
   Future<ApiResponse?> signInWithGoogle() async {
@@ -192,17 +192,17 @@ class UserRepository implements IUserRepository {
         "idToken": idToken,
       });
 
-
       return ApiResponse.fromMap(res.data);
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
   }
+
   @override
   @override
   Future<ApiResponse?> signInWithGithub() async {
     try {
-      final clientId = dotenv.env['GITHUB_CLIENT_ID'] ?? '';
+      final clientId = AppConfig.githubClientId;
 
       final result = await FlutterWebAuth2.authenticate(
         url: "https://github.com/login/oauth/authorize"
@@ -220,7 +220,6 @@ class UserRepository implements IUserRepository {
       final res = await dio.post('/auth/github/mobile', data: {
         "code": code,
       });
-
 
       return ApiResponse.fromMap(res.data);
     } catch (e, stackTrace) {

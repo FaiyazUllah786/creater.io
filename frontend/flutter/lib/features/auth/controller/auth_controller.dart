@@ -10,7 +10,7 @@ import 'package:creatorio/features/auth/repository/user_repository.dart';
 class AuthController extends ChangeNotifier {
   final IUserRepository _userRepository;
 
-  AuthController({IUserRepository? userRepository}) 
+  AuthController({IUserRepository? userRepository})
       : _userRepository = userRepository ?? UserRepository();
 
   bool _isLoading = false;
@@ -29,7 +29,8 @@ class AuthController extends ChangeNotifier {
     _message = null;
   }
 
-  Future<bool> registerUser(String userName, String email, String password, String profilePhoto) async {
+  Future<bool> registerUser(String userName, String email, String password,
+      String profilePhoto) async {
     try {
       _message = null;
       _isLoading = true;
@@ -44,9 +45,11 @@ class AuthController extends ChangeNotifier {
         return false;
       }
 
-      final res = await _userRepository.registerUser(userName, email, password, profilePhoto);
+      final res = await _userRepository.registerUser(
+          userName, email, password, profilePhoto);
       if (res == null) {
-        _message = Message("Registration failed. Please try again.", MessageType.error);
+        _message = Message(
+            "Registration failed. Please try again.", MessageType.error);
         return false;
       }
       return true;
@@ -54,7 +57,8 @@ class AuthController extends ChangeNotifier {
       _message = Message(e.message, MessageType.error);
       return false;
     } catch (e) {
-      _message = Message("Unexpected error during registration", MessageType.error);
+      _message =
+          Message("Unexpected error during registration", MessageType.error);
       return false;
     } finally {
       _isLoading = false;
@@ -76,7 +80,8 @@ class AuthController extends ChangeNotifier {
       }
       final res = await _userRepository.loginUser(email, password);
       if (res == null) {
-        _message = Message("Login failed. Please try again.", MessageType.error);
+        _message =
+            Message("Login failed. Please try again.", MessageType.error);
         return false;
       }
       final accessToken = res.data['accessToken'];
@@ -109,7 +114,8 @@ class AuthController extends ChangeNotifier {
 
       final data = await _userRepository.logout();
       if (data == null) {
-        _message = Message("Logout request failed. Please try again.", MessageType.error);
+        _message = Message(
+            "Logout request failed. Please try again.", MessageType.error);
         return false;
       }
       TokenManager.clear();
@@ -130,7 +136,7 @@ class AuthController extends ChangeNotifier {
       _googleLoading = true;
       _message = null;
       notifyListeners();
-      
+
       final res = await _userRepository.signInWithGoogle();
       if (res == null) {
         _message = Message("Google sign-in failed.", MessageType.error);
@@ -152,7 +158,8 @@ class AuthController extends ChangeNotifier {
       _message = Message(e.message, MessageType.error);
       return false;
     } catch (e) {
-      _message = Message("Something went wrong. Please try again.", MessageType.error);
+      _message =
+          Message("Something went wrong. Please try again.", MessageType.error);
       return false;
     } finally {
       _googleLoading = false;
@@ -187,7 +194,8 @@ class AuthController extends ChangeNotifier {
       _message = Message(e.message, MessageType.error);
       return false;
     } catch (e) {
-      _message = Message("Something went wrong. Please try again.", MessageType.error);
+      _message =
+          Message("Something went wrong. Please try again.", MessageType.error);
       return false;
     } finally {
       _githubLoading = false;

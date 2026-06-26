@@ -24,7 +24,6 @@ class AccountScreen extends StatefulWidget {
 }
 
 class AccountScreenState extends State<AccountScreen> {
-  
   void _logout() async {
     await showAdaptiveDialog<bool>(
       context: context,
@@ -32,6 +31,7 @@ class AccountScreenState extends State<AccountScreen> {
       builder: (dialogContext) => const LogoutDialog(),
     );
   }
+
   void _deleteAccount() async {
     await showAdaptiveDialog<bool>(
       context: context,
@@ -67,10 +67,10 @@ class AccountScreenState extends State<AccountScreen> {
       builder: (_) => const ThemeSelectionDialog(),
     );
   }
+
   @override
   void dispose() {
     super.dispose();
-    
   }
 
   @override
