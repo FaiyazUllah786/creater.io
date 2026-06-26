@@ -2,14 +2,16 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:creatorio/common/theme/colors.dart';
-import 'package:creatorio/common/theme/theme_provider.dart';
 import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/source_sheet.dart';
-import 'package:creatorio/features/auth/controller/auth_controller.dart';
+
 import 'package:creatorio/features/auth/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
+
 import 'package:provider/provider.dart';
+import 'package:creatorio/features/auth/widgets/logout_dialog.dart';
+import 'package:creatorio/features/auth/widgets/delete_account_dialog.dart';
+import 'package:creatorio/common/widgets/theme_selection_dialog.dart';
 import 'package:image_cropper/image_cropper.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -22,242 +24,20 @@ class AccountScreen extends StatefulWidget {
 }
 
 class AccountScreenState extends State<AccountScreen> {
-  final TextEditingController _cofirmEditingController =
-      TextEditingController();
+  
   void _logout() async {
     await showAdaptiveDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) {
-        return Consumer<AuthController>(
-          builder: (context, userController, _) => Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Are you sure you want to logout?",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: whiteColor,
-                              backgroundColor: blackColor,
-                            ),
-                            onPressed: userController.isLoading
-                                ? () {}
-                                : () => Navigator.pop(dialogContext),
-                            child: Text("Cancel")),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: whiteColor,
-                            backgroundColor: redColor,
-                          ),
-                          onPressed: userController.isLoading
-                              ? () {}
-                              : () async {
-                                  final success = await userController.logout();
-                                  if (!mounted) return;
-                                  context.read<ProfileController>().clearProfile();
-                                  handleMessage(context, userController);
-                                  if (success) {
-                                    Navigator.pushNamedAndRemoveUntil(
-                                      context,
-                                      "/login",
-                                      (_) => false,
-                                    );
-                                  }
-                                },
-                          child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 200),
-                              child: userController.isLoading
-                                  ? const Padding(
-                                      key: ValueKey('loader'),
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 8.0),
-                                      child: LinearProgressIndicator(
-                                        backgroundColor: whiteColor,
-                                        color: redColor,
-                                      ),
-                                    )
-                                  : Text("Log out")),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+      builder: (dialogContext) => const LogoutDialog(),
     );
   }
-
   void _deleteAccount() async {
-    _cofirmEditingController.clear();
     await showAdaptiveDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) {
-        return Consumer<ProfileController>(
-          builder: (context, userController, _) =>
-              StatefulBuilder(builder: (context, setState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      height: 150,
-                      child: Lottie.asset('assets/anim/error.json'),
-                    ),
-                    Text(
-                      "Are you sure you want to delete your account?",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      "The account will no longer be available and all data will be permanently deleted.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.normal,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      "Enter the word Confirm below to perform this action.",
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.normal,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _cofirmEditingController,
-                      onChanged: (value) => setState(() {}),
-                      textCapitalization: TextCapitalization.characters,
-                      maxLength: 7,
-                      decoration: const InputDecoration(
-                          labelText: 'CONFIRM',
-                          border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(30))),
-                          prefixIcon: Icon(Icons.key_rounded),
-                          counterText: ''),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: whiteColor,
-                                backgroundColor: blackColor,
-                              ),
-                              onPressed: userController.isLoading
-                                  ? () {}
-                                  : () {
-                                      _cofirmEditingController.clear();
-                                      Navigator.pop(dialogContext);
-                                    },
-                              child: Text(
-                                "Cancel",
-                                style: TextStyle(fontSize: 14),
-                              )),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: whiteColor,
-                              backgroundColor: redColor,
-                            ),
-                            onPressed: _cofirmEditingController.text
-                                        .trim()
-                                        .toLowerCase() !=
-                                    'confirm'
-                                ? null
-                                : userController.isLoading
-                                    ? () {}
-                                    : () async {
-                                        FocusManager.instance.primaryFocus
-                                            ?.unfocus();
-                                        await Future.delayed(
-                                            const Duration(milliseconds: 100));
-                                        final success = await userController
-                                            .deleteAccount();
-                                        if (!mounted) return;
-                                        handleMessage(context, userController);
-                                        if (success) {
-                                          _cofirmEditingController.clear();
-                                          Navigator.pushNamedAndRemoveUntil(
-                                            context,
-                                            "/login",
-                                            (_) => false,
-                                          );
-                                        }
-                                      },
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 200),
-                              child: userController.isLoading
-                                  ? const Padding(
-                                      key: ValueKey('loader'),
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 8.0),
-                                      child: LinearProgressIndicator(
-                                        backgroundColor: whiteColor,
-                                        color: redColor,
-                                      ),
-                                    )
-                                  : Text(
-                                      "Delete account",
-                                      style: TextStyle(fontSize: 14),
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
-        );
-      },
-    ).then((_) {
-      _cofirmEditingController.clear();
-    });
+      builder: (dialogContext) => const DeleteAccountDialog(),
+    );
   }
 
   Future<CroppedFile?> _changeAvatar(File? imageFile) async {
@@ -282,125 +62,15 @@ class AccountScreenState extends State<AccountScreen> {
   }
 
   void _changeTheme() async {
-    showAdaptiveDialog(
+    showDialog(
       context: context,
-      builder: (dialogContext) {
-        return Consumer<ThemeProvider>(builder: (context, themeProvider, _) {
-          ThemeMode themeMode = themeProvider.themeMode;
-
-          return StatefulBuilder(builder: (context, setDialogState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 0),
-                      child: Text(
-                        "Change theme",
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    RadioMenuButton<ThemeMode>(
-                      value: ThemeMode.system,
-                      groupValue: themeMode,
-                      onChanged: (mode) {
-                        setDialogState(() {
-                          themeMode = mode!;
-                        });
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text("System"),
-                        ],
-                      ),
-                    ),
-                    RadioMenuButton<ThemeMode>(
-                      value: ThemeMode.light,
-                      groupValue: themeMode,
-                      onChanged: (mode) {
-                        setDialogState(() {
-                          themeMode = mode!;
-                        });
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text("Light"),
-                        ],
-                      ),
-                    ),
-                    RadioMenuButton<ThemeMode>(
-                      value: ThemeMode.dark,
-                      groupValue: themeMode,
-                      onChanged: (mode) {
-                        setDialogState(() {
-                          themeMode = mode!;
-                        });
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text("Dark"),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: whiteColor,
-                                backgroundColor: blackColor,
-                              ),
-                              onPressed: () => Navigator.pop(dialogContext),
-                              child: Text("Cancel")),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: whiteColor,
-                              backgroundColor: redColor,
-                            ),
-                            onPressed: () {
-                              themeProvider.setTheme(themeMode);
-                              Navigator.pop(dialogContext);
-                            },
-                            child: Text("Apply"),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          });
-        });
-      },
+      builder: (_) => const ThemeSelectionDialog(),
     );
   }
-
   @override
   void dispose() {
     super.dispose();
-    _cofirmEditingController.dispose();
+    
   }
 
   @override

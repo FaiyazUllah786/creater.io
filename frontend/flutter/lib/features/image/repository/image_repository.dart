@@ -3,14 +3,14 @@ import 'dart:io';
 import 'package:creatorio/core/network/dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:creatorio/core/exceptions/api_error.dart';
 import 'package:creatorio/core/models/api_response.dart';
 import 'package:creatorio/core/utils/error_handler.dart';
 
 import 'i_image_repository.dart';
 
 class ImageRepository implements IImageRepository {
-  final Dio dio = DioClient.dio;  @override
+  final Dio dio = DioClient.dio;
+  @override
   Future<ApiResponse?> uploadImage(File imageFiles) async {
     try {
       final imagePath = imageFiles.path;
@@ -38,7 +38,8 @@ class ImageRepository implements IImageRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   Future<ApiResponse?> getImages() async {
     try {
       final res = await dio.get('/image/get-images');
@@ -47,7 +48,8 @@ class ImageRepository implements IImageRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   Future<ApiResponse?> deleteImage(String imageId) async {
     try {
       final res = await dio.post(
@@ -61,7 +63,8 @@ class ImageRepository implements IImageRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   Future<ApiResponse?> saveImage(String imageUrl) async {
     try {
       final res = await dio.post(
@@ -75,7 +78,8 @@ class ImageRepository implements IImageRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   Future<ApiResponse?> addTransformation(
       String imagePublicId, Map<String, dynamic> transformation) async {
     try {
@@ -91,7 +95,8 @@ class ImageRepository implements IImageRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   Future<ApiResponse?> updateTransformation(String imagePublicId,
       Map<String, dynamic> transformation, String transformationId) async {
     try {
@@ -105,7 +110,8 @@ class ImageRepository implements IImageRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   Future<ApiResponse?> deleteTransformation(
       String imagePublicId, String transformationId) async {
     try {
@@ -118,7 +124,8 @@ class ImageRepository implements IImageRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   Future<ApiResponse?> clearTransformation(String imagePublicId) async {
     try {
       final res = await dio.post('/image/clear-transformation', data: {
@@ -129,7 +136,8 @@ class ImageRepository implements IImageRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   Future<ApiResponse?> saveTransformation(
       {required String imagePublicId}) async {
     try {

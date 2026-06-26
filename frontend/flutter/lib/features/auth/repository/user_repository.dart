@@ -1,13 +1,10 @@
-import 'dart:convert';
-import 'package:creatorio/common/ip.dart';
 import 'package:creatorio/core/network/dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:http/http.dart' as http;
 
-import 'package:creatorio/core/exceptions/api_error.dart';
+import 'package:creatorio/core/models/api_error.dart';
 import 'package:creatorio/core/models/api_response.dart';
 import 'package:creatorio/core/utils/error_handler.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -16,7 +13,8 @@ import 'i_user_repository.dart';
 
 class UserRepository implements IUserRepository {
   final GoogleSignIn _signIn = GoogleSignIn.instance;
-  final Dio dio = DioClient.dio;  @override
+  final Dio dio = DioClient.dio;
+  @override
   @override
   Future<ApiResponse?> registerUser(String userName, String email,
       String password, String profilePhoto) async {
@@ -44,7 +42,8 @@ class UserRepository implements IUserRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   @override
   Future<ApiResponse?> loginUser(String email, String password) async {
     try {
@@ -61,7 +60,8 @@ class UserRepository implements IUserRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   @override
   Future<ApiResponse?> logout() async {
     try {
@@ -74,7 +74,8 @@ class UserRepository implements IUserRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   @override
   Future<ApiResponse?> deleteAccount() async {
     try {
@@ -88,7 +89,8 @@ class UserRepository implements IUserRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   @override
   Future<ApiResponse?> changePassword(
       String oldPassword, String newPassword) async {
@@ -105,7 +107,8 @@ class UserRepository implements IUserRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   @override
   Future<ApiResponse?> getCurrentUser() async {
     try {
@@ -118,7 +121,8 @@ class UserRepository implements IUserRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   @override
   Future<ApiResponse?> updateProfilePhoto(String profilePhoto) async {
     try {
@@ -146,7 +150,8 @@ class UserRepository implements IUserRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   @override
   Future<ApiResponse?> updateUserProfile(
       String email, String userName, String firstName, String lastName) async {
@@ -166,7 +171,8 @@ class UserRepository implements IUserRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   @override
   Future<ApiResponse?> signInWithGoogle() async {
     try {
@@ -191,7 +197,8 @@ class UserRepository implements IUserRepository {
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
     }
-  }  @override
+  }
+  @override
   @override
   Future<ApiResponse?> signInWithGithub() async {
     try {

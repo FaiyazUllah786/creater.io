@@ -1,4 +1,5 @@
 import 'package:creatorio/core/network/auth_interceptor.dart';
+import 'package:creatorio/core/network/retry_interceptor.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -21,6 +22,9 @@ class DioClient {
     debugPrint('Interceptor initialized');
     dio.interceptors.add(
       AuthInterceptor(dio),
+    );
+    dio.interceptors.add(
+      RetryInterceptor(dio),
     );
   }
 }

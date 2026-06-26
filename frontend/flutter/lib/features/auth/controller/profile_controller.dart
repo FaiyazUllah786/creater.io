@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:creatorio/common/message.dart';
 import 'package:creatorio/common/storage.dart';
-import 'package:creatorio/core/exceptions/api_error.dart';
+import 'package:creatorio/core/exceptions/app_exceptions.dart';
 import 'package:creatorio/core/network/token_manager.dart';
 import 'package:creatorio/features/auth/repository/i_user_repository.dart';
 import 'package:creatorio/features/auth/repository/user_repository.dart';
@@ -51,7 +51,7 @@ class ProfileController extends ChangeNotifier {
       _userInfo = null;
       _message = Message("Account deleted successfully", MessageType.success);
       return true;
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);
       return false;
     } finally {
@@ -79,7 +79,7 @@ class ProfileController extends ChangeNotifier {
       }
       _message = Message("Password updated successfully", MessageType.success);
       return true;
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);
       return false;
     } finally {
@@ -101,7 +101,7 @@ class ProfileController extends ChangeNotifier {
       final user = UserModel.fromMap(res.data);
       _userInfo = user;
       await SecureStorageService.saveUser(user);
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);
       return;
     } finally {
@@ -129,7 +129,7 @@ class ProfileController extends ChangeNotifier {
       await SecureStorageService.saveUser(user);
       _message = Message("Avatar successfully updated", MessageType.success);
       return true;
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);
       return false;
     } finally {
@@ -153,7 +153,7 @@ class ProfileController extends ChangeNotifier {
       _userInfo = user;
       await SecureStorageService.saveUser(user);
       return true;
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);
       return false;
     } finally {

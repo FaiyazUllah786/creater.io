@@ -1,11 +1,12 @@
+import 'package:creatorio/core/exceptions/app_exceptions.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:creatorio/common/message.dart';
 import 'package:creatorio/features/image/repository/image_repository.dart';
+import 'package:creatorio/features/image/repository/i_image_repository.dart';
 import 'package:creatorio/model/image_model.dart';
 
-import '../../../common/widgets/api_error.dart';
 
 enum ImageLoadingState {
   idle,
@@ -34,8 +35,12 @@ class ImageController extends ChangeNotifier {
     _message = null;
   }
 
-  final imageRepository = ImageRepository();
+  late final IImageRepository imageRepository;
   final List<ImageModel> _images = [];
+
+  ImageController({IImageRepository? repository}) {
+    imageRepository = repository ?? ImageRepository();
+  }
 
   List<ImageModel> get images => _images;
 
@@ -79,7 +84,7 @@ class ImageController extends ChangeNotifier {
       );
       _message = Message("Image uploaded successfully", MessageType.success);
       return true;
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       debugPrint("Unexpected error during image upload: $e");
 
       return false;
@@ -116,7 +121,7 @@ class ImageController extends ChangeNotifier {
       );
       _message = Message("Your gallery is updated", MessageType.success);
       return true;
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       debugPrint("Unexpected error during image fetch: $e");
 
       return false;
@@ -146,7 +151,7 @@ class ImageController extends ChangeNotifier {
       _message = Message("Image deleted successfully", MessageType.success);
 
       return true;
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       debugPrint("Unexpected error during image delete: $e");
 
       return false;
@@ -172,7 +177,7 @@ class ImageController extends ChangeNotifier {
       _hasUnsavedChanges = false;
       _message = Message("Image saved successfully", MessageType.success);
       return true;
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       _message = Message("Failed to save image", MessageType.error);
       debugPrint("Unexpected error during image save: $e");
 
@@ -207,7 +212,7 @@ class ImageController extends ChangeNotifier {
       _message =
           Message("Tranfomation applied successfully", MessageType.success);
       return true;
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       _message = Message("Failed to add transformation", MessageType.error);
       debugPrint("Unexpected error during add transformation: $e");
       return false;
@@ -242,7 +247,7 @@ class ImageController extends ChangeNotifier {
       _message =
           Message("Tranfomation applied successfully", MessageType.success);
       return true;
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       _message = Message("Failed to update transformation", MessageType.error);
       debugPrint("Unexpected error during update transformation: $e");
 
@@ -277,7 +282,7 @@ class ImageController extends ChangeNotifier {
       _message =
           Message("Tranfomation delete successfully", MessageType.success);
       return true;
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       _message = Message("Failed to delete transformation", MessageType.error);
       debugPrint("Unexpected error during image transformation: $e");
       return false;
@@ -307,7 +312,7 @@ class ImageController extends ChangeNotifier {
       _message =
           Message("Tranfomation cleared successfully", MessageType.success);
       return true;
-    } on ApiError catch (e) {
+    } on AppException catch (e) {
       _message = Message("Failed to clear transformation", MessageType.error);
       debugPrint("Unexpected error during transformation clear: $e");
       return false;

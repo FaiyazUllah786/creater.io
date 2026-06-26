@@ -45,14 +45,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final imageController = context.read<ImageController>();
     final theme = Theme.of(context);
     final navTheme = theme.bottomNavigationBarTheme;
     return Scaffold(
       extendBody: true,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          final imageController = context.read<ImageController>();
           final File? imageFile = await showSourceSheet(context);
           if (imageFile == null) return;
           await imageController.uploadImage(imageFile);

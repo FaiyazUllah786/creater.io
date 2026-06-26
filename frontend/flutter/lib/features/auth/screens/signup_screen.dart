@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:creatorio/features/auth/widgets/signup_success_dialog.dart';
 
 import '../../../common/theme/colors.dart';
 
@@ -48,53 +49,10 @@ class _SingUpState extends State<SignupScreen> {
           _userName, _email, _password, _profilePhoto);
       if (!mounted) return;
       if (success) {
-        showAdaptiveDialog(
+        showDialog(
           barrierDismissible: false,
           context: context,
-          builder: (context) {
-            final textTheme = Theme.of(context).textTheme;
-
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      height: 200,
-                      child: Lottie.asset(
-                        "assets/anim/success_celebration.json",
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Account created successfully!",
-                      style: textTheme.labelMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      "Congratulations! Your account has been created. Please log in with your credentials to get started.",
-                      style: textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: whiteColor,
-                          backgroundColor: blackColor,
-                        ),
-                        onPressed: () =>
-                            Navigator.pushReplacementNamed(context, '/login'),
-                        child: Text("Login to get started")),
-                  ],
-                ),
-              ),
-            );
-          },
+          builder: (_) => const SignupSuccessDialog(),
         );
       } else {
         final message = userController.message;

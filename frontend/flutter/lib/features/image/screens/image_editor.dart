@@ -1,8 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:creatorio/common/provider/unsplash_provider.dart';
 import 'package:creatorio/common/theme/colors.dart';
-import 'package:creatorio/common/theme/theme_provider.dart';
-import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/app_snackbar.dart';
 import 'package:creatorio/common/widgets/error.dart';
 import 'package:creatorio/features/image/controller/image_controller.dart';
@@ -10,7 +8,6 @@ import 'package:creatorio/features/image/widgets/edit_widget.dart';
 import 'package:creatorio/features/image/widgets/transformation_drawer.dart';
 import 'package:creatorio/model/image_model.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -106,14 +103,19 @@ class _ImageEditorState extends State<ImageEditor> {
   Widget build(BuildContext context) {
     final imageController = context.watch<ImageController>();
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: !imageController.hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        
         if (imageController.hasUnsavedChanges) {
-          // Show the confirmation dialog if there are unsaved changes
           final exit = await _showExitConfirmationDialog();
-          return exit == true; // Return true to exit, false to stay
+          if (exit == true) {
+            if (context.mounted) {
+              Navigator.pop(context, result);
+            }
+          }
         }
-        return true; // No unsaved changes, allow exit
       },
       child: Scaffold(
         appBar: AppBar(
