@@ -126,3 +126,6 @@ dist
 /frontend/flutter/.dart
 /frontend/flutter/test
 backend/src/test-mongoose.js
+frontend/flutter/test/app_launcher_test.dart
+frontend/flutter/test/auth_service_init_test.dart
+.editorconfig
