@@ -7,60 +7,57 @@ const handler = (req, res, next, options) => {
   next(new ApiError(options.statusCode, options.message));
 };
 
+const skip = () => process.env.NODE_ENV === "development";
+
+// User-based key generator (falls back to IP if not authenticated)
+const userKeyGenerator = (req) => {
+  return req._id ? req._id.toString() : req.ip;
+};
+
 const store = new RedisStore({
-  sendCommand: async (...args) => {
-    try {
-      const client = getRedisInstance();
-      return client.call(...args);
-    } catch (error) {
-      throw error;
-    }
-  },
+  sendCommand: (...args) => getRedisInstance().call(...args),
 });
 
-export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
+const baseConfig = {
   standardHeaders: true,
   legacyHeaders: false,
-  message: "Too many authentication attempts, please try again after 15 minutes",
   handler,
+  skip,
   store,
   passOnStoreError: true,
+};
+
+
+export const authLimiter = rateLimit({
+  ...baseConfig,
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 10,
+  message: "Too many authentication attempts, please try again after 5 minutes",
+  // Authentication routes are IP-based because the user is not yet authenticated.
+  keyGenerator: (req) => req.ip,
 });
 
 export const refreshLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: "Too many refresh token requests, please try again after 15 minutes",
-  handler,
-  store,
-  passOnStoreError: true,
+  ...baseConfig,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50,
+  message:
+    "Too many refresh token requests, please try again after 15 minutes",
+  keyGenerator: userKeyGenerator,
 });
 
 export const cloudinaryLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 1000, // High ceiling abuse safeguard
-  standardHeaders: true,
-  legacyHeaders: false,
+  ...baseConfig,
+  windowMs: 15 * 60 * 1000, // 15 minute
+  max: 50,
   message: "Too many image operations, please try again later",
-  handler,
-  store,
-  passOnStoreError: true,
-  keyGenerator: (req) => {
-    return req._id ? req._id.toString() : req.ip;
-  },
+  keyGenerator: userKeyGenerator,
 });
 
 export const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
+  ...baseConfig,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000,
   message: "Too many requests, please try again after 15 minutes",
-  handler,
-  store,
-  passOnStoreError: true,
+  keyGenerator: userKeyGenerator,
 });

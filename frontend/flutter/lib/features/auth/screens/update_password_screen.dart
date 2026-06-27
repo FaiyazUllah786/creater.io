@@ -1,5 +1,6 @@
 import 'package:creatorio/common/utils.dart';
-import 'package:creatorio/features/auth/controller/user_controller.dart';
+import 'package:creatorio/core/utils/validators.dart';
+import 'package:creatorio/features/auth/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -28,7 +29,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final userController = context.read<UserController>();
+      final userController = context.read<ProfileController>();
       final success =
           await userController.changePassword(_oldPassword, _newPassword);
       debugPrint("_changeUserPassword: $success");
@@ -46,7 +47,8 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
           "Update Password",
         ),
       ),
-      body: Consumer<UserController>(builder: (context, userProvider, child) {
+      body:
+          Consumer<ProfileController>(builder: (context, userProvider, child) {
         if (userProvider.userInfo == null) {
           return const Center(
             child: Text("User data not found!"),
@@ -73,15 +75,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                     const SizedBox(height: 20),
                     TextFormField(
                       autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (password) {
-                        if (password == null ||
-                            password.toString().trim().isEmpty) {
-                          return 'Password is required';
-                        } else if (password.length < 6) {
-                          return 'Password must contain 6 or more characters';
-                        }
-                        return null;
-                      },
+                      validator: AppValidators.validatePassword,
                       onSaved: (password) {
                         _oldPassword = password!;
                       },
@@ -140,15 +134,11 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       controller: _confirmPassController,
                       validator: (password) {
-                        final confirm = password?.trim() ?? "";
+                        final val = AppValidators.validatePassword(password);
+                        if (val != null) return val;
+
                         final newPass = _newPassController.text.trim();
-
-                        if (confirm.isEmpty) {
-                          return 'Password is required';
-                        } else if (confirm.length < 6) {
-                          return 'Password must contain 6 or more characters';
-                        } else if (confirm != newPass) {
-
+                        if (password?.trim() != newPass) {
                           return "Passwords must match";
                         }
                         return null;

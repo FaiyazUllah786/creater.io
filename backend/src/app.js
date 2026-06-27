@@ -2,6 +2,9 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
+import morgan from "morgan";
+import { ApiError } from "./utils/ApiError.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
 import helmet from "helmet";
 
 //import dotenv here cause index.js execute app module first without env
@@ -17,6 +20,8 @@ app.use(
     crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
+
+app.use(morgan("dev"));
 
 app.use(cookieParser());
 
@@ -53,6 +58,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 import userRouter from "./routes/user.routes.js";
 import imageRouter from "./routes/image.routes.js";
 import authRouter from "./routes/auth.routes.js";
+import unsplashRouter from "./routes/unsplash.routes.js";
 import { generalLimiter } from "./middlewares/rateLimit.middleware.js";
 import healthRouter from "./routes/health.routes.js";
 
@@ -65,6 +71,16 @@ app.use("/image", imageRouter);
 
 app.use("/auth", authRouter);
 
+app.use("/unsplash", unsplashRouter);
+
 app.use("/health", healthRouter);
+
+// Catch 404
+app.use((req, res, next) => {
+  next(new ApiError(404, "Route not found"));
+});
+
+// Global Error Handler (Must be at the very end)
+app.use(errorHandler);
 
 export { app };

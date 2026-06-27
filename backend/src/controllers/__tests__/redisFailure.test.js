@@ -33,16 +33,16 @@ describe("Redis Failure Behavior", () => {
       status: vi.fn().mockReturnThis(),
       json: vi.fn(),
     };
-
-    saveTransformation(req, res, () => {});
+    const next = vi.fn();
+    saveTransformation(req, res, next);
 
     await new Promise((resolve) => setTimeout(resolve, 50));
 
-    expect(res.status).toHaveBeenCalledWith(503);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-      statusCode: 503,
-      message: "Transformation service temporarily unavailable",
-    }));
+    expect(next).toHaveBeenCalled();
+    const error = next.mock.calls[0][0];
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.statusCode).toBe(503);
+    expect(error.message).toBe("Transformation service temporarily unavailable");
   });
 
   it("Login remains unaffected when Redis is unavailable", async () => {

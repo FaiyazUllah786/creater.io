@@ -127,7 +127,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
 });
 
 export const getCurrentUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req._id).select("-refreshToken -password");
+  const user = req.user;
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -135,29 +135,29 @@ export const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 export const deleteUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req._id);
+  const user = req.user;
   if (!user) {
     throw new ApiError(404, "User not found");
   }
 
   // Cloudinary Cleanup
   const userImages = await Image.find({ author: req._id });
-  const deletePromises = userImages.map((img) => 
+  const deletePromises = userImages.map((img) =>
     deleteImageFromCloudinary(img.publicId).catch((err) => console.error("Failed to delete orphaned image", err))
   );
-  
+
   if (user.profilePhoto) {
     const profilePublicId = extractPublicId(user.profilePhoto);
     if (profilePublicId) {
       deletePromises.push(deleteImageFromCloudinary(profilePublicId).catch(() => null));
     }
   }
-  
+
   await Promise.all(deletePromises);
 
   // DB Cleanup
   await Image.deleteMany({ author: req._id });
-  await user.deleteOne();
+  await User.deleteOne({ _id: req._id });
 
   return res
     .status(200)
@@ -199,7 +199,7 @@ export const updateUserProfilePhoto = asyncHandler(async (req, res) => {
 });
 
 export const updateUserProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req._id);
+  const user = req.user;
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -221,12 +221,15 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
     }
   }
 
-  await user.updateOne({
-    userName: userName || user.userName,
-    email: email || user.email,
-    firstName: firstName || user.firstName,
-    lastName: lastName || user.lastName,
-  });
+  await User.updateOne(
+    { _id: req._id },
+    {
+      userName: userName || user.userName,
+      email: email || user.email,
+      firstName: firstName || user.firstName,
+      lastName: lastName || user.lastName,
+    }
+  );
 
   const updatedUser = await User.findById(req._id).select("-password -refreshToken");
 

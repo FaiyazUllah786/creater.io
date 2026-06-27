@@ -33,8 +33,6 @@ export const generateAccessRefreshToken = async (userId) => {
 };
 
 export const verifyJWT = asyncHandler(async (req, _, next) => {
-  try {
-
     const token =
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
@@ -63,13 +61,9 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
     req.user = user;
     req._id = user._id;
     next();
-  } catch (error) {
-    console.log("JWT verification failed:", error);
-    throw error;
-  }
 });
 
-export const refreshAccessToken = async (req, res) => {
+export const refreshAccessToken = asyncHandler(async (req, res) => {
   try {
     const incomingRefreshToken =
       req.cookies.refreshToken || req.body.refreshToken;
@@ -120,13 +114,10 @@ export const refreshAccessToken = async (req, res) => {
       );
   } catch (error) {
     console.log("Failed to refresh tokens:", error);
-    return res
-      .clearCookie("accessToken")
-      .clearCookie("refreshToken")
-      .status(error.statusCode ?? 401)
-      .json(new ApiError(error.statusCode ?? 401, error.message ?? "Failed to refresh tokens"));
+    res.clearCookie("accessToken").clearCookie("refreshToken");
+    throw new ApiError(error.statusCode ?? 401, error.message ?? "Failed to refresh tokens");
   }
-};
+});
 
 export const githubAuthMiddleware = passport.authenticate("github", {
   scope: ["user:email"],

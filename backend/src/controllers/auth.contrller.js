@@ -62,10 +62,6 @@ export const githubCallbackHandler = asyncHandler(async (req, res) => {
         "GitHub authentication failed"
       )}`
     );
-    throw new ApiError(
-      500,
-      "Something went wrong during GitHub authentication"
-    );
   }
 });
 
@@ -114,10 +110,6 @@ export const googleCallbackHandler = asyncHandler(async (req, res) => {
       `${process.env.CLIENT_URL}/auth/failure?reason=${encodeURIComponent(
         "Google authentication failed"
       )}`
-    );
-    throw new ApiError(
-      500,
-      "Something went wrong during GitHub authentication"
     );
   }
 });

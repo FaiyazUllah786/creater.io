@@ -1,27 +1,37 @@
 import { getRedisInstance } from "../../redis/redis.js";
 import { ApiError } from "../../utils/ApiError.js";
 
+const TTL_SECONDS = 7200; // 2 hours
+
+const getRedisKey = (publicId) => `transformation:${publicId}`;
+
 export const getCurrentList = async (redis, publicId) => {
   let list = [];
 
-  const redisList = await redis.get(publicId);
+  const redisKey = getRedisKey(publicId);
+  const redisList = await redis.get(redisKey);
   if (redisList === null) {
-    await redis.set(publicId, JSON.stringify(list), "EX", 1800);
+    await redis.set(redisKey, JSON.stringify(list), "EX", TTL_SECONDS);
     return list;
   }
+  
+  // Refresh the TTL on read to prevent expiration during active editing
+  await redis.expire(redisKey, TTL_SECONDS);
+  
   return JSON.parse(redisList);
 };
 
 export const clearTransformationList = async (publicId) => {
   const redis = getRedisInstance();
 
-  const exist = await redis.exists(publicId);
+  const redisKey = getRedisKey(publicId);
+  const exist = await redis.exists(redisKey);
 
   if (exist == 0) {
     throw new ApiError(400, "Transformation list does not exists.");
   }
 
-  const res = await redis.del(publicId);
+  const res = await redis.del(redisKey);
 
   if (res?.status === 0) {
     throw new ApiError(400, "Clearing transformation list failed.");
@@ -37,7 +47,7 @@ export const addTransformationToList = async (publicId, transformation) => {
 
   transformationList.push({ id: crypto.randomUUID(), ...transformation });
 
-  await redis.set(publicId, JSON.stringify(transformationList), "EX", 1800);
+  await redis.set(getRedisKey(publicId), JSON.stringify(transformationList), "EX", TTL_SECONDS);
 
   return transformationList;
 };
@@ -64,7 +74,7 @@ export const modifyTransforamtionFromList = async (publicId, transformation, tra
     item?.id === transformationId ? { ...transformation, id: transformationId } : item
   );
 
-  await redis.set(publicId, JSON.stringify(updatedList), "EX", 1800);
+  await redis.set(getRedisKey(publicId), JSON.stringify(updatedList), "EX", TTL_SECONDS);
 
   return updatedList;
 };
@@ -84,7 +94,7 @@ export const deleteTransformationFromList = async (publicId, transformationId) =
   }
   const updatedList = transformationList.filter((item) => item?.id != transformationId);
 
-  await redis.set(publicId, JSON.stringify(updatedList), "EX", 1800);
+  await redis.set(getRedisKey(publicId), JSON.stringify(updatedList), "EX", TTL_SECONDS);
 
   return updatedList;
 };

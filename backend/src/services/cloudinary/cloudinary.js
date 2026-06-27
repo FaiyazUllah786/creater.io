@@ -3,6 +3,9 @@ import { cloudinaryConfig } from "./config.js";
 import fs from "fs";
 import { ApiError } from "../../utils/ApiError.js";
 
+// Initialize cloudinary config once when module loads
+cloudinaryConfig();
+
 //TODO:upload any file
 export const extractPublicId = (url) => {
   if (!url) return null;
@@ -26,7 +29,6 @@ export const uploadOnCloudinary = async (localFilePath) => {
   try {
     // const temp = await fetch(localFilePath);
     // console.log("temp", temp);
-    cloudinaryConfig();
     if (!localFilePath) {
       return null;
     }
@@ -53,7 +55,6 @@ export const uploadOnCloudinary = async (localFilePath) => {
 //TODO:delete any file
 export const deleteImageFromCloudinary = async (imagePublicId) => {
   try {
-    cloudinaryConfig();
     if (!imagePublicId) {
       return null;
     }
@@ -72,7 +73,6 @@ export const deleteImageFromCloudinary = async (imagePublicId) => {
 
 export const transformationUsingCloudinary = async (imagePublicId, transformationList) => {
   try {
-    cloudinaryConfig();
     if (!imagePublicId || (Array.isArray(transformationList) && transformationList?.length === 0)) {
       return null;
     }

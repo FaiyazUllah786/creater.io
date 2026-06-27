@@ -1,19 +1,19 @@
-import 'dart:convert';
-import 'package:creatorio/common/ip.dart';
 import 'package:creatorio/core/network/dio_client.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:creatorio/core/config/app_config.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:http/http.dart' as http;
-
-import '/common/widgets/api_error.dart';
-import '/common/widgets/api_response.dart';
+import 'package:creatorio/core/models/api_error.dart';
+import 'package:creatorio/core/models/api_response.dart';
+import 'package:creatorio/core/utils/error_handler.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class UserRepository {
+import 'i_user_repository.dart';
+
+class UserRepository implements IUserRepository {
   final GoogleSignIn _signIn = GoogleSignIn.instance;
   final Dio dio = DioClient.dio;
+  @override
+  @override
   Future<ApiResponse?> registerUser(String userName, String email,
       String password, String profilePhoto) async {
     try {
@@ -37,30 +37,13 @@ class UserRepository {
         data: formData,
       );
       return ApiResponse.fromMap(response.data);
-    } on DioException catch (e, stackTrace) {
-      debugPrint("Register Error: ${e.response?.data}");
-      debugPrintStack(stackTrace: stackTrace);
-
-      if (e.response?.data != null) {
-        throw ApiError.fromMap(e.response!.data);
-      }
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Network error occurred",
-      );
     } catch (e, stackTrace) {
-      debugPrint("Unexpected error during registration: $e");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Something went wrong. Please try again.",
-      );
+      throw ErrorHandler.handle(e, stackTrace);
     }
   }
 
+  @override
+  @override
   Future<ApiResponse?> loginUser(String email, String password) async {
     try {
       final res = await dio.post('/user/auth/login', data: {
@@ -68,109 +51,44 @@ class UserRepository {
         'password': password,
       });
 
-
-
       return ApiResponse.fromMap(
         res.data,
       );
-    } on DioException catch (e, stackTrace) {
-      debugPrint("Login Error: ${e.response?.data}");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      if (e.response?.data != null) {
-        throw ApiError.fromMap(
-          e.response!.data,
-        );
-      }
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Network error occurred",
-      );
     } catch (e, stackTrace) {
-      debugPrint("Unexpected error during login: $e");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Something went wrong. Please try again.",
-      );
+      throw ErrorHandler.handle(e, stackTrace);
     }
   }
 
+  @override
+  @override
   Future<ApiResponse?> logout() async {
     try {
       final res = await dio.post('/user/auth/logout');
-      debugPrint("Logout Response: ${res.data}");
 
       return ApiResponse.fromMap(
         res.data,
       );
-    } on DioException catch (e, stackTrace) {
-      debugPrint("Logout Error: ${e.response?.data}");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      if (e.response?.data != null) {
-        throw ApiError.fromMap(
-          e.response!.data,
-        );
-      }
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Network error occurred",
-      );
     } catch (e, stackTrace) {
-      debugPrint("Unexpected error during logout: $e");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Something went wrong. Please try again.",
-      );
+      throw ErrorHandler.handle(e, stackTrace);
     }
   }
 
+  @override
+  @override
   Future<ApiResponse?> deleteAccount() async {
     try {
       final res = await dio.post('/user/delete-user');
 
-      debugPrint("Delete account Response: ${res.data}");
-
       return ApiResponse.fromMap(
         res.data,
       );
-    } on DioException catch (e, stackTrace) {
-      debugPrint("Delete account Error: ${e.response?.data}");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      if (e.response?.data != null) {
-        throw ApiError.fromMap(
-          e.response!.data,
-        );
-      }
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Network error occurred",
-      );
     } catch (e, stackTrace) {
-      debugPrint("Unexpected error during delete account: $e");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Something went wrong. Please try again.",
-      );
+      throw ErrorHandler.handle(e, stackTrace);
     }
   }
 
+  @override
+  @override
   Future<ApiResponse?> changePassword(
       String oldPassword, String newPassword) async {
     try {
@@ -179,72 +97,30 @@ class UserRepository {
         'newPassword': newPassword,
       });
 
-
       return ApiResponse.fromMap(
         res.data,
       );
-    } on DioException catch (e, stackTrace) {
-      debugPrint("Change password Error: ${e.response?.data}");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      if (e.response?.data != null) {
-        throw ApiError.fromMap(
-          e.response!.data,
-        );
-      }
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Network error occurred",
-      );
     } catch (e, stackTrace) {
-      debugPrint("Unexpected error during change password: $e");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Something went wrong. Please try again.",
-      );
+      throw ErrorHandler.handle(e, stackTrace);
     }
   }
 
+  @override
+  @override
   Future<ApiResponse?> getCurrentUser() async {
     try {
       final res = await dio.get('/user/current-user');
 
-
       return ApiResponse.fromMap(
         res.data,
       );
-    } on DioException catch (e, stackTrace) {
-      debugPrint("Current user Error: ${e.response?.data}");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      if (e.response?.data != null) {
-        throw ApiError.fromMap(
-          e.response!.data,
-        );
-      }
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Network error occurred",
-      );
     } catch (e, stackTrace) {
-      debugPrint("Unexpected error during current user: $e");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Something went wrong. Please try again.",
-      );
+      throw ErrorHandler.handle(e, stackTrace);
     }
   }
 
+  @override
+  @override
   Future<ApiResponse?> updateProfilePhoto(String profilePhoto) async {
     try {
       FormData formData = FormData();
@@ -263,38 +139,16 @@ class UserRepository {
         data: formData,
       );
 
-
-
       return ApiResponse.fromMap(
         res.data,
       );
-    } on DioException catch (e, stackTrace) {
-      debugPrint("Update profile photo Error: ${e.response?.data}");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      if (e.response?.data != null) {
-        throw ApiError.fromMap(
-          e.response!.data,
-        );
-      }
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Network error occurred",
-      );
     } catch (e, stackTrace) {
-      debugPrint("Unexpected error during update profile photo: $e");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Something went wrong. Please try again.",
-      );
+      throw ErrorHandler.handle(e, stackTrace);
     }
   }
 
+  @override
+  @override
   Future<ApiResponse?> updateUserProfile(
       String email, String userName, String firstName, String lastName) async {
     try {
@@ -305,38 +159,16 @@ class UserRepository {
         "lastName": lastName,
       });
 
-
-
       return ApiResponse.fromMap(
         res.data,
       );
-    } on DioException catch (e, stackTrace) {
-      debugPrint("Update user profile Error: ${e.response?.data}");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      if (e.response?.data != null) {
-        throw ApiError.fromMap(
-          e.response!.data,
-        );
-      }
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Network error occurred",
-      );
     } catch (e, stackTrace) {
-      debugPrint("Unexpected error during update user profile: $e");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Something went wrong. Please try again.",
-      );
+      throw ErrorHandler.handle(e, stackTrace);
     }
   }
 
+  @override
+  @override
   Future<ApiResponse?> signInWithGoogle() async {
     try {
       await _signIn.initialize();
@@ -355,38 +187,17 @@ class UserRepository {
         "idToken": idToken,
       });
 
-
       return ApiResponse.fromMap(res.data);
-    } on DioException catch (e, stackTrace) {
-      debugPrint("Signin with google error: ${e.response?.data}");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      if (e.response?.data != null) {
-        throw ApiError.fromMap(
-          e.response!.data,
-        );
-      }
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Network error occurred",
-      );
     } catch (e, stackTrace) {
-      debugPrint("Signin with google error: $e");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Something went wrong. Please try again.",
-      );
+      throw ErrorHandler.handle(e, stackTrace);
     }
   }
 
+  @override
+  @override
   Future<ApiResponse?> signInWithGithub() async {
     try {
-      final clientId = dotenv.env['GITHUB_CLIENT_ID'] ?? '';
+      final clientId = AppConfig.githubClientId;
 
       final result = await FlutterWebAuth2.authenticate(
         url: "https://github.com/login/oauth/authorize"
@@ -405,32 +216,9 @@ class UserRepository {
         "code": code,
       });
 
-
       return ApiResponse.fromMap(res.data);
-    } on DioException catch (e, stackTrace) {
-      debugPrint("Signin with github error: ${e.response?.data}");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      if (e.response?.data != null) {
-        throw ApiError.fromMap(
-          e.response!.data,
-        );
-      }
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Network error occurred",
-      );
     } catch (e, stackTrace) {
-      debugPrint("Signin with github error: $e");
-
-      debugPrintStack(stackTrace: stackTrace);
-
-      throw ApiError(
-        statusCode: 500,
-        message: "Something went wrong. Please try again.",
-      );
+      throw ErrorHandler.handle(e, stackTrace);
     }
   }
 }

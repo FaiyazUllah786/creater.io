@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/source_sheet.dart';
-import 'package:creatorio/features/Image/controller/image_controller.dart';
-import 'package:creatorio/features/auth/controller/user_controller.dart';
+import 'package:creatorio/features/image/controller/image_controller.dart';
+import 'package:creatorio/features/auth/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:creatorio/common/theme/colors.dart';
 
-import 'features/Image/screens/image_gallery.dart';
+import 'features/image/screens/image_gallery.dart';
 import '/features/auth/screens/account_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final controller = context.read<UserController>();
+      final controller = context.read<ProfileController>();
 
       controller.loadUserFromStorage();
       controller.getCurrentUser();
@@ -45,18 +45,24 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final imageController = context.read<ImageController>();
     final theme = Theme.of(context);
     final navTheme = theme.bottomNavigationBarTheme;
     return Scaffold(
       extendBody: true,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          final imageController = context.read<ImageController>();
           final File? imageFile = await showSourceSheet(context);
           if (imageFile == null) return;
           await imageController.uploadImage(imageFile);
-          if (!mounted) return;
+          if (!context.mounted) return;
           handleMessage(context, imageController);
         },
         child: const Icon(Icons.add),
