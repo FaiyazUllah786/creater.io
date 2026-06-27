@@ -120,10 +120,9 @@ dist
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
 /frontend/web
-/frontend/flutter/pubspec.lock
+
 /frontend/flutter/.dart_tool
 /frontend/flutter/.pub-cache
 /frontend/flutter/.dart
-/frontend/flutter/test/test_driver
-
-/backend/package-lock.json
+/frontend/flutter/test
+backend/src/test-mongoose.js

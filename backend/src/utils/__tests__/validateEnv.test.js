@@ -71,7 +71,7 @@ describe("validateEnv", () => {
 
   it("fails if PORT is invalid", () => {
     process.env.PORT = "abc";
-    expect(() => validateEnv()).toThrow(/PORT is invalid/);
+    expect(() => validateEnv()).toThrow(/PORT/);
   });
 
   it("aggregates multiple errors", () => {

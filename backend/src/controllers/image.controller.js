@@ -9,7 +9,7 @@ import { Image } from "../models/image.model.js";
 import { User } from "../models/user.model.js";
 
 export const imageUploads = asyncHandler(async (req, res) => {
-  const user = await User.findById(req._id);
+  const user = req.user;
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -45,12 +45,22 @@ export const imageUploads = asyncHandler(async (req, res) => {
 });
 
 export const getImageFromDatabase = asyncHandler(async (req, res) => {
-  const user = await User.findById(req._id);
+  const user = req.user;
   if (!user) {
     throw new ApiError(404, "User not found");
   }
 
-  const images = await Image.aggregate([{ $match: { author: user._id } }]);
+  const { page = 1, limit = 10 } = req.query;
+
+  const aggregate = Image.aggregate([
+    { $match: { author: user._id } },
+    { $sort: { createdAt: -1 } }
+  ]);
+
+  const images = await Image.aggregatePaginate(aggregate, {
+    page: parseInt(page, 10),
+    limit: parseInt(limit, 10),
+  });
 
   return res
     .status(200)
@@ -58,7 +68,7 @@ export const getImageFromDatabase = asyncHandler(async (req, res) => {
 });
 
 export const saveImageToDatabase = asyncHandler(async (req, res) => {
-  const user = await User.findById(req._id);
+  const user = req.user;
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -102,7 +112,7 @@ export const saveImageToDatabase = asyncHandler(async (req, res) => {
 });
 
 export const deleteImage = asyncHandler(async (req, res) => {
-  const user = await User.findById(req._id);
+  const user = req.user;
   if (!user) {
     throw new ApiError(404, "User not found");
   }

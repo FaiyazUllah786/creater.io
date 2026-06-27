@@ -9,7 +9,7 @@
 //   flutter test test/auth_interceptor_parse_test.dart
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:creatorio/common/widgets/api_response.dart';
+import 'package:creatorio/core/models/api_response.dart';
 
 void main() {
   group('Backend Response Parsing', () {
@@ -61,7 +61,7 @@ void main() {
       };
 
       final resMap = ApiResponse.fromMap(malformedResponse);
-      
+
       expect(resMap.data['accessToken'], equals('only_access_token'));
       expect(resMap.data['refreshToken'], isNull);
     });

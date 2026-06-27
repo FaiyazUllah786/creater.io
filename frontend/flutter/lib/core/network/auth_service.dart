@@ -1,7 +1,7 @@
-import 'package:creatorio/common/widgets/api_response.dart';
+import 'package:creatorio/core/models/api_response.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:creatorio/core/config/app_config.dart';
 
 import '../../common/storage.dart';
 import '../network/token_manager.dart';
@@ -10,7 +10,7 @@ import 'auth_bootstrap.dart';
 class AuthService {
   static final Dio _refreshDio = Dio(
     BaseOptions(
-      baseUrl: dotenv.env['SERVER_URL'] ?? '',
+      baseUrl: AppConfig.serverUrl,
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       headers: {

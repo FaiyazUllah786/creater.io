@@ -3,7 +3,7 @@ import 'package:creatorio/common/navigator_key.dart';
 import 'package:creatorio/common/storage.dart';
 import 'package:creatorio/core/network/auth_bootstrap.dart';
 import 'package:creatorio/core/network/token_manager.dart';
-import 'package:creatorio/common/widgets/api_response.dart';
+import 'package:creatorio/core/models/api_response.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 

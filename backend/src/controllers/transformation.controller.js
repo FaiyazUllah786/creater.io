@@ -118,7 +118,7 @@ export const saveTransformation = asyncHandler(async (req, res) => {
   try {
     const uploadResponse = await uploadOnCloudinary(finalUrl);
     if (uploadResponse) {
-      const user = await User.findById(req._id);
+      const user = req.user;
       if (user) {
         savedImage = await Image.create({
           publicId: uploadResponse.public_id,

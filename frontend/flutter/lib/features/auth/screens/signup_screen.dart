@@ -3,11 +3,13 @@ import 'dart:io';
 import 'package:creatorio/common/navigator_key.dart';
 import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/app_snackbar.dart';
-import 'package:creatorio/features/auth/controller/user_controller.dart';
+import 'package:creatorio/core/utils/validators.dart';
+import 'package:creatorio/features/auth/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:creatorio/features/auth/widgets/signup_success_dialog.dart';
 
 import '../../../common/theme/colors.dart';
 
@@ -43,58 +45,15 @@ class _SingUpState extends State<SignupScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final userController = context.read<UserController>();
+      final userController = context.read<AuthController>();
       final success = await userController.registerUser(
           _userName, _email, _password, _profilePhoto);
       if (!mounted) return;
       if (success) {
-        showAdaptiveDialog(
+        showDialog(
           barrierDismissible: false,
           context: context,
-          builder: (context) {
-            final textTheme = Theme.of(context).textTheme;
-
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      height: 200,
-                      child: Lottie.asset(
-                        "assets/anim/success_celebration.json",
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Account created successfully!",
-                      style: textTheme.labelMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      "Congratulations! Your account has been created. Please log in with your credentials to get started.",
-                      style: textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: whiteColor,
-                          backgroundColor: blackColor,
-                        ),
-                        onPressed: () =>
-                            Navigator.pushReplacementNamed(context, '/login'),
-                        child: Text("Login to get started")),
-                  ],
-                ),
-              ),
-            );
-          },
+          builder: (_) => const SignupSuccessDialog(),
         );
       } else {
         final message = userController.message;
@@ -111,7 +70,7 @@ class _SingUpState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userController = context.watch<UserController>();
+    final userController = context.watch<AuthController>();
 
     final textTheme = Theme.of(context).textTheme;
 
@@ -191,13 +150,7 @@ class _SingUpState extends State<SignupScreen> {
                                         BorderRadius.all(Radius.circular(30))),
                                 prefixIcon: Icon(Icons.account_circle_outlined),
                               ),
-                              validator: (userName) {
-                                if (userName == null ||
-                                    userName.toString().trim().isEmpty) {
-                                  return 'Username is required';
-                                }
-                                return null;
-                              },
+                              validator: AppValidators.validateUsername,
                               onSaved: (username) {
                                 _userName = username!;
                               },
@@ -211,17 +164,7 @@ class _SingUpState extends State<SignupScreen> {
                                         BorderRadius.all(Radius.circular(30))),
                                 prefixIcon: Icon(Icons.email_outlined),
                               ),
-                              validator: (email) {
-                                if (email == null ||
-                                    email.toString().trim().isEmpty) {
-                                  return 'Email is required';
-                                } else if (!RegExp(
-                                        r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
-                                    .hasMatch(email)) {
-                                  return 'Not a valid email';
-                                }
-                                return null;
-                              },
+                              validator: AppValidators.validateEmail,
                               onSaved: (email) {
                                 _email = email!;
                               },
@@ -242,15 +185,7 @@ class _SingUpState extends State<SignupScreen> {
                                 ),
                               ),
                               obscureText: !_seePassword,
-                              validator: (password) {
-                                if (password == null ||
-                                    password.toString().trim().isEmpty) {
-                                  return 'Password is required';
-                                } else if (password.length < 6) {
-                                  return 'Password must contain 6 or more characters';
-                                }
-                                return null;
-                              },
+                              validator: AppValidators.validatePassword,
                               onSaved: (password) {
                                 _password = password!;
                               },

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:creatorio/features/auth/controller/user_controller.dart';
+import 'package:creatorio/features/auth/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/colors.dart';
@@ -96,12 +96,13 @@ class _ImageViewerState extends State<ImageViewer> {
                         setState(() {
                           _isLoading = true;
                         });
-                        await Provider.of<UserController>(context,
+                        await Provider.of<ProfileController>(context,
                                 listen: false)
                             .updateProfilePhoto(widget.imageFile.path);
                         setState(() {
                           _isLoading = false;
                         });
+                        if (!context.mounted) return;
                         Navigator.pop(context);
                       },
                       child: const Text("Select"),
