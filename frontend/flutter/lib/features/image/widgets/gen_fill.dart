@@ -158,7 +158,9 @@ class _GenerativeFillState extends State<GenerativeFill> {
                       final direction = Direction.values[index];
                       return Radio(
                         value: direction,
+                        // ignore: deprecated_member_use
                         groupValue: _selectedDirection,
+                        // ignore: deprecated_member_use
                         onChanged: (direction) {
                           setState(
                             () {

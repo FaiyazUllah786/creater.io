@@ -1,4 +1,5 @@
 import 'package:creatorio/common/utils.dart';
+import 'package:creatorio/core/utils/validators.dart';
 import 'package:creatorio/features/auth/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -74,15 +75,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                     const SizedBox(height: 20),
                     TextFormField(
                       autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (password) {
-                        if (password == null ||
-                            password.toString().trim().isEmpty) {
-                          return 'Password is required';
-                        } else if (password.length < 6) {
-                          return 'Password must contain 6 or more characters';
-                        }
-                        return null;
-                      },
+                      validator: AppValidators.validatePassword,
                       onSaved: (password) {
                         _oldPassword = password!;
                       },
@@ -141,14 +134,11 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       controller: _confirmPassController,
                       validator: (password) {
-                        final confirm = password?.trim() ?? "";
-                        final newPass = _newPassController.text.trim();
+                        final val = AppValidators.validatePassword(password);
+                        if (val != null) return val;
 
-                        if (confirm.isEmpty) {
-                          return 'Password is required';
-                        } else if (confirm.length < 6) {
-                          return 'Password must contain 6 or more characters';
-                        } else if (confirm != newPass) {
+                        final newPass = _newPassController.text.trim();
+                        if (password?.trim() != newPass) {
                           return "Passwords must match";
                         }
                         return null;

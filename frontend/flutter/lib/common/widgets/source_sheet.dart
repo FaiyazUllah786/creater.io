@@ -33,17 +33,20 @@ Future<File?> showSourceSheet(BuildContext context) async {
                   showSourceSheetContext, "assets/icons/camera.png", "Camera",
                   () async {
                 final imageFile = await pickImageFromCamera();
+                if (!showSourceSheetContext.mounted) return;
                 Navigator.pop(showSourceSheetContext, imageFile);
               }),
               _buildSourceOption(
                   showSourceSheetContext, "assets/icons/gallery.png", "Gallery",
                   () async {
                 final imageFile = await pickImageFromGallery();
+                if (!showSourceSheetContext.mounted) return;
                 Navigator.pop(showSourceSheetContext, imageFile);
               }),
               _buildSourceOption(showSourceSheetContext,
                   "assets/icons/file-explorer.png", "Files", () async {
                 final imageFile = await pickImageFromExplorer();
+                if (!showSourceSheetContext.mounted) return;
                 Navigator.pop(showSourceSheetContext, imageFile);
 
                 // if (imageFile == null) return;

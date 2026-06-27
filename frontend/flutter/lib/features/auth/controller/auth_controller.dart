@@ -6,7 +6,7 @@ import 'package:creatorio/core/exceptions/app_exceptions.dart';
 import 'package:creatorio/core/network/token_manager.dart';
 import 'package:creatorio/features/auth/repository/i_user_repository.dart';
 import 'package:creatorio/features/auth/repository/user_repository.dart';
-
+import 'package:creatorio/core/services/analytics_service.dart';
 class AuthController extends ChangeNotifier {
   final IUserRepository _userRepository;
 
@@ -52,6 +52,9 @@ class AuthController extends ChangeNotifier {
             "Registration failed. Please try again.", MessageType.error);
         return false;
       }
+      
+      await AnalyticsService.logSignUp('email');
+      
       return true;
     } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);
@@ -96,6 +99,9 @@ class AuthController extends ChangeNotifier {
       await SecureStorageService.saveRefreshToken(refreshToken);
 
       _message = Message("Logged in successfully", MessageType.success);
+      
+      await AnalyticsService.logLogin('email');
+      
       return true;
     } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);
@@ -153,6 +159,9 @@ class AuthController extends ChangeNotifier {
       await TokenManager.setAccessToken(accessToken);
       await SecureStorageService.saveAccessToken(accessToken);
       await SecureStorageService.saveRefreshToken(refreshToken);
+      
+      await AnalyticsService.logLogin('google');
+      
       return true;
     } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);
@@ -189,6 +198,9 @@ class AuthController extends ChangeNotifier {
       await TokenManager.setAccessToken(accessToken);
       await SecureStorageService.saveAccessToken(accessToken);
       await SecureStorageService.saveRefreshToken(refreshToken);
+      
+      await AnalyticsService.logLogin('github');
+      
       return true;
     } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);

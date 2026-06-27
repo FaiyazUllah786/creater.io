@@ -120,7 +120,7 @@ dist
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
 /frontend/web
-/frontend/flutter/pubspec.lock
+
 /frontend/flutter/.dart_tool
 /frontend/flutter/.pub-cache
 /frontend/flutter/.dart

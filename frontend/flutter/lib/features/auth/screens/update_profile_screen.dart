@@ -1,4 +1,5 @@
 import 'package:creatorio/common/utils.dart';
+import 'package:creatorio/core/utils/validators.dart';
 import 'package:creatorio/features/auth/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -71,16 +72,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                                 BorderRadius.all(Radius.circular(30))),
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
-                      validator: (email) {
-                        if (email == null || email.toString().trim().isEmpty) {
-                          return 'Email is required';
-                        } else if (!RegExp(
-                                r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
-                            .hasMatch(email)) {
-                          return 'Not a valid email';
-                        }
-                        return null;
-                      },
+                      validator: AppValidators.validateEmail,
                       onSaved: (email) {
                         _email = email!;
                       },
@@ -95,13 +87,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                                 BorderRadius.all(Radius.circular(30))),
                         prefixIcon: Icon(Icons.account_circle_outlined),
                       ),
-                      validator: (userName) {
-                        if (userName == null ||
-                            userName.toString().trim().isEmpty) {
-                          return 'userName is required';
-                        }
-                        return null;
-                      },
+                      validator: AppValidators.validateUsername,
                       onSaved: (userName) {
                         _userName = userName!;
                       },

@@ -2,6 +2,7 @@ import 'package:creatorio/common/navigator_key.dart';
 import 'package:creatorio/common/storage.dart';
 import 'package:creatorio/core/network/auth_service.dart';
 import 'package:creatorio/core/network/token_manager.dart';
+import 'package:creatorio/core/services/update_checker.dart';
 import 'package:creatorio/splash_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -24,6 +25,13 @@ class _AppLauncherState extends State<AppLauncher> {
     await AuthService.initializeAuth();
 
     if (!mounted) return;
+
+    final isUpdateRequired = await UpdateChecker.isUpdateRequired();
+    if (isUpdateRequired) {
+      if (!mounted) return;
+      navigatorKey.currentState?.pushReplacementNamed('/updateRequired');
+      return;
+    }
 
     final hasAccessToken = TokenManager.hasValidAccessToken();
 

@@ -164,12 +164,13 @@ class UnsplashScreenState extends State<UnsplashScreen> {
                       return InkWell(
                         onTap: () async {
                           final imageFile = await widget.pickImageFromUnsplash(
-                              image.urls.regular, (progress) {
+                              image.urls.regular, image.id, (progress) {
                             setState(() {
                               _progressMap[image.urls.regular.toString()] =
                                   progress;
                             });
                           });
+                          if (!context.mounted) return;
                           Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -185,7 +186,7 @@ class UnsplashScreenState extends State<UnsplashScreen> {
                           children: [
                             CachedNetworkImage(
                               useOldImageOnUrlChange: true,
-                              imageUrl: "${image.urls.regular}",
+                              imageUrl: image.urls.regular,
                               fit: BoxFit.cover,
                               placeholder: (context, url) =>
                                   const ShimmerLoading(),

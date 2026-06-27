@@ -2,6 +2,7 @@ import 'package:creatorio/common/navigator_key.dart';
 import 'package:creatorio/common/theme/colors.dart';
 import 'package:creatorio/common/widgets/app_snackbar.dart';
 import 'package:creatorio/features/auth/controller/auth_controller.dart';
+import 'package:creatorio/core/utils/validators.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -104,17 +105,7 @@ class _SingUpState extends State<LoginScreen> {
                                 labelText: 'Email',
                                 prefixIcon: Icon(Icons.email_outlined),
                               ),
-                              validator: (email) {
-                                if (email == null ||
-                                    email.toString().trim().isEmpty) {
-                                  return 'Email is required';
-                                } else if (!RegExp(
-                                        r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
-                                    .hasMatch(email)) {
-                                  return 'Not a valid email';
-                                }
-                                return null;
-                              },
+                              validator: AppValidators.validateEmail,
                               onSaved: (email) {
                                 _email = email!;
                               },
@@ -133,15 +124,7 @@ class _SingUpState extends State<LoginScreen> {
                                 ),
                               ),
                               obscureText: !_seePassword,
-                              validator: (password) {
-                                if (password == null ||
-                                    password.toString().trim().isEmpty) {
-                                  return 'Password is required';
-                                } else if (password.length < 6) {
-                                  return 'Password must contain 6 or more characters';
-                                }
-                                return null;
-                              },
+                              validator: AppValidators.validatePassword,
                               onSaved: (password) {
                                 _password = password!;
                               },

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:creatorio/core/network/dio_client.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:creatorio/core/models/api_response.dart';
 import 'package:creatorio/core/utils/error_handler.dart';
 
@@ -30,8 +29,6 @@ class ImageRepository implements IImageRepository {
         data: formData,
       );
 
-      debugPrint("Update photo Response: ${res.data}");
-
       return ApiResponse.fromMap(
         res.data,
       );
@@ -41,10 +38,12 @@ class ImageRepository implements IImageRepository {
   }
 
   @override
-  Future<ApiResponse?> getImages() async {
+  Future<ApiResponse?> getImages({int page = 1, int limit = 10}) async {
     try {
-      final res = await dio.get('/image/get-images');
-      debugPrint("Get images Response: ${res.data}");
+      final res = await dio.get('/image/get-images', queryParameters: {
+        'page': page,
+        'limit': limit,
+      });
       return ApiResponse.fromMap(res.data);
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
@@ -60,7 +59,6 @@ class ImageRepository implements IImageRepository {
           "imageId": imageId,
         },
       );
-      debugPrint("Delete image response body: ${res.data}");
       return ApiResponse.fromMap(res.data);
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
@@ -76,7 +74,6 @@ class ImageRepository implements IImageRepository {
           "imageUrl": imageUrl,
         },
       );
-      debugPrint("Save image response body: ${res.data}");
       return ApiResponse.fromMap(res.data);
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
@@ -94,7 +91,6 @@ class ImageRepository implements IImageRepository {
           "transformation": transformation,
         },
       );
-      debugPrint("Add image transformation response body: ${res.data}");
       return ApiResponse.fromMap(res.data);
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
@@ -110,7 +106,6 @@ class ImageRepository implements IImageRepository {
         "transformation": transformation,
         "transformationId": transformationId
       });
-      debugPrint("Update image transformation response body: ${res.data}");
       return ApiResponse.fromMap(res.data);
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
@@ -125,7 +120,6 @@ class ImageRepository implements IImageRepository {
         "imagePublicId": imagePublicId,
         "transformationId": transformationId
       });
-      debugPrint("Delete image transformation response body: ${res.data}");
       return ApiResponse.fromMap(res.data);
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
@@ -138,7 +132,6 @@ class ImageRepository implements IImageRepository {
       final res = await dio.post('/image/clear-transformation', data: {
         "imagePublicId": imagePublicId,
       });
-      debugPrint("Clear image transformation response body: ${res.data}");
       return ApiResponse.fromMap(res.data);
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);
@@ -152,7 +145,6 @@ class ImageRepository implements IImageRepository {
       final res = await dio.post('/image/save', data: {
         "imagePublicId": imagePublicId,
       });
-      debugPrint("save image transformation response body: ${res.data}");
       return ApiResponse.fromMap(res.data);
     } catch (e, stackTrace) {
       throw ErrorHandler.handle(e, stackTrace);

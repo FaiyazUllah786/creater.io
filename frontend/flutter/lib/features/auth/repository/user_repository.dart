@@ -1,9 +1,7 @@
 import 'package:creatorio/core/network/dio_client.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:creatorio/core/config/app_config.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-
 import 'package:creatorio/core/models/api_error.dart';
 import 'package:creatorio/core/models/api_response.dart';
 import 'package:creatorio/core/utils/error_handler.dart';
@@ -66,7 +64,6 @@ class UserRepository implements IUserRepository {
   Future<ApiResponse?> logout() async {
     try {
       final res = await dio.post('/user/auth/logout');
-      debugPrint("Logout Response: ${res.data}");
 
       return ApiResponse.fromMap(
         res.data,
@@ -81,8 +78,6 @@ class UserRepository implements IUserRepository {
   Future<ApiResponse?> deleteAccount() async {
     try {
       final res = await dio.post('/user/delete-user');
-
-      debugPrint("Delete account Response: ${res.data}");
 
       return ApiResponse.fromMap(
         res.data,

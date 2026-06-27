@@ -3,7 +3,7 @@ import 'package:creatorio/core/models/api_response.dart';
 
 abstract class IImageRepository {
   Future<ApiResponse?> uploadImage(File imageFiles);
-  Future<ApiResponse?> getImages();
+  Future<ApiResponse?> getImages({int page = 1, int limit = 10});
   Future<ApiResponse?> deleteImage(String imageId);
   Future<ApiResponse?> saveImage(String imageUrl);
   Future<ApiResponse?> addTransformation(

@@ -4,9 +4,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:creatorio/core/config/app_config.dart';
 
+/// A singleton client providing a configured [Dio] instance for network requests.
 class DioClient {
   DioClient._();
 
+  /// The globally accessible [Dio] instance pre-configured with base URL and timeouts.
   static final Dio dio = Dio(
     BaseOptions(
       baseUrl: AppConfig.serverUrl,
@@ -18,6 +20,8 @@ class DioClient {
     ),
   );
 
+  /// Initializes interceptors for authentication and retry logic.
+  /// Should be called exactly once during app initialization.
   static void initializeInterceptors() {
     debugPrint('Interceptor initialized');
     dio.interceptors.add(

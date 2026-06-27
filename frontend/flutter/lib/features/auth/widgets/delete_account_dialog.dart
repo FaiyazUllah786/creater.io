@@ -116,7 +116,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                                       const Duration(milliseconds: 100));
                                   final success =
                                       await userController.deleteAccount();
-                                  if (!mounted) return;
+                                  if (!context.mounted) return;
                                   handleMessage(context, userController);
                                   if (success) {
                                     _confirmEditingController.clear();

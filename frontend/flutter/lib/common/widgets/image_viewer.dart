@@ -102,6 +102,7 @@ class _ImageViewerState extends State<ImageViewer> {
                         setState(() {
                           _isLoading = false;
                         });
+                        if (!context.mounted) return;
                         Navigator.pop(context);
                       },
                       child: const Text("Select"),

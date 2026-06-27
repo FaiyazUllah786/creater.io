@@ -60,7 +60,7 @@ class _LogoutDialogState extends State<LogoutDialog> {
                           ? () {}
                           : () async {
                               final success = await userController.logout();
-                              if (!mounted) return;
+                              if (!context.mounted) return;
                               context.read<ProfileController>().clearProfile();
                               handleMessage(context, userController);
                               if (success) {

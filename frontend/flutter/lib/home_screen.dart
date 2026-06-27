@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
           final File? imageFile = await showSourceSheet(context);
           if (imageFile == null) return;
           await imageController.uploadImage(imageFile);
-          if (!mounted) return;
+          if (!context.mounted) return;
           handleMessage(context, imageController);
         },
         child: const Icon(Icons.add),

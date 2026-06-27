@@ -79,7 +79,7 @@ class _ImageEditorState extends State<ImageEditor> {
   void _share() async {
     final imageController = context.read<ImageController>();
     final file = await UnsplashProvider().downloadAndSaveImage(
-        imageController.transformedImageUrl, (progress) {});
+        imageController.transformedImageUrl, widget.image.id, (progress) {});
     if (file != null) {
       final params = ShareParams(
         files: [XFile(file.path)],
@@ -128,6 +128,7 @@ class _ImageEditorState extends State<ImageEditor> {
                 if (confirmed != true) return;
                 final success =
                     await imageController.deleteImage(widget.image.id);
+                if (!context.mounted) return;
                 final message = imageController.message;
                 if (message != null) {
                   AppSnackbar.show(
@@ -137,9 +138,7 @@ class _ImageEditorState extends State<ImageEditor> {
                   );
                 }
                 if (success) {
-                  imageController.getAllImages();
-
-                  if (!mounted) return;
+                  imageController.getAllImages(refresh: true);
                   Navigator.pop(context);
                 }
               },
@@ -174,6 +173,7 @@ class _ImageEditorState extends State<ImageEditor> {
                 onPressed: () async {
                   await imageController
                       .saveImage(imageController.transformedImageUrl);
+                  if (!context.mounted) return;
                   final message = imageController.message;
                   if (message != null) {
                     AppSnackbar.show(
@@ -182,7 +182,7 @@ class _ImageEditorState extends State<ImageEditor> {
                       type: message.messageType,
                     );
                   }
-                  imageController.getAllImages();
+                  imageController.getAllImages(refresh: true);
                 },
               ),
             ],

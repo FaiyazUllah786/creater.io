@@ -131,10 +131,9 @@ Future<File?> pickImageFromExplorer() async {
   return File(image.files.single.path!);
 }
 
-Future<File?> pickImageFromUnsplash(unsplashImageUrl, onProgress) async {
-  final String image = unsplashImageUrl.toString();
+Future<File?> pickImageFromUnsplash(String unsplashImageUrl, String photoId, Function(double) onProgress) async {
   final imageFile =
-      await UnsplashProvider().downloadAndSaveImage(image, onProgress);
+      await UnsplashProvider().downloadAndSaveImage(unsplashImageUrl, photoId, onProgress);
   if (imageFile == null) {
     return null;
   }

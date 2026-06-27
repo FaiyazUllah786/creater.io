@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:creatorio/features/auth/widgets/logout_dialog.dart';
 import 'package:creatorio/features/auth/widgets/delete_account_dialog.dart';
 import 'package:creatorio/common/widgets/theme_selection_dialog.dart';
+import 'package:creatorio/common/widgets/empty_state.dart';
 import 'package:image_cropper/image_cropper.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -88,6 +89,7 @@ class AccountScreenState extends State<AccountScreen> {
           IconButton(
             onPressed: () async {
               await userController.getCurrentUser();
+              if (!context.mounted) return;
               handleMessage(context, userController);
             },
             icon: const Icon(Icons.refresh),
@@ -96,8 +98,11 @@ class AccountScreenState extends State<AccountScreen> {
         ],
       ),
       body: userInfo == null
-          ? const Center(
-              child: Text("User data not found!"),
+          ? const EmptyStateWidget(
+              title: "Profile Unavailable",
+              subtitle:
+                  "We couldn't load your profile information. Please refresh.",
+              icon: Icons.person_off_outlined,
             )
           : Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -194,7 +199,7 @@ class AccountScreenState extends State<AccountScreen> {
                         if (croppedImage == null) return;
                         await userController
                             .updateProfilePhoto(croppedImage.path);
-                        if (!mounted) return;
+                        if (!context.mounted) return;
                         handleMessage(context, userController);
                       },
                       child: Container(

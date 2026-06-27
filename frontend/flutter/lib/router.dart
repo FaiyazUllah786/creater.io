@@ -3,6 +3,7 @@ import 'package:creatorio/features/auth/screens/update_password_screen.dart';
 import 'package:creatorio/features/auth/screens/update_profile_screen.dart';
 import 'package:creatorio/splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:creatorio/common/widgets/update_required_screen.dart';
 
 import 'features/auth/screens/account_screen.dart';
 import 'features/auth/screens/login_screen.dart';
@@ -33,6 +34,9 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
           builder: (context) => UnsplashScreen(
                 pickImageFromUnsplash: pickImageFromUnsplash,
               ));
+    case UpdateRequiredScreen.routeName:
+      return MaterialPageRoute(
+          builder: (context) => const UpdateRequiredScreen());
     default:
       return MaterialPageRoute(
           builder: (context) =>

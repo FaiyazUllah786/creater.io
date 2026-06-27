@@ -6,6 +6,7 @@ import 'package:creatorio/common/message.dart';
 import 'package:creatorio/features/image/repository/image_repository.dart';
 import 'package:creatorio/features/image/repository/i_image_repository.dart';
 import 'package:creatorio/model/image_model.dart';
+import 'package:creatorio/core/services/analytics_service.dart';
 
 enum ImageLoadingState {
   idle,
@@ -57,6 +58,11 @@ class ImageController extends ChangeNotifier {
   List<Map<String, dynamic>>? _transfomationList;
   List<dynamic>? get transfomationList => _transfomationList;
 
+  int _currentPage = 1;
+  bool _hasMore = true;
+  bool _isPaginating = false;
+  bool get isPaginating => _isPaginating;
+
   Future<bool> uploadImage(File images) async {
     try {
       clearMessage();
@@ -82,6 +88,9 @@ class ImageController extends ChangeNotifier {
             b.createdAt.millisecondsSinceEpoch,
       );
       _message = Message("Image uploaded successfully", MessageType.success);
+
+      await AnalyticsService.logEvent('upload_image');
+
       return true;
     } on AppException catch (e) {
       debugPrint("Unexpected error during image upload: $e");
@@ -96,29 +105,53 @@ class ImageController extends ChangeNotifier {
     }
   }
 
-  Future<bool> getAllImages() async {
+  Future<bool> getAllImages({bool refresh = false}) async {
+    if (refresh) {
+      _currentPage = 1;
+      _hasMore = true;
+    }
+
+    if (!_hasMore || _isPaginating) return false;
+
     try {
       clearMessage();
-      _message = Message("Refreshing....", MessageType.info);
-      _setLoading(ImageLoadingState.fetching);
-      final res = await imageRepository.getImages();
+      if (refresh) {
+        _message = Message("Refreshing....", MessageType.info);
+        _setLoading(ImageLoadingState.fetching);
+      } else {
+        _isPaginating = true;
+        notifyListeners();
+      }
+
+      final res =
+          await imageRepository.getImages(page: _currentPage, limit: 12);
       if (res == null) {
-        _message = Message("Refresh failed....", MessageType.error);
+        _message = Message("Fetch failed....", MessageType.error);
         return false;
       }
-      _images.clear();
 
-      final images = res.data;
-      for (int i = 0; i < images.length; i++) {
-        final ImageModel imageModel = ImageModel.fromMap(images[i]);
+      if (refresh) _images.clear();
+      final docs = res.data['docs'] as List<dynamic>? ?? [];
+      final hasNextPage = res.data['hasNextPage'] as bool? ?? false;
+
+      for (int i = 0; i < docs.length; i++) {
+        final ImageModel imageModel = ImageModel.fromMap(docs[i]);
         _images.add(imageModel);
       }
       _images.sort(
         (a, b) =>
-            a.createdAt.millisecondsSinceEpoch -
-            b.createdAt.millisecondsSinceEpoch,
+            b.createdAt.millisecondsSinceEpoch -
+            a.createdAt.millisecondsSinceEpoch,
       );
-      _message = Message("Your gallery is updated", MessageType.success);
+
+      _hasMore = hasNextPage;
+      if (hasNextPage) {
+        _currentPage++;
+      }
+
+      if (refresh) {
+        _message = Message("Your gallery is updated", MessageType.success);
+      }
       return true;
     } on AppException catch (e) {
       debugPrint("Unexpected error during image fetch: $e");
@@ -129,7 +162,12 @@ class ImageController extends ChangeNotifier {
       debugPrintStack(stackTrace: stackTrace);
       return false;
     } finally {
-      _setLoading(ImageLoadingState.idle);
+      if (refresh) {
+        _setLoading(ImageLoadingState.idle);
+      } else {
+        _isPaginating = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -148,6 +186,8 @@ class ImageController extends ChangeNotifier {
       _hasUnsavedChanges = false;
       _transformedImageUrl = '';
       _message = Message("Image deleted successfully", MessageType.success);
+
+      await AnalyticsService.logEvent('delete_image');
 
       return true;
     } on AppException catch (e) {
@@ -175,6 +215,9 @@ class ImageController extends ChangeNotifier {
       }
       _hasUnsavedChanges = false;
       _message = Message("Image saved successfully", MessageType.success);
+
+      await AnalyticsService.logEvent('save_image');
+
       return true;
     } on AppException catch (e) {
       _message = Message("Failed to save image", MessageType.error);
@@ -210,6 +253,9 @@ class ImageController extends ChangeNotifier {
       _hasUnsavedChanges = true;
       _message =
           Message("Tranfomation applied successfully", MessageType.success);
+
+      await AnalyticsService.logEvent('add_transformation');
+
       return true;
     } on AppException catch (e) {
       _message = Message("Failed to add transformation", MessageType.error);
@@ -245,6 +291,9 @@ class ImageController extends ChangeNotifier {
       _hasUnsavedChanges = true;
       _message =
           Message("Tranfomation applied successfully", MessageType.success);
+
+      await AnalyticsService.logEvent('update_transformation');
+
       return true;
     } on AppException catch (e) {
       _message = Message("Failed to update transformation", MessageType.error);
@@ -280,6 +329,9 @@ class ImageController extends ChangeNotifier {
 
       _message =
           Message("Tranfomation delete successfully", MessageType.success);
+
+      await AnalyticsService.logEvent('delete_transformation');
+
       return true;
     } on AppException catch (e) {
       _message = Message("Failed to delete transformation", MessageType.error);
@@ -310,6 +362,9 @@ class ImageController extends ChangeNotifier {
       _transformedImageUrl = res.data?['previewUrl'];
       _message =
           Message("Tranfomation cleared successfully", MessageType.success);
+
+      await AnalyticsService.logEvent('clear_transformation');
+
       return true;
     } on AppException catch (e) {
       _message = Message("Failed to clear transformation", MessageType.error);

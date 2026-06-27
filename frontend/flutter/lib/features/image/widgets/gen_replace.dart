@@ -1,4 +1,5 @@
 import 'package:creatorio/common/theme/colors.dart';
+import 'package:creatorio/core/utils/validators.dart';
 import 'package:creatorio/features/image/controller/image_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -85,12 +86,7 @@ class _GenReplaceState extends State<GenReplace> {
                     controller: _itemToReplaceController,
                     decoration:
                         InputDecoration(label: Text('Enter item to replace')),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter item to replace";
-                      }
-                      return null;
-                    },
+                    validator: (value) => AppValidators.validateRequired(value, 'Prompt is required'),
                   ),
                   Container(
                     margin: EdgeInsets.symmetric(vertical: 20),
@@ -100,12 +96,7 @@ class _GenReplaceState extends State<GenReplace> {
                     controller: _replaceWithController,
                     decoration: InputDecoration(
                         label: Text('Enter item to replace with')),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter item to replace with";
-                      }
-                      return null;
-                    },
+                    validator: (value) => AppValidators.validateRequired(value, "Please enter item to replace with"),
                   ),
                   SizedBox(height: 40),
                   Row(

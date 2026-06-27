@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:creatorio/common/navigator_key.dart';
 import 'package:creatorio/common/utils.dart';
 import 'package:creatorio/common/widgets/app_snackbar.dart';
+import 'package:creatorio/core/utils/validators.dart';
 import 'package:creatorio/features/auth/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -149,13 +150,7 @@ class _SingUpState extends State<SignupScreen> {
                                         BorderRadius.all(Radius.circular(30))),
                                 prefixIcon: Icon(Icons.account_circle_outlined),
                               ),
-                              validator: (userName) {
-                                if (userName == null ||
-                                    userName.toString().trim().isEmpty) {
-                                  return 'Username is required';
-                                }
-                                return null;
-                              },
+                              validator: AppValidators.validateUsername,
                               onSaved: (username) {
                                 _userName = username!;
                               },
@@ -169,17 +164,7 @@ class _SingUpState extends State<SignupScreen> {
                                         BorderRadius.all(Radius.circular(30))),
                                 prefixIcon: Icon(Icons.email_outlined),
                               ),
-                              validator: (email) {
-                                if (email == null ||
-                                    email.toString().trim().isEmpty) {
-                                  return 'Email is required';
-                                } else if (!RegExp(
-                                        r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
-                                    .hasMatch(email)) {
-                                  return 'Not a valid email';
-                                }
-                                return null;
-                              },
+                              validator: AppValidators.validateEmail,
                               onSaved: (email) {
                                 _email = email!;
                               },
@@ -200,15 +185,7 @@ class _SingUpState extends State<SignupScreen> {
                                 ),
                               ),
                               obscureText: !_seePassword,
-                              validator: (password) {
-                                if (password == null ||
-                                    password.toString().trim().isEmpty) {
-                                  return 'Password is required';
-                                } else if (password.length < 6) {
-                                  return 'Password must contain 6 or more characters';
-                                }
-                                return null;
-                              },
+                              validator: AppValidators.validatePassword,
                               onSaved: (password) {
                                 _password = password!;
                               },
