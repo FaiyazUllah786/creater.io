@@ -4,9 +4,7 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { accessTokenCookieOptions, refreshTokenCookieOptions } from "../utils/cookieOptions.js";
-import configurePassport from "../passport/auth.passport.js";
-
-const passport = configurePassport();
+import passport from "passport";
 
 export const generateAccessRefreshToken = async (userId) => {
   try {
