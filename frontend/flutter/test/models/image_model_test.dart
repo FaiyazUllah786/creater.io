@@ -22,7 +22,8 @@ void main() {
       expect(image.height, equals(1080));
       expect(image.width, equals(1920));
       expect(image.author, equals('user_456'));
-      expect(image.createdAt, equals(DateTime.parse('2023-10-01T12:00:00.000Z')));
+      expect(
+          image.createdAt, equals(DateTime.parse('2023-10-01T12:00:00.000Z')));
     });
 
     test('toMap() correctly serializes object to map', () {
@@ -44,7 +45,8 @@ void main() {
       expect(map['height'], equals(600));
       expect(map['width'], equals(800));
       expect(map['author'], equals('user_111'));
-      expect(map['createdAt'], equals(DateTime.parse('2023-12-25T00:00:00.000Z')));
+      expect(
+          map['createdAt'], equals(DateTime.parse('2023-12-25T00:00:00.000Z')));
     });
   });
 }

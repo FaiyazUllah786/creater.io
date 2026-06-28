@@ -9,7 +9,8 @@ class AppValidators {
   static String? validateEmail(String? email) {
     if (email == null || email.trim().isEmpty) {
       return 'Email is required';
-    } else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(email)) {
+    } else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+        .hasMatch(email)) {
       return 'Not a valid email';
     }
     return null;

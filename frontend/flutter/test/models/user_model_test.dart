@@ -24,8 +24,10 @@ void main() {
       expect(user.profilePhoto, equals('http://example.com/photo.jpg'));
       expect(user.firstName, equals('John'));
       expect(user.lastName, equals('Doe'));
-      expect(user.createdAt, equals(DateTime.parse('2023-01-01T00:00:00.000Z')));
-      expect(user.updatedAt, equals(DateTime.parse('2023-01-02T00:00:00.000Z')));
+      expect(
+          user.createdAt, equals(DateTime.parse('2023-01-01T00:00:00.000Z')));
+      expect(
+          user.updatedAt, equals(DateTime.parse('2023-01-02T00:00:00.000Z')));
       expect(user.authProvider, equals('local'));
       expect(user.githubId, isNull);
       expect(user.googleId, isNull);
