@@ -4,11 +4,14 @@ import cors from "cors";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import { ApiError } from "./utils/ApiError.js";
+import configurePassport from "./passport/auth.passport.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import helmet from "helmet";
 
 //import dotenv here cause index.js execute app module first without env
 dotenv.config();
+
+configurePassport();
 
 const app = express();
 

@@ -6,7 +6,8 @@ class AnalyticsService {
   static final FirebaseAnalyticsObserver observer =
       FirebaseAnalyticsObserver(analytics: _analytics);
 
-  static Future<void> logEvent(String name, {Map<String, Object>? parameters}) async {
+  static Future<void> logEvent(String name,
+      {Map<String, Object>? parameters}) async {
     try {
       await _analytics.logEvent(name: name, parameters: parameters);
     } catch (e) {

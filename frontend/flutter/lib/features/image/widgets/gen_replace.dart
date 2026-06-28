@@ -86,7 +86,8 @@ class _GenReplaceState extends State<GenReplace> {
                     controller: _itemToReplaceController,
                     decoration:
                         InputDecoration(label: Text('Enter item to replace')),
-                    validator: (value) => AppValidators.validateRequired(value, 'Prompt is required'),
+                    validator: (value) => AppValidators.validateRequired(
+                        value, 'Prompt is required'),
                   ),
                   Container(
                     margin: EdgeInsets.symmetric(vertical: 20),
@@ -96,7 +97,8 @@ class _GenReplaceState extends State<GenReplace> {
                     controller: _replaceWithController,
                     decoration: InputDecoration(
                         label: Text('Enter item to replace with')),
-                    validator: (value) => AppValidators.validateRequired(value, "Please enter item to replace with"),
+                    validator: (value) => AppValidators.validateRequired(
+                        value, "Please enter item to replace with"),
                   ),
                   SizedBox(height: 40),
                   Row(

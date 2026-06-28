@@ -1,6 +1,5 @@
 import Redis from "ioredis";
 import dotenv from "dotenv";
-import { app } from "./../app.js";
 import { ApiError } from "./../utils/ApiError.js";
 
 dotenv.config();
@@ -26,7 +25,6 @@ export const connectRedis = async () => {
     redis.on("ready", () => {
       console.log("Redis ready");
       redisClient = redis;
-      app.locals.redis = redis;
 
       if (!settled) {
         settled = true;

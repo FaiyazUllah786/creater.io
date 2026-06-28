@@ -23,7 +23,9 @@ void main() {
       expect(error.errors[0], equals('Invalid email'));
     });
 
-    test('fromMap() correctly handles missing errors list by using null or default', () {
+    test(
+        'fromMap() correctly handles missing errors list by using null or default',
+        () {
       final map = {
         'statusCode': 500,
         'message': 'Internal Server Error',
@@ -36,7 +38,8 @@ void main() {
 
       expect(error.statusCode, equals(500));
       expect(error.message, equals('Internal Server Error'));
-      expect(error.errors, isEmpty); // Since map['errors'] is null, defaults to []
+      expect(
+          error.errors, isEmpty); // Since map['errors'] is null, defaults to []
     });
 
     test('toMap() correctly serializes object to map', () {

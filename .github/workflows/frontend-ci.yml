@@ -25,6 +25,7 @@ jobs:
       with:
         flutter-version: '3.41.3' # Or specify exact version
         channel: 'stable'
+        cache: true
         
     - name: Install dependencies
       run: flutter pub get

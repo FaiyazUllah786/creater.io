@@ -5,16 +5,25 @@ import { getRedisInstance } from "../../redis/redis.js";
 import { User } from "../../models/user.model.js";
 import { ApiError } from "../../utils/ApiError.js";
 
-vi.mock("../../redis/redis.js", () => ({
-  getRedisInstance: vi.fn(),
-}));
+vi.mock("../../redis/redis.js", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    getRedisInstance: vi.fn(),
+  };
+});
 
-vi.mock("../../models/user.model.js", () => ({
-  User: {
-    findOne: vi.fn(),
-    findById: vi.fn(),
-  },
-}));
+vi.mock("../../models/user.model.js", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    User: {
+      ...actual.User,
+      findOne: vi.fn(),
+      findById: vi.fn(),
+    },
+  };
+});
 
 describe("Redis Failure Behavior", () => {
   beforeEach(() => {

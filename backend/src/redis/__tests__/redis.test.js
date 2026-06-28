@@ -11,13 +11,7 @@ vi.mock("ioredis", () => {
   return { default: MockRedis };
 });
 
-// We must mock app.js to prevent it from loading routers and Mongoose models
-// since we don't need them to test Redis lifecycle.
-vi.mock("../app.js", () => ({
-  app: {
-    locals: {}
-  }
-}));
+
 
 describe("Redis Connection Lifecycle", () => {
   let mockOn;
