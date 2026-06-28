@@ -13,10 +13,10 @@ class ApiResponse extends Error {
 
   factory ApiResponse.fromMap(Map<String, dynamic> map) {
     return ApiResponse(
-        statusCode: map['statusCode'],
-        message: map['message'],
+        statusCode: map['statusCode'] ?? 200,
+        message: map['message'] ?? 'Success',
         data: map['data'],
-        success: map['success']);
+        success: map['success'] ?? true);
   }
 
   Map<String, dynamic> toMap() {

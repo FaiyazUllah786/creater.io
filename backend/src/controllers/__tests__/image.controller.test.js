@@ -3,9 +3,12 @@ import { getImageFromDatabase } from "../image.controller.js";
 import { Image } from "../../models/image.model.js";
 
 // Mock the Image model
-vi.mock("../../models/image.model.js", () => {
+vi.mock("../../models/image.model.js", async (importOriginal) => {
+  const actual = await importOriginal();
   return {
+    ...actual,
     Image: {
+      ...actual.Image,
       aggregate: vi.fn(),
       aggregatePaginate: vi.fn(),
     },

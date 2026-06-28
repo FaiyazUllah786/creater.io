@@ -1,6 +1,37 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import express from "express";
 import request from "supertest";
+vi.mock("rate-limit-redis", () => {
+  return {
+    RedisStore: class MockStore {
+      constructor() {
+        this.hits = {};
+      }
+      init(options) {
+        this.windowMs = options.windowMs;
+      }
+      async increment(key) {
+        if (!this.hits[key]) {
+          this.hits[key] = { count: 0, resetTime: new Date(Date.now() + (this.windowMs || 10000)) };
+        }
+        if (this.hits[key].resetTime.getTime() <= Date.now()) {
+          this.hits[key] = { count: 0, resetTime: new Date(Date.now() + (this.windowMs || 10000)) };
+        }
+        this.hits[key].count++;
+        return { totalHits: this.hits[key].count, resetTime: this.hits[key].resetTime };
+      }
+      async decrement(key) {
+        if (this.hits[key]) {
+          this.hits[key].count = Math.max(0, this.hits[key].count - 1);
+        }
+      }
+      async resetKey(key) {
+        delete this.hits[key];
+      }
+    }
+  };
+});
+
 import { authLimiter } from "../rateLimit.middleware.js";
 
 // Helper to create a test app
@@ -31,19 +62,19 @@ describe("Issue 10: Express Rate Limiting", () => {
   });
 
   it("requests below limit succeed", async () => {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
       const res = await request(app).get("/").set("X-Forwarded-For", "192.168.1.1");
       expect(res.status).toBe(200);
     }
   });
 
   it("requests above limit return 429", async () => {
-    // 5 successful requests
-    for (let i = 0; i < 5; i++) {
+    // 10 successful requests
+    for (let i = 0; i < 10; i++) {
       await request(app).get("/").set("X-Forwarded-For", "192.168.1.2");
     }
 
-    // 6th request should fail
+    // 11th request should fail
     const res = await request(app).get("/").set("X-Forwarded-For", "192.168.1.2");
     expect(res.status).toBe(429);
     expect(res.body.message).toContain("Too many authentication attempts");
@@ -51,7 +82,7 @@ describe("Issue 10: Express Rate Limiting", () => {
 
   it("different IPs are isolated", async () => {
     // IP 1 exhausts limit
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
       await request(app).get("/").set("X-Forwarded-For", "10.0.0.1");
     }
     const resFail = await request(app).get("/").set("X-Forwarded-For", "10.0.0.1");
@@ -64,7 +95,7 @@ describe("Issue 10: Express Rate Limiting", () => {
 
   it("limit resets appropriately after windowMs", async () => {
     // Exhaust limit
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
       await request(app).get("/").set("X-Forwarded-For", "172.16.0.1");
     }
     let res = await request(app).get("/").set("X-Forwarded-For", "172.16.0.1");

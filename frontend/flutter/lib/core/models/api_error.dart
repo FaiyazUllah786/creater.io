@@ -15,11 +15,11 @@ class ApiError implements Exception {
 
   factory ApiError.fromMap(Map<String, dynamic> map) {
     return ApiError(
-        statusCode: map['statusCode'],
-        message: map['message'],
+        statusCode: map['statusCode'] ?? 500,
+        message: map['message'] ?? 'Unknown Error',
         data: map['data'],
-        errors: map['errors'],
-        success: map['success']);
+        errors: map['errors'] ?? [],
+        success: map['success'] ?? false);
   }
   Map<String, dynamic> toMap() {
     return {

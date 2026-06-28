@@ -5,17 +5,26 @@ import healthRouter from "../health.routes.js";
 import mongoose from "mongoose";
 import * as redisModule from "../../redis/redis.js";
 
-vi.mock("mongoose", () => ({
-  default: {
-    connection: {
-      readyState: 1, // 1 = connected
+vi.mock("mongoose", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    default: {
+      ...actual.default,
+      connection: {
+        readyState: 1, // 1 = connected
+      },
     },
-  },
-}));
+  };
+});
 
-vi.mock("../../redis/redis.js", () => ({
-  getRedisInstance: vi.fn(),
-}));
+vi.mock("../../redis/redis.js", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    getRedisInstance: vi.fn(),
+  };
+});
 
 const app = express();
 app.use("/health", healthRouter);
