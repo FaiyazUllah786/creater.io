@@ -58,5 +58,17 @@ void main() {
       await TokenManager.setAccessToken(token);
       expect(TokenManager.shouldRefreshToken(), isFalse);
     });
+
+    test('hasValidAccessToken() throws FormatException for malformed token',
+        () async {
+      await TokenManager.setAccessToken('invalid_token_format');
+      expect(() => TokenManager.hasValidAccessToken(), throwsFormatException);
+    });
+
+    test('shouldRefreshToken() throws FormatException for malformed token',
+        () async {
+      await TokenManager.setAccessToken('invalid_token_format');
+      expect(() => TokenManager.shouldRefreshToken(), throwsFormatException);
+    });
   });
 }

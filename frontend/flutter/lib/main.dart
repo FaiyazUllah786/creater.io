@@ -71,7 +71,9 @@ class MyApp extends StatelessWidget {
         darkTheme: AppTheme.darkTheme,
         theme: AppTheme.lightTheme,
         onGenerateRoute: onGenerateRoute,
-        navigatorObservers: [AnalyticsService.observer],
+        navigatorObservers: [
+          if (AnalyticsService.observer != null) AnalyticsService.observer!
+        ],
         home: const AppLauncher(),
       ),
     );
