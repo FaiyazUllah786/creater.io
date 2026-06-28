@@ -52,9 +52,9 @@ class ProfileController extends ChangeNotifier {
       await SecureStorageService.clear();
       _userInfo = null;
       _message = Message("Account deleted successfully", MessageType.success);
-      
+
       await AnalyticsService.logEvent('delete_account');
-      
+
       return true;
     } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);
@@ -85,9 +85,9 @@ class ProfileController extends ChangeNotifier {
         return false;
       }
       _message = Message("Password updated successfully", MessageType.success);
-      
+
       await AnalyticsService.logEvent('change_password');
-      
+
       return true;
     } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);
@@ -140,9 +140,9 @@ class ProfileController extends ChangeNotifier {
       _userInfo = user;
       await SecureStorageService.saveUser(user);
       _message = Message("Avatar successfully updated", MessageType.success);
-      
+
       await AnalyticsService.logEvent('update_profile_photo');
-      
+
       return true;
     } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);
@@ -171,9 +171,9 @@ class ProfileController extends ChangeNotifier {
       final user = UserModel.fromMap(res.data);
       _userInfo = user;
       await SecureStorageService.saveUser(user);
-      
+
       await AnalyticsService.logEvent('update_user_profile');
-      
+
       return true;
     } on AppException catch (e) {
       _message = Message(e.message, MessageType.error);

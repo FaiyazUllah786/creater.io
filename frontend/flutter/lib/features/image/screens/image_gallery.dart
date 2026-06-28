@@ -34,9 +34,10 @@ class _ImageGalleryState extends State<ImageGallery> {
         await imageController.getAllImages(refresh: true);
       }
     });
-    
+
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
         final imageController = context.read<ImageController>();
         if (!imageController.isPaginating) {
           imageController.getAllImages(refresh: false);
@@ -88,7 +89,8 @@ class _ImageGalleryState extends State<ImageGallery> {
               imageController.images.isEmpty) {
             return ErrorStateWidget(
               title: "Failed to load images",
-              subtitle: imageController.message?.message ?? "An unexpected error occurred.",
+              subtitle: imageController.message?.message ??
+                  "An unexpected error occurred.",
               onRetry: getImages,
             );
           } else if (imageController.loadingState == ImageLoadingState.idle &&
@@ -124,7 +126,8 @@ class _ImageGalleryState extends State<ImageGallery> {
                         final image = imageController.images[index];
                         return InkWell(
                           onTap: () async {
-                            imageController.settransformedImageUrl(image.secureUrl);
+                            imageController
+                                .settransformedImageUrl(image.secureUrl);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -138,8 +141,10 @@ class _ImageGalleryState extends State<ImageGallery> {
                               CachedNetworkImage(
                                 imageUrl: image.secureUrl,
                                 fit: BoxFit.cover,
-                                memCacheWidth: 400, // Limit memory cache size for thumbnails
-                                placeholder: (context, url) => const ShimmerLoading(),
+                                memCacheWidth:
+                                    400, // Limit memory cache size for thumbnails
+                                placeholder: (context, url) =>
+                                    const ShimmerLoading(),
                               ),
                             ],
                           ),
